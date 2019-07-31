@@ -117,8 +117,8 @@ def best_gini_idx(samples, comp_mats, active_samples):
 
         fracs = []
         # TODO isn't this matrix multiplication?
-        for k in range(N):
-            for i in range(samples.m):
+        for i in range(samples.m):
+            for k in range(N):
                 comp_row = comp_mats[i][k]
                 comp_row_not = bit_not(comp_row)
 
@@ -143,17 +143,20 @@ def best_gini_idx(samples, comp_mats, active_samples):
                 denom = above_threshold * below_threshold
                 fracs.append((numerator, denom))
         return fracs
-
+    
     fracs = compute_cont_attr_fracs(samples, comp_mats, active_samples)
-    best_gini = argmax_fracs(fracs)
-    return best_gini
-
+    best_gini_idx = argmax_fracs(fracs).reveal()
+    # attr_idx = best_gini_idx // len(samples.samples)
+    # sample_idx = best_gini_idx % len(samples.samples)
+    return best_gini_idx
 
 def stree(samples):
     active_samples = [1 for _ in samples.samples]
     comp_mats = get_comparison_mats(samples)
 
     current_gini = best_gini_idx(samples, comp_mats, active_samples)
+        
+
 
 
 def test():
@@ -164,15 +167,15 @@ def test():
             raise NotImplemented
         eq = expected == actual
         # TODO not a proper assert
+
         @if_e(eq.reveal())
         def _():
             print_str("Passed.\n")
+
         @else_
         def _():
             print_ln("Expected %s but was %s", expected, actual)
 
-
-    # TODO runtime asserts
     actual = argmax_fracs([
         (sint(1), sint(1)),
         (sint(9), sint(4)),
