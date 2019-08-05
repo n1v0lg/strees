@@ -144,7 +144,6 @@ def naive_sort_by(samples, key_col_idx):
 
     return res
 
-
 def compute_cont_ginis(samples, attr_col_idx, class_col_idx, active_col_idx):
     """Computes gini values as fractions for given attribute.
 
