@@ -5,6 +5,8 @@ from library import *
 from util import *
 
 
+# Various, probably redundant utility methods
+
 def print_list(lst):
     print_str("[ ")
     for v in lst:
@@ -18,6 +20,16 @@ def print_mat(mat):
         print_str(" ")
         print_list(row)
     print_ln("]")
+
+
+def prod(left, right):
+    """Pairwise product of elements."""
+    return [l * r for l, r in zip(left, right)]
+
+
+def neg(bits):
+    """Bitwise not of each element in bits."""
+    return [1 - bit for bit in bits]
 
 
 def mat_assign_op(raw_mat, f):
@@ -54,6 +66,8 @@ def input_matrix(mat):
     return mat_assign_op(mat, lambda x: sint(x))
 
 
+# Core functionality
+
 class Samples:
 
     def __init__(self, samples, n, m):
@@ -64,7 +78,7 @@ class Samples:
         :param n: number of continuous attributes
         :param m: number of discrete attributes
         """
-        if len(samples) != n + m + 2:
+        if len(samples[0]) != n + m + 2:
             raise Exception("Wrong number of cols. in samples matrix")
         self.samples = samples
         self.n = n
@@ -143,6 +157,50 @@ def compute_cont_ginis(samples, attr_col_idx, class_col_idx, active_col_idx):
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
 
+    # TODO only use necessary columns
+    # TODO Samples class is awkward
+    byattr = Samples(naive_sort_by(samples.samples, attr_col_idx), samples.n, samples.m)
+
+    class_col = byattr.get_col(class_col_idx)
+    is_active = byattr.get_col(active_col_idx)
+    # all samples of class 1 that are still active
+    is_one = prod(class_col, is_active)
+    # active 0 samples
+    is_zero = prod(neg(is_one), is_active)
+
+    fractions = []
+    # we can skip last entry; the fraction here is always (0, 0) since splitting on the last attribute always
+    # partitions the samples a set containing all input samples and the empty set
+    for row_idx in range(len(byattr) - 1):
+        denominator, numerator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
+        fractions.append((numerator, denominator))
+    # include fraction for splitting on last term
+    fractions.append((sint(0), sint(0)))
+    return fractions
+
+
+def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
+    # TODO keep updating values as we go instead of recomputing sum
+    leq_this = sum(is_active[:row_idx + 1])
+    gt_this = sum(is_active[row_idx + 1:])
+    # total rows from 0 to row_idx + 1 of class 1
+    ones_leq = sum(is_one[:row_idx + 1])
+    # total rows from row_idx + 1 to total_rows of class 1
+    ones_gt = sum(is_one[row_idx + 1:])
+    # total rows from 0 to row_idx + 1 of class 1
+    zeroes_leq = sum(is_zero[:row_idx + 1])
+    # total rows from row_idx + 1 to total_rows of class 1
+    zeroes_gt = sum(is_zero[row_idx + 1:])
+    # Note that ones_leq = |D'_{C_{attr_col_idx} <= c_{attr_col_idx, row_idx}} ^ D'_{Y = 1}|
+    # where D' is D sorted by the attribute at attr_col_idx
+    numerator_one_term = \
+        (ones_leq ** 2) * gt_this + (ones_gt ** 2) * leq_this
+    numerator_zero_term = \
+        (zeroes_leq ** 2) * gt_this + (zeroes_gt ** 2) * leq_this
+    numerator = numerator_one_term + numerator_zero_term
+    denominator = leq_this * gt_this
+    return denominator, numerator
+
 
 def test():
     def runtime_assert_mat_equals(expected, actual):
@@ -202,8 +260,18 @@ def test():
              [3, 1, 1]],
             actual)
 
+    def test_compute_cont_ginis():
+        sec_mat = input_matrix([
+            [3, 0, 1],
+            [1, 1, 1],
+            [2, 1, 1]
+        ])
+        actual = compute_cont_ginis(Samples(sec_mat, 1, 0), 0, 1, 2)
+        runtime_assert_mat_equals([(4, 2), (6, 2), (0, 0)], actual)
+
     test_argmax()
     test_naive_sort_by()
+    test_compute_cont_ginis()
 
 
 test()
