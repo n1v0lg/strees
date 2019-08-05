@@ -1,9 +1,11 @@
 #!/bin/bash
 
+MPC_SRC_NAME=main.py
+
 HERE=$(cd `dirname $0`; pwd)
-SPDZROOT=/home/nikolaj/Desktop/work/MP-SPDZ
-cd ${SPDZROOT}
+SPDZ_ROOT=${HERE}/../MP-SPDZ
+cd ${SPDZ_ROOT}
 
 # .py extension for sublime-formatter
-./compile.py --ring=64  ${HERE}/strees.py 
-./Scripts/ring.sh strees.py
+./compile.py ${HERE}/${MPC_SRC_NAME}
+./Scripts/mascot.sh ${MPC_SRC_NAME}
