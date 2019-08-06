@@ -117,6 +117,23 @@ class Samples:
     def get_active_col_idx(self):
         return self.n + self.m + 1
 
+    def get_active_col(self):
+        return self.get_col(self.get_active_col_idx())
+
+    def get_class_col(self):
+        return self.get_col(self.get_class_col_idx())
+
+    def with_updated_actives(self, updated_actives):
+        # TODO hacky
+        if len(updated_actives) != len(self):
+            raise Exception("Incorrect number of values")
+        new_samples = []
+        for active_flag, row in zip(updated_actives, self.samples):
+            updated_row = row[:]
+            updated_row[self.get_active_col_idx()] = active_flag
+            new_samples.append(updated_row)
+        return Samples(new_samples, self.n, self.m)
+
     def __len__(self):
         return len(self.samples)
 
@@ -302,7 +319,23 @@ def partition_on(samples, attr_idx, threshold):
     :param threshold:
     :return:
     """
-    pass
+    selected_col = obl_select_col_at(samples, attr_idx)
+
+    # TODO this only works for binary discrete attributes,
+    # else have to obliviously distinguish whether to use an eq or a leq
+    go_left = [v <= threshold for v in selected_col]
+    go_right = neg(go_left)
+
+    # mask out rows that are already inactive
+    active_col = samples.get_active_col()
+    go_left = prod(go_left, active_col)
+    # TODO can we derive this from go_left?
+    go_right = prod(go_right, active_col)
+
+    left = samples.with_updated_actives(go_left)
+    right = samples.with_updated_actives(go_right)
+
+    return left, right
 
 
 def test():
@@ -414,11 +447,61 @@ def test():
         actual = obl_select_col_at(Samples(sec_mat, 3, 0), sint(1))
         runtime_assert_arr_equals([2, 5, 8], actual, default_test_name())
 
+    def test_partition_on():
+        sec_mat = input_matrix([
+            [1, 2, 3, 1, 1],
+            [4, 5, 6, 1, 1],
+            [7, 8, 9, 1, 1],
+            [10, 11, 12, 1, 1]
+        ])
+        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5)
+        runtime_assert_mat_equals(
+            [[1, 2, 3, 1, 1],
+             [4, 5, 6, 1, 1],
+             [7, 8, 9, 1, 0],
+             [10, 11, 12, 1, 0]],
+            left.samples,
+            default_test_name()
+        )
+        runtime_assert_mat_equals(
+            [[1, 2, 3, 1, 0],
+             [4, 5, 6, 1, 0],
+             [7, 8, 9, 1, 1],
+             [10, 11, 12, 1, 1]],
+            right.samples,
+            default_test_name()
+        )
+
+        sec_mat = input_matrix([
+            [1, 2, 3, 1, 0],
+            [4, 5, 6, 1, 1],
+            [7, 8, 9, 1, 0],
+            [10, 11, 12, 1, 1]
+        ])
+        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5)
+        runtime_assert_mat_equals(
+            [[1, 2, 3, 1, 0],
+             [4, 5, 6, 1, 1],
+             [7, 8, 9, 1, 0],
+             [10, 11, 12, 1, 0]],
+            left.samples,
+            default_test_name()
+        )
+        runtime_assert_mat_equals(
+            [[1, 2, 3, 1, 0],
+             [4, 5, 6, 1, 0],
+             [7, 8, 9, 1, 0],
+             [10, 11, 12, 1, 1]],
+            right.samples,
+            default_test_name()
+        )
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
     test_obl_select_col_at()
+    test_partition_on()
 
 
 test()
