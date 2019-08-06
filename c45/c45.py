@@ -38,6 +38,44 @@ def neg(bits):
     return [1 - bit for bit in bits]
 
 
+def same_len(row_a, row_b):
+    if len(row_a) != len(row_b):
+        raise Exception("Must be same length")
+
+
+def if_else_row(bit, row_a, row_b):
+    same_len(row_a, row_b)
+    return [if_else(bit, a, b) for a, b in zip(row_a, row_b)]
+
+
+def cond_swap_rows(row_x, row_y, key_col_idx):
+    """Copied from MP-SPDZ main repo.
+
+    Modified to support rows as entries instead of single values.
+    """
+    b = row_x[key_col_idx] < row_y[key_col_idx]
+    row_bx = [b * x for x in row_x]
+    row_by = [b * y for y in row_y]
+    new_row_x = [bx + y - by for y, bx, by in zip(row_y, row_bx, row_by)]
+    new_row_y = [x - bx + by for x, bx, by in zip(row_x, row_bx, row_by)]
+    return new_row_x, new_row_y
+
+
+def naive_sort_by(samples, key_col_idx):
+    """Sorts 2D-array by specified column.
+
+    Note: this uses naive bubble-sort.
+    Copied from MP-SPDZ main repo.
+    """
+    res = samples
+
+    for i in range(len(samples)):
+        for j in reversed(range(i)):
+            res[j], res[j + 1] = cond_swap_rows(res[j], res[j + 1], key_col_idx)
+
+    return res
+
+
 def mat_assign_op(raw_mat, f):
     if len(raw_mat) == 0:
         raise Exception("Empty matrix")
@@ -141,12 +179,12 @@ class Samples:
 def argmax_over_fracs(elements):
     """Computes argmax of elements.
 
-    Assumes elements has three columns, a numerator column, denominator col., and value column.
+    Supports arbitrary number of columns but assumes that numerator and denominator are the first two columns.
 
     NOTE: undefined if denominator of any fraction is 0.
 
-    :param elements: represented as tuples of numerator, denominator, value
-    :return tuple of index and max fraction
+    :param elements: represented as rows of form [numerator, denominator, ...]
+    :return row with max fraction
     """
 
     @debug_only
@@ -157,53 +195,20 @@ def argmax_over_fracs(elements):
         def _():
             print_ln("%s 0 in denominator.", MPC_ERROR_FLAG)
 
-    def _select_larger(tup_a, tup_b):
-        num_a, denom_a, val_a = tup_a
-        num_b, denom_b, val_b = tup_b
+    def _select_larger(row_a, row_b):
+        num_a, denom_a = row_a[0], row_a[1]
+        num_b, denom_b = row_b[0], row_b[1]
 
         debug_sanity_check(denom_a)
         debug_sanity_check(denom_b)
 
         a_gt = (num_a * denom_b) > (num_b * denom_a)
-        updated_val = if_else(a_gt, val_a, val_b)
-        updated_num = if_else(a_gt, num_a, num_b)
-        updated_denom = if_else(a_gt, denom_a, denom_b)
-        return updated_num, updated_denom, updated_val
+        return if_else_row(a_gt, row_a, row_b)
 
     if not elements:
         raise Exception("No elements to argmax on")
-    if len(elements[0]) != 3:
-        raise Exception("Must have exactly three columns")
 
     return tree_reduce(_select_larger, elements)
-
-
-def cond_swap_rows(row_x, row_y, key_col_idx):
-    """Copied from MP-SPDZ main repo.
-
-    Modified to support rows as entries instead of single values.
-    """
-    b = row_x[key_col_idx] < row_y[key_col_idx]
-    row_bx = [b * x for x in row_x]
-    row_by = [b * y for y in row_y]
-    new_row_x = [bx + y - by for y, bx, by in zip(row_y, row_bx, row_by)]
-    new_row_y = [x - bx + by for x, bx, by in zip(row_x, row_bx, row_by)]
-    return new_row_x, new_row_y
-
-
-def naive_sort_by(samples, key_col_idx):
-    """Sorts 2D-array by specified column.
-
-    Note: this uses naive bubble-sort.
-    Copied from MP-SPDZ main repo.
-    """
-    res = samples
-
-    for i in range(len(samples)):
-        for j in reversed(range(i)):
-            res[j], res[j + 1] = cond_swap_rows(res[j], res[j + 1], key_col_idx)
-
-    return res
 
 
 def compute_cont_ginis(samples, attr_col_idx):
@@ -235,12 +240,12 @@ def compute_cont_ginis(samples, attr_col_idx):
     # partitions the samples a set containing all input samples and the empty set
     for row_idx in range(len(byattr) - 1):
         threshold = byattr.samples[row_idx][attr_col_idx]
-        denominator, numerator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
-        fractions.append((numerator, denominator, threshold))
+        numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
+        fractions.append([numerator, denominator, threshold])
 
     # include fraction for splitting on last term
     last_threshold = byattr.samples[-1][attr_col_idx]
-    fractions.append((sint(0), sint(1), last_threshold))
+    fractions.append([sint(0), sint(1), last_threshold])
 
     return fractions
 
@@ -268,7 +273,7 @@ def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
         (zeroes_leq ** 2) * gt_this + (zeroes_gt ** 2) * leq_this
     numerator = numerator_one_term + numerator_zero_term
     denominator = leq_this * gt_this
-    return denominator, numerator
+    return numerator, denominator
 
 
 def compute_best_gini_cont(samples, attr_col_idx):
@@ -350,6 +355,24 @@ def leaf_reached(left_samples, right_samples):
     return (left_total * right_total) == 0
 
 
+def c45(samples):
+    """Runs C4.5 algorithm on samples.
+
+    :param samples:
+    :return:
+    """
+    if samples.m != 0:
+        # TODO
+        raise Exception("Discrete attributes not implemented yet")
+
+    candidates = []
+    for c in range(samples.n):
+        num, denom, thresh = compute_best_gini_cont(samples, c)
+        candidates.append((num, denom, c, thresh))
+
+    _, _, attr_idx, thresh = argmax_over_fracs(candidates)
+
+
 def test():
     def default_test_name():
         return sys._getframe(1).f_code.co_name
@@ -397,8 +420,8 @@ def test():
             [2, 1, 2],
             [1, 2, 3]
         ])
-        num, denom, val = argmax_over_fracs(sec_mat)
-        runtime_assert_equals(1, val, default_test_name())
+        actual = argmax_over_fracs(sec_mat)
+        runtime_assert_arr_equals([9, 4, 1], actual, default_test_name())
 
         sec_mat = input_matrix([
             [1, 2, 0],
@@ -407,15 +430,15 @@ def test():
             [1, 9, 3],
             [9, 10, 4]
         ])
-        num, denom, val = argmax_over_fracs(sec_mat)
-        runtime_assert_equals(4, val, default_test_name())
+        actual = argmax_over_fracs(sec_mat)
+        runtime_assert_arr_equals([9, 10, 4], actual, default_test_name())
 
         sec_mat = input_matrix([
             [1, 9, 0],
             [0, 1, 1]
         ])
-        num, denom, val = argmax_over_fracs(sec_mat)
-        runtime_assert_equals(0, val, default_test_name())
+        actual = argmax_over_fracs(sec_mat)
+        runtime_assert_arr_equals([1, 9, 0], actual, default_test_name())
 
     def test_naive_sort_by():
         sec_mat = input_matrix([
@@ -546,5 +569,6 @@ def test():
     test_obl_select_col_at()
     test_partition_on()
     test_leaf_reached()
+
 
 test()
