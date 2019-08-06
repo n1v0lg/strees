@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 from Compiler.types import sint, cint
 from library import *
@@ -235,14 +236,22 @@ def compute_best_gini_cont(samples, attr_col_idx):
 def test():
     error_flag = "MPC_ERROR"
 
-    def runtime_assert_mat_equals(expected, actual):
+    def default_test_name():
+        return sys._getframe(1).f_code.co_name
+
+    def runtime_assert_mat_equals(expected, actual, test_name):
         if isinstance(actual[0][0], sint):
             actual = reveal_mat(actual)
+        if len(expected) != len(actual):
+            print_ln("%s in %s dimensions wrong.", error_flag, test_name)
+        if len(expected[0]) != len(actual[0]):
+            print_ln("%s in %s dimensions wrong", error_flag, test_name)
+
         for expected_row, actual_row in zip(expected, actual):
             for expected_val, actual_val in zip(expected_row, actual_row):
-                runtime_assert_equals(expected_val, actual_val)
+                runtime_assert_equals(expected_val, actual_val, test_name)
 
-    def runtime_assert_equals(expected, actual):
+    def runtime_assert_equals(expected, actual, test_name):
         if isinstance(actual, sint):
             actual = actual.reveal()
         if not isinstance(actual, cint):
@@ -253,11 +262,11 @@ def test():
 
         @if_e(eq)
         def _():
-            print_str("Passed.\n")
+            print_ln("%s passed.", test_name)
 
         @else_
         def _():
-            print_ln("%s Expected %s but was %s", error_flag, expected, actual)
+            print_ln("%s in %s.Expected %s but was %s", error_flag, test_name, expected, actual)
 
     def test_argmax():
         sec_mat = input_matrix([
@@ -267,7 +276,7 @@ def test():
             [1, 2, 3]
         ])
         num, denom, val = argmax_over_fracs(sec_mat)
-        runtime_assert_equals(1, val)
+        runtime_assert_equals(1, val, default_test_name())
 
         sec_mat = input_matrix([
             [1, 2, 0],
@@ -277,7 +286,7 @@ def test():
             [9, 10, 4]
         ])
         num, denom, val = argmax_over_fracs(sec_mat)
-        runtime_assert_equals(4, val)
+        runtime_assert_equals(4, val, default_test_name())
 
     def test_naive_sort_by():
         sec_mat = input_matrix([
@@ -292,7 +301,7 @@ def test():
              [1, 0, 1],
              [2, 0, 0],
              [3, 1, 1]],
-            actual)
+            actual, default_test_name())
 
     def test_compute_cont_ginis():
         sec_mat = input_matrix([
@@ -301,7 +310,7 @@ def test():
             [2, 1, 1]
         ])
         actual = compute_cont_ginis(Samples(sec_mat, 1, 0), 0)
-        runtime_assert_mat_equals([(4, 2), (6, 2), (0, 0)], actual)
+        runtime_assert_mat_equals([(4, 2, 1), (6, 2, 2), (0, 0, 3)], actual, default_test_name())
 
     test_argmax()
     test_naive_sort_by()
