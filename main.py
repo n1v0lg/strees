@@ -217,6 +217,8 @@ def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
 
 
 def test():
+    error_flag = "MPC_ERROR"
+
     def runtime_assert_mat_equals(expected, actual):
         if isinstance(actual[0][0], sint):
             actual = reveal_mat(actual)
@@ -239,7 +241,7 @@ def test():
 
         @else_
         def _():
-            print_ln("Expected %s but was %s", expected, actual)
+            print_ln("%s Expected %s but was %s", error_flag, expected, actual)
 
     def test_argmax():
         key, val = argmax_over_fracs([
