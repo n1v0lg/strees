@@ -92,36 +92,39 @@ class Samples:
             raise ValueError
         return col_idx < self.n
 
+    def get_class_col_idx(self):
+        return self.n + self.m
+
+    def get_active_col_idx(self):
+        return self.n + self.m + 1
+
     def __len__(self):
         return len(self.samples)
 
 
-def argmax_over_fracs(elements, key_col_idx=0, val_col_idx=1):
+def argmax_over_fracs(elements):
     """Computes argmax of elements.
 
-    Assumes elements has two columns, a key column and value column. Key column is required to be fractions,
-    represented as tuples.
+    Assumes elements has three columns, a numerator column, denominator col., and value column.
 
-    :param elements: represented as tuples of numerator and denominator.
-    :param key_col_idx: column to do max over
-    :param val_col_idx: column to return value from
+    :param elements: represented as tuples of numerator, denominator, value
     :return tuple of index and max fraction
     """
 
     def _select_larger(tup_a, tup_b):
-        num_a, denom_a = tup_a[key_col_idx]
-        num_b, denom_b = tup_b[key_col_idx]
+        num_a, denom_a, val_a = tup_a
+        num_b, denom_b, val_b = tup_b
 
         lt = (num_a * denom_b) > (num_b * denom_a)
-        updated_val = if_else(lt, tup_a[val_col_idx], tup_b[val_col_idx])
+        updated_val = if_else(lt, val_a, val_b)
         updated_num = if_else(lt, num_a, num_b)
         updated_denom = if_else(lt, denom_a, denom_b)
-        return (updated_num, updated_denom), updated_val
+        return updated_num, updated_denom, updated_val
 
     if not elements:
         raise Exception("No elements to argmax on")
-    if len(elements[0]) != 2:
-        raise Exception("Must have exactly two columns")
+    if len(elements[0]) != 3:
+        raise Exception("Must have exactly three columns")
 
     return tree_reduce(_select_larger, elements)
 
@@ -154,17 +157,18 @@ def naive_sort_by(samples, key_col_idx):
     return res
 
 
-def compute_cont_ginis(samples, attr_col_idx, class_col_idx, active_col_idx):
+def compute_cont_ginis(samples, attr_col_idx):
     """Computes gini values as fractions for given attribute.
 
     :param samples:
     :param attr_col_idx:
-    :param class_col_idx:
-    :param active_col_idx:
     :return:
     """
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
+
+    class_col_idx = samples.get_class_col_idx()
+    active_col_idx = samples.get_active_col_idx()
 
     # TODO only use necessary columns
     # TODO Samples class is awkward
@@ -181,11 +185,13 @@ def compute_cont_ginis(samples, attr_col_idx, class_col_idx, active_col_idx):
     # we can skip last entry; the fraction here is always (0, 0) since splitting on the last attribute always
     # partitions the samples a set containing all input samples and the empty set
     for row_idx in range(len(byattr) - 1):
+        threshold = byattr.samples[row_idx][attr_col_idx]
         denominator, numerator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
-        fractions.append((numerator, denominator))
+        fractions.append((numerator, denominator, threshold))
 
     # include fraction for splitting on last term
-    fractions.append((sint(0), sint(0)))
+    last_threshold = byattr.samples[-1][attr_col_idx]
+    fractions.append((sint(0), sint(0), last_threshold))
 
     return fractions
 
@@ -216,6 +222,16 @@ def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
     return denominator, numerator
 
 
+def compute_best_gini_cont(samples, attr_col_idx):
+    """Computes best gini for given attribute.
+
+    :param samples:
+    :param attr_col_idx:
+    :return:
+    """
+    compute_cont_ginis(samples, attr_col_idx)
+
+
 def test():
     error_flag = "MPC_ERROR"
 
@@ -244,21 +260,23 @@ def test():
             print_ln("%s Expected %s but was %s", error_flag, expected, actual)
 
     def test_argmax():
-        key, val = argmax_over_fracs([
-            ((sint(1), sint(1)), 0),
-            ((sint(9), sint(4)), 1),
-            ((sint(2), sint(1)), 2),
-            ((sint(1), sint(2)), 3),
+        sec_mat = input_matrix([
+            [1, 1, 0],
+            [9, 4, 1],
+            [2, 1, 2],
+            [1, 2, 3]
         ])
+        num, denom, val = argmax_over_fracs(sec_mat)
         runtime_assert_equals(1, val)
 
-        key, val = argmax_over_fracs([
-            ((sint(1), sint(2)), 0),
-            ((sint(2), sint(5)), 1),
-            ((sint(2), sint(6)), 2),
-            ((sint(1), sint(9)), 3),
-            ((sint(9), sint(10)), 4),
+        sec_mat = input_matrix([
+            [1, 2, 0],
+            [2, 5, 1],
+            [2, 6, 2],
+            [1, 9, 3],
+            [9, 10, 4]
         ])
+        num, denom, val = argmax_over_fracs(sec_mat)
         runtime_assert_equals(4, val)
 
     def test_naive_sort_by():
@@ -282,7 +300,7 @@ def test():
             [1, 1, 1],
             [2, 1, 1]
         ])
-        actual = compute_cont_ginis(Samples(sec_mat, 1, 0), 0, 1, 2)
+        actual = compute_cont_ginis(Samples(sec_mat, 1, 0), 0)
         runtime_assert_mat_equals([(4, 2), (6, 2), (0, 0)], actual)
 
     test_argmax()
