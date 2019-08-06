@@ -75,6 +75,16 @@ def input_matrix(mat):
 # Core functionality
 
 MPC_ERROR_FLAG = "MPC_ERROR"
+DEBUG = True
+
+
+def debug_only(f):
+    def wrapper(*args, **kwargs):
+        if DEBUG:
+            f(*args, **kwargs)
+        return
+
+    return wrapper
 
 
 class Samples:
@@ -122,6 +132,7 @@ def argmax_over_fracs(elements):
     :return tuple of index and max fraction
     """
 
+    @debug_only
     def debug_sanity_check(d):
         # INSECURE for debugging only!
         # Verifies that denominator is not 0
@@ -262,9 +273,11 @@ def obl_select_col_at(samples, secret_idx):
     :return:
     """
 
+    @debug_only
     def debug_sanity_check(i):
         # INSECURE for debugging only!
         # Verifies that idx is within range
+        # TODO make this a decorator
         @if_((i >= samples.n + samples.m).reveal())
         def _():
             print_ln("%s index is out of range.", MPC_ERROR_FLAG)
