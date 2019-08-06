@@ -338,6 +338,18 @@ def partition_on(samples, attr_idx, threshold):
     return left, right
 
 
+def leaf_reached(left_samples, right_samples):
+    """Computes bit indicating if we have reached a leaf node (no need to partition further).
+
+    :param left_samples:
+    :param right_samples:
+    :return:
+    """
+    left_total = sum(left_samples.get_active_col())
+    right_total = sum(right_samples.get_active_col())
+    return (left_total * right_total) == 0
+
+
 def test():
     def default_test_name():
         return sys._getframe(1).f_code.co_name
@@ -496,12 +508,43 @@ def test():
             default_test_name()
         )
 
+    def test_leaf_reached():
+        left_sec_mat = input_matrix([
+            [1, 1, 0],
+            [2, 1, 0],
+            [3, 1, 0],
+            [4, 1, 0]
+        ])
+        right_sec_mat = input_matrix([
+            [1, 1, 0],
+            [2, 1, 0],
+            [3, 1, 0],
+            [4, 1, 0]
+        ])
+        actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
+        runtime_assert_equals(1, actual, default_test_name())
+
+        left_sec_mat = input_matrix([
+            [1, 1, 1],
+            [2, 1, 0],
+            [3, 1, 0],
+            [4, 1, 0]
+        ])
+        right_sec_mat = input_matrix([
+            [1, 1, 0],
+            [2, 1, 0],
+            [3, 1, 0],
+            [4, 1, 1]
+        ])
+        actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
+        runtime_assert_equals(0, actual, default_test_name())
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
     test_obl_select_col_at()
     test_partition_on()
-
+    test_leaf_reached()
 
 test()
