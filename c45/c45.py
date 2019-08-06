@@ -283,6 +283,7 @@ def compute_best_gini_cont(samples, attr_col_idx):
     :param attr_col_idx:
     :return:
     """
+    # TODO handle single attribute case
     cand_ginis = compute_cont_ginis(samples, attr_col_idx)
     return argmax_over_fracs(cand_ginis)
 
@@ -369,8 +370,22 @@ def c45(samples):
     for c in range(samples.n):
         num, denom, thresh = compute_best_gini_cont(samples, c)
         candidates.append((num, denom, c, thresh))
-
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
+
+    left, right = partition_on(samples, attr_idx, thresh)
+    # TODO stopping condition not correct
+    is_done = leaf_reached(left, right).reveal()
+
+    @if_e(is_done)
+    def _():
+        print_ln("Leaf.")
+
+    @else_
+    def _():
+        print_ln("Non-leaf.")
+        # TODO how do we use recursion in MP-SPDZ?
+        # c45(left)
+        # c45(right)
 
 
 def test():
@@ -562,6 +577,16 @@ def test():
         actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
         runtime_assert_equals(0, actual, default_test_name())
 
+    def test_c45():
+        # TODO single column case!
+        sec_mat = input_matrix([
+            [1, 5, 0, 1],
+            [2, 6, 0, 1],
+            [3, 7, 1, 1],
+            [4, 8, 1, 1]
+        ])
+        c45(Samples(sec_mat, 2, 0))
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -569,6 +594,7 @@ def test():
     test_obl_select_col_at()
     test_partition_on()
     test_leaf_reached()
+    test_c45()
 
 
 test()
