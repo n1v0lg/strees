@@ -28,6 +28,11 @@ def prod(left, right):
     return [l * r for l, r in zip(left, right)]
 
 
+def inner_prod(left, right):
+    """Inner product of elements."""
+    return sum(l * r for l, r in zip(left, right))
+
+
 def neg(bits):
     """Bitwise not of each element in bits."""
     return [1 - bit for bit in bits]
@@ -249,6 +254,44 @@ def compute_best_gini_cont(samples, attr_col_idx):
     return argmax_over_fracs(cand_ginis)
 
 
+def obl_select_col_at(samples, secret_idx):
+    """Obliviously selects column at given index.
+
+    :param samples:
+    :param secret_idx:
+    :return:
+    """
+
+    def debug_sanity_check(i):
+        # INSECURE for debugging only!
+        # Verifies that idx is within range
+        @if_((i >= samples.n + samples.m).reveal())
+        def _():
+            print_ln("%s index is out of range.", MPC_ERROR_FLAG)
+
+    if not isinstance(secret_idx, sint):
+        raise Exception("Only use this if index is secret")
+
+    debug_sanity_check(secret_idx)
+    # TODO optimize
+    res = []
+    eq_flags = [secret_idx == idx for idx in range(samples.n + samples.m)]
+    for row in samples.samples:
+        res.append(inner_prod(eq_flags, row))
+    return res
+
+
+def partition_on(samples, attr_idx, threshold):
+    """Partitions samples on given attribute and threshold.
+
+    :param samples:
+    :param attr_idx:
+    :param threshold:
+    :return:
+    """
+    pass
+
+
 def test():
     def default_test_name():
         return sys._getframe(1).f_code.co_name
@@ -349,10 +392,20 @@ def test():
         actual = compute_best_gini_cont(Samples(sec_mat, 1, 0), 0)
         runtime_assert_arr_equals([6, 2, 2], actual, default_test_name())
 
+    def test_obl_select_col_at():
+        sec_mat = input_matrix([
+            [1, 2, 3, 1, 1],
+            [4, 5, 6, 1, 1],
+            [7, 8, 9, 1, 1]
+        ])
+        actual = obl_select_col_at(Samples(sec_mat, 3, 0), sint(1))
+        runtime_assert_arr_equals([2, 5, 8], actual, default_test_name())
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
+    test_obl_select_col_at()
 
 
 test()
