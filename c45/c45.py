@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+from collections import deque
 
 from Compiler.types import sint, cint, MemValue
 from library import print_ln, print_str, if_, if_e, else_, do_while
@@ -136,21 +137,19 @@ class DeTreeNode:
 
 class Samples:
 
-    def __init__(self, samples, n, m, max_iteration_count=100):
+    def __init__(self, samples, n, m):
         """Create Samples object.
 
         :param samples: raw matrix containing continuous and discrete (binary) attribute values, category (binary),
         and indicator vector, each row represents a sample
         :param n: number of continuous attributes
         :param m: number of discrete attributes
-        :param max_iteration_count: upper limit on iterations to generate decision tree for samples
         """
         if len(samples[0]) != n + m + 2:
             raise Exception("Wrong number of cols. in samples matrix")
         self.samples = samples
         self.n = n
         self.m = m
-        self.max_iteration_count = max_iteration_count
 
     def get_col(self, col_idx):
         return [row[col_idx] for row in self.samples]
@@ -394,6 +393,44 @@ def c45_single_round(samples):
     return DeTreeNode(attr_idx, thresh), left, right
 
 
+def to_tree(nodes):
+    # TODO
+    return nodes
+
+
+def c45(input_samples, max_iteration_count=2 ** 4):
+    """Runs C4.5 algorithm to construct decision tree.
+
+    TODO Executes exactly max_iteration_count iterations for now
+
+    This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
+    better aligned with MP-SPDZ.
+
+    :param input_samples:
+    :param max_iteration_count: upper limit on iterations to generate decision tree for samples
+    :return:
+    """
+    nodes = []
+    queue = deque([input_samples])
+
+    # we first compute the nodes (for a complete tree), in a BFS-like traversal
+    for _ in range(max_iteration_count):
+        samples = queue.popleft()
+        node, left, right = c45_single_round(samples)
+
+        # persist node
+        nodes.append(node)
+
+        # push back partitioned samples to process
+        # TODO could just append tuple with ref. to parent instead, and link later
+        queue.append(left)
+        queue.append(right)
+
+    # then stitch the nodes together into an actual tree
+    # since we get a complete binary tree, we can do so with just the node list
+    return to_tree(nodes)
+
+
 def test():
     def default_test_name():
         return sys._getframe(1).f_code.co_name
@@ -614,6 +651,15 @@ def test():
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
+    def test_c45():
+        sec_mat = input_matrix([
+            [8, 1, 0, 1],
+            [5, 2, 0, 1],
+            [7, 3, 1, 1],
+            [6, 4, 1, 1]
+        ])
+        c45(Samples(sec_mat, 2, 0), 1)
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -623,6 +669,7 @@ def test():
     test_leaf_reached()
     test_while()
     test_c45_single_round()
+    test_c45()
 
 
 test()
