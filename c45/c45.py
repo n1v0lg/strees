@@ -125,6 +125,15 @@ def debug_only(f):
     return wrapper
 
 
+class DeTreeNode:
+
+    def __init__(self, attr_idx, threshold):
+        self.attr_idx = attr_idx
+        self.threshold = threshold
+        self.left = None
+        self.right = None
+
+
 class Samples:
 
     def __init__(self, samples, n, m, max_iteration_count=100):
@@ -368,13 +377,17 @@ def c45_single_round(samples):
         # TODO
         raise Exception("Discrete attributes not implemented yet")
 
+    # compute best attribute and threshold to split on
     candidates = []
     for c in range(samples.n):
         num, denom, thresh = compute_best_gini_cont(samples, c)
         candidates.append((num, denom, c, thresh))
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
-    return partition_on(samples, attr_idx, thresh)
+    # partition samples on selected attribute
+    left, right = partition_on(samples, attr_idx, thresh)
+
+    return DeTreeNode(attr_idx, thresh), left, right
 
 
 def test():
@@ -518,20 +531,14 @@ def test():
             [10, 11, 12, 1, 1]
         ])
         left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5)
-        runtime_assert_mat_equals(
-            [[1, 2, 3, 1, 0],
-             [4, 5, 6, 1, 1],
-             [7, 8, 9, 1, 0],
-             [10, 11, 12, 1, 0]],
-            left.samples,
+        runtime_assert_arr_equals(
+            [0, 1, 0, 0],
+            left.get_active_col(),
             default_test_name()
         )
-        runtime_assert_mat_equals(
-            [[1, 2, 3, 1, 0],
-             [4, 5, 6, 1, 0],
-             [7, 8, 9, 1, 0],
-             [10, 11, 12, 1, 1]],
-            right.samples,
+        runtime_assert_arr_equals(
+            [0, 0, 0, 1],
+            right.get_active_col(),
             default_test_name()
         )
 
@@ -581,12 +588,16 @@ def test():
     def test_c45_single_round():
         # TODO single column case!
         sec_mat = input_matrix([
-            [1, 5, 0, 1],
-            [2, 6, 0, 1],
-            [3, 7, 1, 1],
-            [4, 8, 1, 1]
+            [8, 1, 0, 1],
+            [5, 2, 0, 1],
+            [7, 3, 1, 1],
+            [6, 4, 1, 1]
         ])
-        c45_single_round(Samples(sec_mat, 2, 0))
+        node, left, right = c45_single_round(Samples(sec_mat, 2, 0))
+        runtime_assert_equals(1, node.attr_idx, default_test_name())
+        runtime_assert_equals(2, node.threshold, default_test_name())
+        runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
+        runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
     test_argmax()
     test_naive_sort_by()
@@ -599,4 +610,5 @@ def test():
     test_c45_single_round()
 
 
+sys.path.insert(0, 'tree')
 test()
