@@ -627,5 +627,4 @@ def test():
     test_c45_single_round()
 
 
-sys.path.insert(0, 'tree')
 test()
