@@ -2,8 +2,8 @@
 import sys
 
 from Compiler.types import sint, cint, MemValue
-from library import print_ln, print_str, if_, tree_reduce, if_else, if_e, else_, do_while
-from util import *
+from library import print_ln, print_str, if_, if_e, else_, do_while
+from util import tree_reduce, if_else
 
 
 # Various, probably redundant, utility methods
@@ -358,8 +358,8 @@ def leaf_reached(left_samples, right_samples):
     return (left_total * right_total) == 0
 
 
-def c45(samples):
-    """Runs C4.5 algorithm on samples.
+def c45_single_round(samples):
+    """Runs single round of C4.5 algorithm.
 
     :param samples:
     :return:
@@ -374,20 +374,7 @@ def c45(samples):
         candidates.append((num, denom, c, thresh))
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
-    left, right = partition_on(samples, attr_idx, thresh)
-    # TODO stopping condition not correct
-    is_done = leaf_reached(left, right).reveal()
-
-    @if_e(is_done)
-    def _():
-        print_ln("Leaf.")
-
-    @else_
-    def _():
-        print_ln("Non-leaf.")
-        # TODO how do we use recursion in MP-SPDZ?
-        # c45(left)
-        # c45(right)
+    return partition_on(samples, attr_idx, thresh)
 
 
 def test():
@@ -579,16 +566,6 @@ def test():
         actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
         runtime_assert_equals(0, actual, default_test_name())
 
-    def test_c45():
-        # TODO single column case!
-        sec_mat = input_matrix([
-            [1, 5, 0, 1],
-            [2, 6, 0, 1],
-            [3, 7, 1, 1],
-            [4, 8, 1, 1]
-        ])
-        c45(Samples(sec_mat, 2, 0))
-
     def test_while():
         counter = MemValue(sint(5))
 
@@ -601,6 +578,16 @@ def test():
 
         runtime_assert_equals(1, sint(counter), default_test_name())
 
+    def test_c45_single_round():
+        # TODO single column case!
+        sec_mat = input_matrix([
+            [1, 5, 0, 1],
+            [2, 6, 0, 1],
+            [3, 7, 1, 1],
+            [4, 8, 1, 1]
+        ])
+        c45_single_round(Samples(sec_mat, 2, 0))
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -608,8 +595,8 @@ def test():
     test_obl_select_col_at()
     test_partition_on()
     test_leaf_reached()
-    # test_c45()
     test_while()
+    test_c45_single_round()
 
 
 test()
