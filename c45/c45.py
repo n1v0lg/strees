@@ -2,7 +2,7 @@
 import sys
 
 from Compiler.types import sint, cint, MemValue
-from library import print_ln, print_str
+from library import print_ln, print_str, if_, tree_reduce, if_else, if_e, else_, do_while
 from util import *
 
 
@@ -127,19 +127,21 @@ def debug_only(f):
 
 class Samples:
 
-    def __init__(self, samples, n, m):
+    def __init__(self, samples, n, m, max_iteration_count=100):
         """Create Samples object.
 
         :param samples: raw matrix containing continuous and discrete (binary) attribute values, category (binary),
         and indicator vector, each row represents a sample
         :param n: number of continuous attributes
         :param m: number of discrete attributes
+        :param max_iteration_count: upper limit on iterations to generate decision tree for samples
         """
         if len(samples[0]) != n + m + 2:
             raise Exception("Wrong number of cols. in samples matrix")
         self.samples = samples
         self.n = n
         self.m = m
+        self.max_iteration_count = max_iteration_count
 
     def get_col(self, col_idx):
         return [row[col_idx] for row in self.samples]
