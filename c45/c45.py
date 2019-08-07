@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
 
-from Compiler.types import sint, cint
-from library import *
+from Compiler.types import sint, cint, MemValue
+from library import print_ln, print_str
 from util import *
 
 
@@ -587,6 +587,18 @@ def test():
         ])
         c45(Samples(sec_mat, 2, 0))
 
+    def test_while():
+        counter = MemValue(sint(5))
+
+        @do_while
+        def body():
+            counter.write(counter.read() - 1)
+            opened = counter.reveal()
+            print_ln("Counter %s", opened)
+            return opened > 1
+
+        runtime_assert_equals(1, sint(counter), default_test_name())
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -594,7 +606,8 @@ def test():
     test_obl_select_col_at()
     test_partition_on()
     test_leaf_reached()
-    test_c45()
+    # test_c45()
+    test_while()
 
 
 test()
