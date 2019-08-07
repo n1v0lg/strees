@@ -218,7 +218,8 @@ def argmax_over_fracs(elements):
 
     if not elements:
         raise Exception("No elements to argmax on")
-
+    if len(elements) == 1:
+        return elements[0]
     return tree_reduce(_select_larger, elements)
 
 
@@ -299,11 +300,11 @@ def compute_best_gini_cont(samples, attr_col_idx):
     return argmax_over_fracs(cand_ginis)
 
 
-def obl_select_col_at(samples, secret_idx):
-    """Obliviously selects column at given index.
+def select_col_at(samples, idx):
+    """Selects column at given index, obliviously if index is secret.
 
     :param samples:
-    :param secret_idx:
+    :param idx:
     :return:
     """
 
@@ -316,13 +317,16 @@ def obl_select_col_at(samples, secret_idx):
         def _():
             print_ln("%s index is out of range.", MPC_ERROR_FLAG)
 
-    if not isinstance(secret_idx, sint):
-        raise Exception("Only use this if index is secret")
+    if isinstance(idx, int):
+        return samples.get_col(idx)
 
-    debug_sanity_check(secret_idx)
+    if not isinstance(idx, sint):
+        raise Exception("Only use this if index is secret or int")
+
+    debug_sanity_check(idx)
     # TODO optimize
     res = []
-    eq_flags = [secret_idx == idx for idx in range(samples.n + samples.m)]
+    eq_flags = [idx == i for i in range(samples.n + samples.m)]
     for row in samples.samples:
         res.append(inner_prod(eq_flags, row))
     return res
@@ -336,7 +340,7 @@ def partition_on(samples, attr_idx, threshold):
     :param threshold:
     :return:
     """
-    selected_col = obl_select_col_at(samples, attr_idx)
+    selected_col = select_col_at(samples, attr_idx)
 
     # TODO this only works for binary discrete attributes,
     # else have to obliviously distinguish whether to use an eq or a leq
@@ -387,6 +391,8 @@ def c45_single_round(samples):
     # partition samples on selected attribute
     left, right = partition_on(samples, attr_idx, thresh)
 
+    # wrap index in sint, in case it isn't secret (can happen if we only have one attribute)
+    attr_idx = sint(attr_idx) if isinstance(attr_idx, int) else attr_idx
     return DeTreeNode(attr_idx, thresh), left, right
 
 
@@ -496,7 +502,7 @@ def test():
             [4, 5, 6, 1, 1],
             [7, 8, 9, 1, 1]
         ])
-        actual = obl_select_col_at(Samples(sec_mat, 3, 0), sint(1))
+        actual = select_col_at(Samples(sec_mat, 3, 0), sint(1))
         runtime_assert_arr_equals([2, 5, 8], actual, default_test_name())
 
     def test_partition_on():
@@ -586,7 +592,6 @@ def test():
         runtime_assert_equals(1, sint(counter), default_test_name())
 
     def test_c45_single_round():
-        # TODO single column case!
         sec_mat = input_matrix([
             [8, 1, 0, 1],
             [5, 2, 0, 1],
@@ -595,6 +600,18 @@ def test():
         ])
         node, left, right = c45_single_round(Samples(sec_mat, 2, 0))
         runtime_assert_equals(1, node.attr_idx, default_test_name())
+        runtime_assert_equals(2, node.threshold, default_test_name())
+        runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
+        runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
+
+        sec_mat = input_matrix([
+            [1, 0, 1],
+            [2, 0, 1],
+            [3, 1, 1],
+            [4, 1, 1]
+        ])
+        node, left, right = c45_single_round(Samples(sec_mat, 1, 0))
+        runtime_assert_equals(0, node.attr_idx, default_test_name())
         runtime_assert_equals(2, node.threshold, default_test_name())
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
