@@ -295,7 +295,6 @@ def compute_best_gini_cont(samples, attr_col_idx):
     :param attr_col_idx:
     :return:
     """
-    # TODO handle single attribute case
     cand_ginis = compute_cont_ginis(samples, attr_col_idx)
     return argmax_over_fracs(cand_ginis)
 
@@ -312,7 +311,6 @@ def select_col_at(samples, idx):
     def debug_sanity_check(i):
         # INSECURE for debugging only!
         # Verifies that idx is within range
-        # TODO make this a decorator
         @if_((i >= samples.n + samples.m).reveal())
         def _():
             print_ln("%s index is out of range.", MPC_ERROR_FLAG)
