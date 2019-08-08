@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import sys
 from collections import deque
 
@@ -119,6 +120,7 @@ def input_matrix(mat):
 # Core functionality
 
 MPC_ERROR_FLAG = "MPC_ERROR"
+MPC_WARN_FLAG = "MPC_WARN"
 DEBUG = True
 
 
@@ -206,9 +208,11 @@ def argmax_over_fracs(elements):
     def debug_sanity_check(d):
         # INSECURE for debugging only!
         # Verifies that denominator is not 0
-        @if_((d == 0).reveal())
+        @if_((d.reveal() == 0))
         def _():
-            print_ln("%s 0 in denominator.", MPC_ERROR_FLAG)
+            # Only a warning since this is acceptable when we are obliviously splitting even though we've already
+            # reached a leaf node
+            print_ln("%s 0 in denominator.", MPC_WARN_FLAG)
 
     def _select_larger(row_a, row_b):
         num_a, denom_a = row_a[0], row_a[1]
