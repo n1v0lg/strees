@@ -140,36 +140,10 @@ class Node:
         self.right = None
 
 
-class OpenTreeNode(Node):
+class TreeNode(Node):
 
     def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class):
-        Node.__init__(self)
-        self.is_leaf = is_leaf
-        self.attr_idx = attr_idx
-        self.threshold = threshold
-        self.is_dummy = is_dummy
-        self.node_class = node_class
-
-    def print_self(self):
-        @if_e(self.is_leaf)
-        def _():
-            @if_e(self.is_dummy)
-            def _():
-                print_str("(X)")
-
-            @else_
-            def _():
-                print_str("(%s)", self.node_class)
-
-        @else_
-        def _():
-            print_str("(c_{%s} <= %s)", self.attr_idx, self.threshold)
-
-
-class OblTreeNode(Node):
-
-    def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class):
-        """An oblivious tree node.
+        """Represents tree node.
 
          Holds following secret flags and values.
 
@@ -189,15 +163,60 @@ class OblTreeNode(Node):
         self.left = None
         self.right = None
 
-    def reveal(self):
-        """Opens all secret values and creates decision tree node based on result."""
-        return OpenTreeNode(
-            self.is_leaf.reveal(),
-            self.attr_idx.reveal(),
-            self.threshold.reveal(),
-            self.is_dummy.reveal(),
-            self.node_class.reveal()
-        )
+    def reveal_self(self):
+        """Opens all secret values (modifies self)."""
+        self.is_leaf = self.is_leaf.reveal()
+        self.attr_idx = self.attr_idx.reveal()
+        self.threshold = self.threshold.reveal()
+        self.is_dummy = self.is_dummy.reveal()
+        self.node_class = self.node_class.reveal()
+
+    def print_self(self):
+        @if_e(self.is_leaf)
+        def _():
+            @if_e(self.is_dummy)
+            def _():
+                print_str("(X)")
+
+            @else_
+            def _():
+                print_str("(%s)", self.node_class)
+
+        @else_
+        def _():
+            print_str("(c_{%s} <= %s)", self.attr_idx, self.threshold)
+
+
+class Tree:
+
+    def __init__(self, root):
+        self.root = root
+
+    def _reveal(self, node):
+        if node:
+            node.reveal_self()
+            self._reveal(node.left)
+            self._reveal(node.right)
+
+    def reveal_self(self):
+        self._reveal(self.root)
+
+    @staticmethod
+    def _bfs_print(node):
+        queue = deque([node])
+        while queue:
+            curr = queue.popleft()
+            print_str(" ")
+            if curr:
+                curr.print_self()
+                queue.append(curr.left)
+                queue.append(curr.right)
+            else:
+                print_str("(X)")
+        print_ln("")
+
+    def print_self(self):
+        self._bfs_print(self.root)
 
 
 class Samples:
@@ -477,7 +496,7 @@ def c45_single_round(samples):
     # wrap index in sint, in case it isn't secret (can happen if we only have one attribute)
     attr_idx = sint(attr_idx) if isinstance(attr_idx, int) else attr_idx
 
-    node = OblTreeNode(is_leaf, attr_idx, thresh, is_dummy, node_class)
+    node = TreeNode(is_leaf, attr_idx, thresh, is_dummy, node_class)
     return node, left, right
 
 
@@ -517,7 +536,7 @@ def c45(input_samples, max_iteration_count=2 ** 4):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
-    return root
+    return Tree(root)
 
 
 def test():
@@ -752,9 +771,10 @@ def test():
             [7, 3, 1, 1],
             [6, 4, 1, 1]
         ])
-        node = c45(Samples(sec_mat, 2, 0), 1)
+        tree = c45(Samples(sec_mat, 2, 0), 1)
         # TODO actual asserts
-        node.reveal().print_self()
+        tree.reveal_self()
+        tree.print_self()
 
     test_argmax()
     test_naive_sort_by()
