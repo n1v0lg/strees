@@ -24,6 +24,11 @@ def print_mat(mat):
     print_ln("]")
 
 
+def log_or(bit_a, bit_b):
+    """Logical OR via arithmetic ops"""
+    return bit_a + bit_b - bit_a * bit_b
+
+
 def prod(left, right):
     """Pairwise product of elements."""
     return [l * r for l, r in zip(left, right)]
@@ -137,7 +142,7 @@ class DeTreeNode:
 
 class Samples:
 
-    def __init__(self, samples, n, m):
+    def __init__(self, samples, n, m=0):
         """Create Samples object.
 
         :param samples: raw matrix containing continuous and discrete (binary) attribute values, category (binary),
@@ -356,16 +361,29 @@ def partition_on(samples, attr_idx, threshold):
     return left, right
 
 
-def leaf_reached(left_samples, right_samples):
-    """Computes bit indicating if we have reached a leaf node (no need to partition further).
+def determine_if_leaf(samples):
+    """Computes if this node is a leaf.
 
-    :param left_samples:
-    :param right_samples:
+    This is the case if (i) all samples are inactive, or (ii) all active samples have the same class.
+
+    :param samples:
     :return:
     """
-    left_total = sum(left_samples.get_active_col())
-    right_total = sum(right_samples.get_active_col())
-    return (left_total * right_total) == 0
+    active_col = samples.get_active_col()
+    is_category_one = samples.get_class_col()
+    is_category_zero = neg(is_category_one)
+
+    active_ones = prod(is_category_one, active_col)
+    active_zeroes = prod(is_category_zero, active_col)
+
+    total_actives = sum(active_col)
+
+    all_inactive = total_actives == 0
+    all_ones = sum(active_ones) == total_actives
+    all_zeroes = sum(active_zeroes) == total_actives
+
+    is_leaf = log_or(all_inactive, log_or(all_ones, all_zeroes))
+    return is_leaf, all_inactive, all_ones
 
 
 def c45_single_round(samples):
@@ -377,6 +395,12 @@ def c45_single_round(samples):
     if samples.m != 0:
         # TODO
         raise Exception("Discrete attributes not implemented yet")
+
+    # since we don't want to leak anything apart from an upper bound on the threshold of the tree,
+    # we need to both compute if we have reached a leaf case, and a splitting attribute
+
+    # compute if this node is a leaf node, if it's a dummy, and its class
+    is_leaf, is_dummy, node_class = determine_if_leaf(samples)
 
     # compute best attribute and threshold to split on
     candidates = []
@@ -390,21 +414,17 @@ def c45_single_round(samples):
 
     # wrap index in sint, in case it isn't secret (can happen if we only have one attribute)
     attr_idx = sint(attr_idx) if isinstance(attr_idx, int) else attr_idx
+
     return DeTreeNode(attr_idx, thresh), left, right
-
-
-def to_tree(nodes):
-    # TODO
-    return nodes
 
 
 def c45(input_samples, max_iteration_count=2 ** 4):
     """Runs C4.5 algorithm to construct decision tree.
 
-    TODO Executes exactly max_iteration_count iterations for now
-
     This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
     better aligned with MP-SPDZ.
+
+    TODO Executes exactly max_iteration_count iterations for now
 
     :param input_samples:
     :param max_iteration_count: upper limit on iterations to generate decision tree for samples
@@ -434,8 +454,6 @@ def c45(input_samples, max_iteration_count=2 ** 4):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
-    # then stitch the nodes together into an actual tree
-    # since we get a complete binary tree, we can do so with just the node list
     return root
 
 
@@ -591,36 +609,42 @@ def test():
             default_test_name()
         )
 
-    def test_leaf_reached():
-        left_sec_mat = input_matrix([
-            [1, 1, 0],
+    def test_determine_if_leaf():
+        sec_mat = input_matrix([
+            [1, 0, 1],
             [2, 1, 0],
-            [3, 1, 0],
-            [4, 1, 0]
-        ])
-        right_sec_mat = input_matrix([
-            [1, 1, 0],
-            [2, 1, 0],
-            [3, 1, 0],
-            [4, 1, 0]
-        ])
-        actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
-        runtime_assert_equals(1, actual, default_test_name())
-
-        left_sec_mat = input_matrix([
-            [1, 1, 1],
-            [2, 1, 0],
-            [3, 1, 0],
-            [4, 1, 0]
-        ])
-        right_sec_mat = input_matrix([
-            [1, 1, 0],
-            [2, 1, 0],
-            [3, 1, 0],
+            [3, 0, 0],
             [4, 1, 1]
         ])
-        actual = leaf_reached(Samples(left_sec_mat, 1, 0), Samples(right_sec_mat, 1, 0))
-        runtime_assert_equals(0, actual, default_test_name())
+        is_leaf, _, _ = determine_if_leaf(Samples(sec_mat, 1))
+        runtime_assert_equals(0, is_leaf, default_test_name())
+
+        sec_mat = input_matrix([
+            [1, 0, 0],
+            [2, 1, 0],
+            [3, 0, 0],
+            [4, 1, 1]
+        ])
+        is_leaf, is_dummy, node_class = determine_if_leaf(Samples(sec_mat, 1))
+        runtime_assert_arr_equals([1, 0, 1], [is_leaf, is_dummy, node_class], default_test_name())
+
+        sec_mat = input_matrix([
+            [1, 0, 1],
+            [2, 1, 0],
+            [3, 0, 0],
+            [4, 1, 0]
+        ])
+        is_leaf, is_dummy, node_class = determine_if_leaf(Samples(sec_mat, 1))
+        runtime_assert_arr_equals([1, 0, 0], [is_leaf, is_dummy, node_class], default_test_name())
+
+        sec_mat = input_matrix([
+            [1, 0, 0],
+            [2, 1, 0],
+            [3, 0, 0],
+            [4, 1, 0]
+        ])
+        is_leaf, is_dummy, _ = determine_if_leaf(Samples(sec_mat, 1))
+        runtime_assert_arr_equals([1, 1], [is_leaf, is_dummy], default_test_name())
 
     def test_while():
         counter = MemValue(sint(5))
@@ -673,7 +697,7 @@ def test():
     test_compute_best_gini_cont()
     test_obl_select_col_at()
     test_partition_on()
-    test_leaf_reached()
+    test_determine_if_leaf()
     test_while()
     test_c45_single_round()
     test_c45()
