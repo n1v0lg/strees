@@ -410,25 +410,33 @@ def c45(input_samples, max_iteration_count=2 ** 4):
     :param max_iteration_count: upper limit on iterations to generate decision tree for samples
     :return:
     """
-    nodes = []
-    queue = deque([input_samples])
+    queue = deque([(None, input_samples)])
+    root = None
 
-    # we first compute the nodes (for a complete tree), in a BFS-like traversal
+    # Create tree in a BFS-like traversal
     for _ in range(max_iteration_count):
-        samples = queue.popleft()
-        node, left, right = c45_single_round(samples)
+        parent, samples = queue.popleft()
+        node, left_samples, right_samples = c45_single_round(samples)
+        if parent:
+            # if there is a parent, we need to link the current node back to it as a child
+            # since we're doing a BFS, the left child will always come first
+            if not parent.left:
+                parent.left = node
+            else:
+                parent.right = node
 
-        # persist node
-        nodes.append(node)
+        # track root node, to return it later
+        if not root:
+            root = node
 
-        # push back partitioned samples to process
-        # TODO could just append tuple with ref. to parent instead, and link later
-        queue.append(left)
-        queue.append(right)
+        # push back partitioned samples to process, along with the current node which will be the resulting nodes'
+        # parent
+        queue.append((node, left_samples))
+        queue.append((node, right_samples))
 
     # then stitch the nodes together into an actual tree
     # since we get a complete binary tree, we can do so with just the node list
-    return to_tree(nodes)
+    return root
 
 
 def test():
@@ -621,7 +629,6 @@ def test():
         def body():
             counter.write(counter.read() - 1)
             opened = counter.reveal()
-            print_ln("Counter %s", opened)
             return opened > 1
 
         runtime_assert_equals(1, sint(counter), default_test_name())
