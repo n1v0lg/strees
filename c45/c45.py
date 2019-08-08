@@ -133,13 +133,71 @@ def debug_only(f):
     return wrapper
 
 
-class DeTreeNode:
+class Node:
 
-    def __init__(self, attr_idx, threshold):
-        self.attr_idx = attr_idx
-        self.threshold = threshold
+    def __init__(self):
         self.left = None
         self.right = None
+
+
+class OpenTreeNode(Node):
+
+    def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class):
+        Node.__init__(self)
+        self.is_leaf = is_leaf
+        self.attr_idx = attr_idx
+        self.threshold = threshold
+        self.is_dummy = is_dummy
+        self.node_class = node_class
+
+    def print_self(self):
+        @if_e(self.is_leaf)
+        def _():
+            @if_e(self.is_dummy)
+            def _():
+                print_str("(X)")
+
+            @else_
+            def _():
+                print_str("(%s)", self.node_class)
+
+        @else_
+        def _():
+            print_str("(c_{%s} <= %s)", self.attr_idx, self.threshold)
+
+
+class OblTreeNode(Node):
+
+    def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class):
+        """An oblivious tree node.
+
+         Holds following secret flags and values.
+
+        :param is_leaf: flag indicating whether this is a leaf node, or an internal node
+        :param attr_idx: index of attribute to split on (bogus value if leaf node)
+        :param threshold: threshold value to split on (bogus value if leaf node)
+        :param is_dummy: flag indicating if this is a dummy leaf node (i.e., a fake leaf node that is an ancestor of
+        a real leaf node)
+        :param node_class: class of the node (bogus value if no leaf node)
+        """
+        Node.__init__(self)
+        self.is_leaf = is_leaf
+        self.attr_idx = attr_idx
+        self.threshold = threshold
+        self.is_dummy = is_dummy
+        self.node_class = node_class
+        self.left = None
+        self.right = None
+
+    def reveal(self):
+        """Opens all secret values and creates decision tree node based on result."""
+        return OpenTreeNode(
+            self.is_leaf.reveal(),
+            self.attr_idx.reveal(),
+            self.threshold.reveal(),
+            self.is_dummy.reveal(),
+            self.node_class.reveal()
+        )
 
 
 class Samples:
@@ -400,7 +458,7 @@ def c45_single_round(samples):
         # TODO
         raise Exception("Discrete attributes not implemented yet")
 
-    # since we don't want to leak anything apart from an upper bound on the threshold of the tree,
+    # since we don't want to leak anything apart from an upper bound on the depth of the tree,
     # we need to both compute if we have reached a leaf case, and a splitting attribute
 
     # compute if this node is a leaf node, if it's a dummy, and its class
@@ -419,7 +477,8 @@ def c45_single_round(samples):
     # wrap index in sint, in case it isn't secret (can happen if we only have one attribute)
     attr_idx = sint(attr_idx) if isinstance(attr_idx, int) else attr_idx
 
-    return DeTreeNode(attr_idx, thresh), left, right
+    node = OblTreeNode(is_leaf, attr_idx, thresh, is_dummy, node_class)
+    return node, left, right
 
 
 def c45(input_samples, max_iteration_count=2 ** 4):
@@ -693,7 +752,9 @@ def test():
             [7, 3, 1, 1],
             [6, 4, 1, 1]
         ])
-        c45(Samples(sec_mat, 2, 0), 1)
+        node = c45(Samples(sec_mat, 2, 0), 1)
+        # TODO actual asserts
+        node.reveal().print_self()
 
     test_argmax()
     test_naive_sort_by()
