@@ -26,7 +26,7 @@ def print_mat(mat):
 
 
 def log_or(bit_a, bit_b):
-    """Logical OR via arithmetic ops"""
+    """Logical OR via arithmetic ops."""
     return bit_a + bit_b - bit_a * bit_b
 
 
@@ -536,6 +536,7 @@ def c45(input_samples, max_iteration_count=2 ** 4):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
+    # TODO need to post-process tree to fill dummy leaves that have real sibling with actual categories
     return Tree(root)
 
 
@@ -764,18 +765,6 @@ def test():
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
-    def test_c45():
-        sec_mat = input_matrix([
-            [8, 1, 0, 1],
-            [5, 2, 0, 1],
-            [7, 3, 1, 1],
-            [6, 4, 1, 1]
-        ])
-        tree = c45(Samples(sec_mat, 2, 0), 1)
-        # TODO actual asserts
-        tree.reveal_self()
-        tree.print_self()
-
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -785,7 +774,20 @@ def test():
     test_determine_if_leaf()
     test_while()
     test_c45_single_round()
-    test_c45()
+    # TODO test main algorithm
+
+
+def main():
+    sec_mat = input_matrix([
+        [8, 1, 0, 1],
+        [5, 2, 0, 1],
+        [7, 3, 1, 1],
+        [6, 4, 1, 1]
+    ])
+    tree = c45(Samples(sec_mat, 2), 3)
+    tree.reveal_self()
+    tree.print_self()
 
 
 test()
+main()
