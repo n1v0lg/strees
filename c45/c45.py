@@ -176,7 +176,7 @@ class TreeNode(Node):
         def _():
             @if_e(self.is_dummy)
             def _():
-                print_str("(X)")
+                print_str("(D)")
 
             @else_
             def _():
@@ -821,12 +821,25 @@ def test():
             [7, 3, 0, 1],
             [6, 4, 0, 1]
         ])
-        tree = c45(Samples(sec_mat, 2), max_iteration_count=3)
+        actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
         expected = \
             DN(1, 2) \
                 .l(LN(0, 1)) \
                 .r(LN(0, 0))
-        runtime_assert_tree_equals(expected, tree, default_test_name())
+        runtime_assert_tree_equals(expected, actual, default_test_name())
+
+        # sec_mat = input_matrix([
+        #     [1, 1, 1, 1],
+        #     [2, 0, 0, 1],
+        #     [3, 1, 1, 1],
+        #     [4, 2, 0, 1],
+        #     [5, 2, 0, 1]
+        # ])
+        # total_nodes = 2 * (2 ** 2) - 1
+        # actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
+        # actual.reveal_self()
+        # actual.print_self()
+
 
     test_argmax()
     test_naive_sort_by()
@@ -853,4 +866,4 @@ def main():
 
 
 test()
-# main()
+main()
