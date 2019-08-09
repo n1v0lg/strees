@@ -14,7 +14,7 @@ To set up, run (make sure Docker is running!):
 bash build.sh
 ```
 
-This might take a while. Once it's done you should get a bash terminal into a Docker container.
+This might take a while. Once it's done you should get a bash terminal inside a Docker container.
 
 The folder that contains `strees` is mounted into the Docker container. This means that you can modify the source files *outside* the Docker container and the changes will show up inside the container. 
 
@@ -44,3 +44,4 @@ This is very much work in progress. Some limitations include:
 * The continuous attribute values are currently just integer values.
 * The algorithm re-sorts at every new gini computation, which is unnecessary.
 * Not well tested, things will probably break when you run the main algorithm on more complicated inputs.
+* Only supports binary discrete attributes, and binary classes.
