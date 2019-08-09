@@ -580,6 +580,55 @@ def test():
         def _():
             print_ln("%s in %s.Expected %s but was %s", MPC_ERROR_FLAG, test_name, expected, actual)
 
+    class DN:
+
+        def __init__(self, attr_idx, threshold):
+            """Decision node."""
+            self.attr_idx = attr_idx
+            self.threshold = threshold
+            self.left = None
+            self.right = None
+
+        def l(self, left_child):
+            self.left = left_child
+            return self
+
+        def r(self, right_child):
+            self.right = right_child
+            return self
+
+    class LN:
+
+        def __init__(self, is_dummy, node_class):
+            """Leaf node."""
+            self.is_dummy = is_dummy
+            self.node_class = node_class
+
+    def runtime_assert_node_equals(expected, actual, test_name):
+        if isinstance(expected, LN):
+            runtime_assert_equals(1, actual.is_leaf, test_name)
+            runtime_assert_equals(expected.node_class, actual.node_class, test_name)
+        elif isinstance(expected, DN):
+            runtime_assert_equals(0, actual.is_leaf, test_name)
+            runtime_assert_equals(expected.attr_idx, actual.attr_idx, test_name)
+            runtime_assert_equals(expected.threshold, actual.threshold, test_name)
+        else:
+            print_ln("%s incorrect expected tree, must only hold nodes", MPC_ERROR_FLAG)
+
+    def runtime_assert_tree_equals(expected, actual, test_name):
+        # TODO how should dummy nodes be handled?
+        actual.reveal_self()
+        queue = deque([(expected, actual.root)])
+        while queue:
+            expected_next_node, actual_next_node = queue.popleft()
+            if isinstance(expected_next_node, DN):
+                runtime_assert_node_equals(expected_next_node, actual_next_node, test_name)
+                queue.append((expected_next_node.left, actual_next_node.left))
+                queue.append((expected_next_node.right, actual_next_node.right))
+            else:
+                # leaf node expected
+                runtime_assert_node_equals(expected_next_node, actual_next_node, test_name)
+
     def test_argmax():
         sec_mat = input_matrix([
             [1, 1, 0],
@@ -765,6 +814,20 @@ def test():
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
+    def test_c45():
+        sec_mat = input_matrix([
+            [8, 1, 1, 1],
+            [5, 2, 1, 1],
+            [7, 3, 0, 1],
+            [6, 4, 0, 1]
+        ])
+        tree = c45(Samples(sec_mat, 2), max_iteration_count=3)
+        expected = \
+            DN(1, 2) \
+                .l(LN(0, 1)) \
+                .r(LN(0, 0))
+        runtime_assert_tree_equals(expected, tree, default_test_name())
+
     test_argmax()
     test_naive_sort_by()
     test_compute_cont_ginis()
@@ -774,7 +837,7 @@ def test():
     test_determine_if_leaf()
     test_while()
     test_c45_single_round()
-    # TODO test main algorithm
+    test_c45()
 
 
 def main():
@@ -790,4 +853,4 @@ def main():
 
 
 test()
-main()
+# main()
