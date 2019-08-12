@@ -427,6 +427,8 @@ def partition_on(samples, attr_idx, threshold):
 
     # TODO this only works for binary discrete attributes,
     # else have to obliviously distinguish whether to use an eq or a leq
+    # IDEA if we have few classes, we can represent these as via separate indicator columns, one for each class
+    # this lets us avoid using equality checks
     go_left = [v <= threshold for v in selected_col]
     go_right = neg(go_left)
 
@@ -839,7 +841,6 @@ def test():
         # actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
         # actual.reveal_self()
         # actual.print_self()
-
 
     test_argmax()
     test_naive_sort_by()

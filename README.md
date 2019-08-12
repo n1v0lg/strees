@@ -45,3 +45,8 @@ This is very much work in progress. Some limitations include:
 * The algorithm re-sorts at every new gini computation, which is unnecessary.
 * Not well tested, things will probably break when you run the main algorithm on more complicated inputs.
 * Only supports binary discrete attributes, and binary classes.
+
+## Misc
+
+*Representing classes.* There are different ways in which we can represent the class of a sample. The current implementation only deals with binary classes so a single binary column is sufficient. If we have more than two classes, one obvious representation is to assign an integer to each class and have a non-binary class column. However, this forces us to run additional equality checks. We can avoid these by using a separate binary indicator column for each class instead.
+ 
