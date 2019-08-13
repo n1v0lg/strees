@@ -30,6 +30,11 @@ def log_or(bit_a, bit_b):
     return bit_a + bit_b - bit_a * bit_b
 
 
+def toggle(bit, elements):
+    """Keeps elements same if bit is 1, sets all to 0 otherwise"""
+    return [el * bit for el in elements]
+
+
 def prod(left, right):
     """Pairwise product of elements."""
     return [l * r for l, r in zip(left, right)]
@@ -139,6 +144,14 @@ class Node:
         self.left = None
         self.right = None
 
+    def l(self, left):
+        self.left = left
+        return self
+
+    def r(self, right):
+        self.right = right
+        return self
+
 
 class TreeNode(Node):
 
@@ -217,6 +230,15 @@ class Tree:
 
     def print_self(self):
         self._bfs_print(self.root)
+
+    def _num_nodes(self, node):
+        if node is None:
+            return 0
+        else:
+            return 1 + self._num_nodes(node.left) + self._num_nodes(node.right)
+
+    def num_nodes(self):
+        return self._num_nodes(self.root)
 
 
 class Samples:
@@ -415,12 +437,15 @@ def select_col_at(samples, idx):
     return res
 
 
-def partition_on(samples, attr_idx, threshold):
+def partition_on(samples, attr_idx, threshold, is_leaf):
     """Partitions samples on given attribute and threshold.
+
+    Sets all indicator values on both partitions to 0 if we're dealing with leaf node.
 
     :param samples:
     :param attr_idx:
     :param threshold:
+    :param is_leaf:
     :return:
     """
     selected_col = select_col_at(samples, attr_idx)
@@ -437,6 +462,11 @@ def partition_on(samples, attr_idx, threshold):
     go_left = prod(go_left, active_col)
     # TODO can we derive this from go_left?
     go_right = prod(go_right, active_col)
+
+    # set both indicator vectors to 0 if we're at a leaf node
+    is_internal = 1 - is_leaf
+    go_left = toggle(is_internal, go_left)
+    go_right = toggle(is_internal, go_right)
 
     left = samples.with_updated_actives(go_left)
     right = samples.with_updated_actives(go_right)
@@ -493,7 +523,7 @@ def c45_single_round(samples):
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
     # partition samples on selected attribute
-    left, right = partition_on(samples, attr_idx, thresh)
+    left, right = partition_on(samples, attr_idx, thresh, is_leaf)
 
     # wrap index in sint, in case it isn't secret (can happen if we only have one attribute)
     attr_idx = sint(attr_idx) if isinstance(attr_idx, int) else attr_idx
@@ -582,34 +612,36 @@ def test():
         def _():
             print_ln("%s in %s.Expected %s but was %s", MPC_ERROR_FLAG, test_name, expected, actual)
 
-    class DN:
+    class DN(Node):
 
         def __init__(self, attr_idx, threshold):
             """Decision node."""
+            Node.__init__(self)
             self.attr_idx = attr_idx
             self.threshold = threshold
             self.left = None
             self.right = None
 
-        def l(self, left_child):
-            self.left = left_child
-            return self
+    class LN(Node):
 
-        def r(self, right_child):
-            self.right = right_child
-            return self
-
-    class LN:
-
-        def __init__(self, is_dummy, node_class):
+        def __init__(self, node_class, is_dummy=False):
             """Leaf node."""
-            self.is_dummy = is_dummy
+            Node.__init__(self)
             self.node_class = node_class
+            self.is_dummy = is_dummy
+            self.left = None
+            self.right = None
 
     def runtime_assert_node_equals(expected, actual, test_name):
         if isinstance(expected, LN):
             runtime_assert_equals(1, actual.is_leaf, test_name)
-            runtime_assert_equals(expected.node_class, actual.node_class, test_name)
+            if expected.is_dummy:
+                # dummy case
+                runtime_assert_equals(1, actual.is_dummy, test_name)
+                # don't test class because this is a dummy node
+            else:
+                runtime_assert_equals(0, actual.is_dummy, test_name)
+                runtime_assert_equals(expected.node_class, actual.node_class, test_name)
         elif isinstance(expected, DN):
             runtime_assert_equals(0, actual.is_leaf, test_name)
             runtime_assert_equals(expected.attr_idx, actual.attr_idx, test_name)
@@ -620,16 +652,25 @@ def test():
     def runtime_assert_tree_equals(expected, actual, test_name):
         # TODO how should dummy nodes be handled?
         actual.reveal_self()
-        queue = deque([(expected, actual.root)])
+        expected_num_nodes = expected.num_nodes()
+        actual_num_nodes = actual.num_nodes()
+        if expected_num_nodes != actual_num_nodes:
+            print_ln("%s Expected tree has %s nodes but actual has %s",
+                     MPC_ERROR_FLAG,
+                     expected_num_nodes,
+                     actual_num_nodes)
+        queue = deque([(expected.root, actual.root)])
         while queue:
             expected_next_node, actual_next_node = queue.popleft()
-            if isinstance(expected_next_node, DN):
+            if expected_next_node:
+                if not actual_next_node:
+                    print_ln("%s trees have different topology", MPC_ERROR_FLAG)
                 runtime_assert_node_equals(expected_next_node, actual_next_node, test_name)
                 queue.append((expected_next_node.left, actual_next_node.left))
                 queue.append((expected_next_node.right, actual_next_node.right))
             else:
-                # leaf node expected
-                runtime_assert_node_equals(expected_next_node, actual_next_node, test_name)
+                if actual_next_node:
+                    print_ln("%s trees have different topology", MPC_ERROR_FLAG)
 
     def test_argmax():
         sec_mat = input_matrix([
@@ -707,7 +748,8 @@ def test():
             [7, 8, 9, 1, 1],
             [10, 11, 12, 1, 1]
         ])
-        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5)
+        left, right = partition_on(Samples(sec_mat, 3, 0),
+                                   attr_idx=sint(1), threshold=5, is_leaf=sint(0))
         runtime_assert_mat_equals(
             [[1, 2, 3, 1, 1],
              [4, 5, 6, 1, 1],
@@ -731,7 +773,8 @@ def test():
             [7, 8, 9, 1, 0],
             [10, 11, 12, 1, 1]
         ])
-        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5)
+        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
+                                   is_leaf=0)
         runtime_assert_arr_equals(
             [0, 1, 0, 0],
             left.get_active_col(),
@@ -739,6 +782,25 @@ def test():
         )
         runtime_assert_arr_equals(
             [0, 0, 0, 1],
+            right.get_active_col(),
+            default_test_name()
+        )
+
+        sec_mat = input_matrix([
+            [1, 2, 3, 1, 0],
+            [4, 5, 6, 1, 1],
+            [7, 8, 9, 1, 0],
+            [10, 11, 12, 1, 1]
+        ])
+        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
+                                   is_leaf=sint(1))
+        runtime_assert_arr_equals(
+            [0, 0, 0, 0],
+            left.get_active_col(),
+            default_test_name()
+        )
+        runtime_assert_arr_equals(
+            [0, 0, 0, 0],
             right.get_active_col(),
             default_test_name()
         )
@@ -826,21 +888,28 @@ def test():
         actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
         expected = \
             DN(1, 2) \
-                .l(LN(0, 1)) \
-                .r(LN(0, 0))
-        runtime_assert_tree_equals(expected, actual, default_test_name())
+                .l(LN(1)) \
+                .r(LN(0))
+        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
-        # sec_mat = input_matrix([
-        #     [1, 1, 1, 1],
-        #     [2, 0, 0, 1],
-        #     [3, 1, 1, 1],
-        #     [4, 2, 0, 1],
-        #     [5, 2, 0, 1]
-        # ])
-        # total_nodes = 2 * (2 ** 2) - 1
-        # actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
-        # actual.reveal_self()
-        # actual.print_self()
+        sec_mat = input_matrix([
+            [1, 8, 1, 1],
+            [2, 9, 1, 1],
+            [3, 7, 1, 1],
+            [4, 2, 0, 1],
+            [5, 1, 1, 1]
+        ])
+        total_nodes = 2 * (2 ** 2) - 1
+        actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
+        expected = \
+            DN(1, 2) \
+                .l(DN(0, 4)
+                   .l(LN(0))
+                   .r(LN(1))) \
+                .r(LN(1)
+                   .l(LN(-1, is_dummy=True))
+                   .r(LN(-1, is_dummy=True)))
+        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
     test_argmax()
     test_naive_sort_by()
@@ -867,4 +936,4 @@ def main():
 
 
 test()
-main()
+# main()
