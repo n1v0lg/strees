@@ -355,15 +355,17 @@ def compute_cont_ginis(samples, attr_col_idx):
     is_zero = prod(neg(is_one), is_active)
 
     fractions = []
-    # we can skip last entry; the fraction here is always (0, 0) since splitting on the last attribute always
+    # we can skip last entry; the fraction here is always (0, 1) since splitting on the last attribute always
     # partitions the samples a set containing all input samples and the empty set
     for row_idx in range(len(byattr) - 1):
         threshold = byattr.samples[row_idx][attr_col_idx]
+        # TODO denom should be times alpha + 1
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
         fractions.append([numerator, denominator, threshold])
 
     # include fraction for splitting on last term
     last_threshold = byattr.samples[-1][attr_col_idx]
+    # TODO this can go away once the alpha fix is implemented
     fractions.append([sint(0), sint(1), last_threshold])
 
     return fractions
@@ -402,6 +404,8 @@ def compute_best_gini_cont(samples, attr_col_idx):
     :param attr_col_idx:
     :return:
     """
+    # TODO should we exclude (attribute, splitting point) tuple?
+    # only makes sense if we want to leak the index
     cand_ginis = compute_cont_ginis(samples, attr_col_idx)
     return argmax_over_fracs(cand_ginis)
 
