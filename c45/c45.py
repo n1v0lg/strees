@@ -572,7 +572,8 @@ def c45(input_samples, max_iteration_count=2 ** 4):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
-    # TODO need to post-process tree to fill dummy leaves that have real sibling with actual categories
+    # TODO post-process tree to fill dummy leaves that have real sibling with actual categories
+    # TODO can this still ever happen? seems like the parent of those will have invariably been a leaf node already
     return Tree(root)
 
 
@@ -913,6 +914,22 @@ def test():
                 .r(LN(1)
                    .l(LN(-1, is_dummy=True))
                    .r(LN(-1, is_dummy=True)))
+        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
+
+        sec_mat = input_matrix([
+            [1, 1, 1],
+            [2, 1, 1],
+            [3, 1, 1],
+            [4, 1, 1]
+        ])
+        actual = c45(Samples(sec_mat, 1), max_iteration_count=3)
+        # TODO this makes sense, but is it right?
+        # since all samples have the same class,
+        # we don't partition on any attribute and end up with a leaf for the root
+        expected = \
+            LN(1) \
+                .l(LN(-1, is_dummy=True)) \
+                .r(LN(-1, is_dummy=True))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
     test_argmax()
