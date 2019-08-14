@@ -512,7 +512,7 @@ def c45_single_round(samples):
     # since we don't want to leak anything apart from an upper bound on the depth of the tree,
     # we need to both compute if we have reached a leaf case, and a splitting attribute
 
-    # compute if this node is a leaf node, if it's a dummy, and its class
+    # Base case: compute if this node is a leaf node, if it's a dummy, and its class
     is_leaf, is_dummy, node_class = determine_if_leaf(samples)
 
     # compute best attribute and threshold to split on
@@ -521,6 +521,10 @@ def c45_single_round(samples):
         num, denom, thresh = compute_best_gini_cont(samples, c)
         candidates.append((num, denom, c, thresh))
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
+
+    # TODO Base case: check if partitioning on best attribute doesn't actually further partition the data
+    # This can happen if it's not possible to partition the data perfectly, i.e., we end up with partitions that
+    # include both class 0 and class 1 samples
 
     # partition samples on selected attribute
     left, right = partition_on(samples, attr_idx, thresh, is_leaf)
