@@ -536,7 +536,7 @@ def c45_single_round(samples):
     return node, left, right
 
 
-def c45(input_samples, max_iteration_count=2 ** 4):
+def c45(input_samples, max_iteration_count):
     """Runs C4.5 algorithm to construct decision tree.
 
     This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
