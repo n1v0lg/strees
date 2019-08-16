@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 from collections import deque
-from library import print_ln, print_str, if_, if_e, else_
+
+from library import print_ln, print_str, if_e, else_
+
 
 class Node:
 
