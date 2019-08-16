@@ -2,7 +2,6 @@ import sys
 
 from Compiler.types import sint, cint, MemValue, Array
 from library import print_ln, if_e, else_, do_while
-from permutation import config_shuffle, shuffle
 
 try:
     from tree import *
@@ -301,14 +300,30 @@ def test():
 
         runtime_assert_arr_equals([1, 2, 3, 4, 5], target_arr, default_test_name())
 
-    def test_sort_and_permute():
-        sec_arr = Array(8, sint)
-        sec_arr.assign([2, 0, 1, 3, 5, 4, 7, 6])
-        actual, perm = sort_and_permute(sec_arr, 0)
-        expected = list(i for i in range(8))
+    def test_sort_and_permute_mat():
+        sec_mat = input_matrix([
+            [3, 0, 0],
+            [0, 0, 1],
+            [1, 1, 2],
+            [2, 1, 3],
+            [4, 1, 4],
+            [6, 1, 5],
+            [5, 0, 6]
+        ])
+        actual, perm = sort_and_permute(sec_mat, 0)
+
         # Un-applying the random permutation should give us a sorted list
-        fixed_iter_waksman(actual, config=perm, reverse=False)
-        runtime_assert_arr_equals(expected, actual, default_test_name())
+        fixed_shuffle(actual, config=perm, reverse=False)
+        expected = [
+            [0, 0, 1],
+            [1, 1, 2],
+            [2, 1, 3],
+            [3, 0, 0],
+            [4, 1, 4],
+            [5, 0, 6],
+            [6, 1, 5]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
 
     def test_c45_single_round():
         sec_mat = input_matrix([
@@ -392,6 +407,6 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
-    test_sort_and_permute()
+    test_sort_and_permute_mat()
     test_c45_single_round()
     test_c45()

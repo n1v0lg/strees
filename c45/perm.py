@@ -12,6 +12,7 @@ except Exception:
 
 # NOTE most of these methods are taken from MP-SPDZ and updated to account for shuffling rows and fixing some bugs(?)
 WAKSMAN_FUNCTIONS = {}
+inwards = 1
 
 
 def cond_swap_bit(x, y, b):
@@ -59,8 +60,6 @@ def fixed_iter_waksman(a, config, reverse=False):
     nblocks = MemValue(1)
     size = MemValue(0)
     a2 = Array(n, a[0].reg_type)
-
-    inwards = 1
 
     # config_array = Array(n, a[0].reg_type)
     # reverse = (int(reverse))
@@ -157,21 +156,21 @@ def fixed_shuffle(x, config=None, value_type=sint, reverse=False):
                     xi[j] = x[j][i]
                 for j in range(n, m):
                     xi[j] = value_type(0)
-                fixed_shuffle(xi, config, reverse=reverse)
-                fixed_shuffle(xi, config, reverse=reverse)
+                fixed_iter_waksman(xi, config, reverse=reverse)
+                fixed_iter_waksman(xi, config, reverse=reverse)
         else:
             xa = Array(m, value_type.reg_type)
             for i in range(n):
                 xa[i] = x[i]
             for i in range(n, m):
                 xa[i] = value_type(0)
-            fixed_shuffle(xa, config, reverse=reverse)
-            fixed_shuffle(xa, config, reverse=reverse)
+            fixed_iter_waksman(xa, config, reverse=reverse)
+            fixed_iter_waksman(xa, config, reverse=reverse)
     elif isinstance(x, Array):
         if len(x) != m and config is None:
             raise Exception('Non-power of 2 Array input not yet supported')
-        fixed_shuffle(x, config, reverse=reverse)
-        fixed_shuffle(x, config, reverse=reverse)
+        fixed_iter_waksman(x, config, reverse=reverse)
+        fixed_iter_waksman(x, config, reverse=reverse)
     else:
         raise Exception('Invalid type for shuffle:', type(x))
 
@@ -181,7 +180,7 @@ def fixed_shuffle(x, config=None, value_type=sint, reverse=False):
 def sort_and_permute(rows, attr_idx):
     """Sorts and permutes rows according to specified permutation."""
     config_bits = config_shuffle(len(rows), value_type=sint)
-    sorted_rows = sort(rows)
-    fixed_iter_waksman(sorted_rows, config=config_bits)
+    sorted_rows = naive_sort_by(rows, attr_idx)
+    fixed_shuffle(sorted_rows, config=config_bits)
 
-    return rows, config_bits
+    return sorted_rows, config_bits
