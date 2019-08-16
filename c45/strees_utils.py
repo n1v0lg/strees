@@ -1,3 +1,4 @@
+from Compiler.types import sint
 from library import print_ln, print_str
 from util import if_else
 
@@ -84,7 +85,7 @@ def naive_sort_by(samples, key_col_idx):
     Note: this uses naive bubble-sort.
     Copied from MP-SPDZ main repo.
     """
-    res = samples
+    res = samples[:]
 
     for i in range(len(samples)):
         for j in reversed(range(i)):
@@ -125,3 +126,8 @@ def input_matrix(mat):
     TODO use Matrix?
     """
     return mat_assign_op(mat, lambda x: sint(x))
+
+
+def enumerate_rows(rows):
+    """Adds index to end of each row."""
+    return [row + [i] for i, row in enumerate(rows)]
