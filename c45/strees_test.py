@@ -1,6 +1,6 @@
 import sys
 
-from Compiler.types import sint, cint, MemValue
+from Compiler.types import sint, cint, MemValue, Array
 from library import print_ln, if_e, else_, do_while
 
 try:
@@ -282,15 +282,23 @@ def test():
         runtime_assert_arr_equals([1, 1], [is_leaf, is_dummy], default_test_name())
 
     def test_while():
-        counter = MemValue(sint(5))
+        num_vals = 5
+        counter = MemValue(sint(num_vals - 1))
+        source_arr = Array(num_vals, sint)
+        for i in range(num_vals):
+            source_arr[i] = sint(i)
+        target_arr = Array(num_vals, sint)
 
         @do_while
         def body():
-            counter.write(counter.read() - 1)
+            counter_val = counter.read()
+            counter_val_open = counter_val.reveal()
+            target_arr[counter_val_open] = source_arr[counter_val_open] + 1
+            counter.write(counter_val - 1)
             opened = counter.reveal()
-            return opened > 1
+            return opened >= 0
 
-        runtime_assert_equals(1, sint(counter), default_test_name())
+        runtime_assert_arr_equals([1, 2, 3, 4, 5], target_arr, default_test_name())
 
     def test_c45_single_round():
         sec_mat = input_matrix([

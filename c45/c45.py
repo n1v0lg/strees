@@ -8,6 +8,7 @@ from util import tree_reduce
 try:
     from tree import *
     from strees_utils import *
+    from perm import *
     from strees_test import test
 except Exception:
     pass
@@ -21,10 +22,11 @@ def super_hacky_import_hack(local_module_names):
         execfile(join(root_dir, local_module_name), globals())
 
 
-# Order matters!
+# NOTE: Order matters!
 super_hacky_import_hack([
     "tree.py",
     "strees_utils.py",
+    "perm.py",
     "strees_test.py"
 ])
 
