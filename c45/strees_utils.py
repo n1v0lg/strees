@@ -131,3 +131,29 @@ def input_matrix(mat):
 def enumerate_rows(rows):
     """Adds index to end of each row."""
     return [row + [i] for i, row in enumerate(rows)]
+
+
+def enumerate_vals(rows):
+    """Adds index to end of each val."""
+    return [[val, i] for i, val in enumerate(rows)]
+
+
+def get_col(rows, col_idx):
+    """Returns column at index as list."""
+    return [row[col_idx] for row in rows]
+
+
+def reveal_list(lst):
+    """Reveals list of sints.
+
+    TODO probably already exists somewhere.
+    """
+    return [val.reveal() for val in lst]
+
+
+def is_two_pow(n):
+    """True if 2 power.
+
+    Lazily stolen from SO: https://stackoverflow.com/questions/57025836/check-if-a-given-number-is-power-of-two-in
+    -python."""
+    return (n & (n - 1) == 0) and n != 0

@@ -48,7 +48,7 @@ class Samples:
         self.m = m
 
     def get_col(self, col_idx):
-        return [row[col_idx] for row in self.samples]
+        return get_col(self.samples, col_idx)
 
     def is_cont_attribute(self, col_idx):
         if col_idx > self.n + self.m:
@@ -80,6 +80,52 @@ class Samples:
 
     def __len__(self):
         return len(self.samples)
+
+
+class PrepAttribute:
+
+    def __init__(self, attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm):
+        """Create PrepAttribute object.
+
+        :param attr_idx:
+        :param sorted_val_col:
+        :param sorted_class_col:
+        :param rand_perm:
+        :param open_perm:
+        """
+        self.attr_idx = attr_idx
+        self.sorted_val_col = sorted_val_col
+        self.sorted_class_col = sorted_class_col
+        self.rand_perm = rand_perm
+        self.open_perm = open_perm
+
+    @staticmethod
+    def create(attr_idx, val_col, class_col):
+        """Creates PrepAttribute for given attribute column.
+
+        :param attr_idx:
+        :param val_col:
+        :param class_col:
+        :return:
+        """
+        with_idx = enumerate_vals(val_col)
+        # val col always in first pos. in this case
+        reordered, rand_perm = sort_and_permute(with_idx, 0)
+        open_perm = reveal_list(get_col(reordered, 1))
+        # TODO this is unnecessary
+        sorted_val_col = PrepAttribute._sort(val_col, rand_perm, open_perm)
+        sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)
+        return PrepAttribute(attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm)
+
+    @staticmethod
+    def _sort(col, rand_perm, open_perm):
+        """Sorts given column using random perm and open perm."""
+        sorted_col = open_permute(col, open_perm)
+        fixed_shuffle(sorted_col, config=rand_perm, reverse=True)
+        return sorted_col
+
+    def sort(self, col):
+        return self._sort(col, self.rand_perm, self.open_perm)
 
 
 def argmax_over_fracs(elements):

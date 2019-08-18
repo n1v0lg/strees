@@ -300,30 +300,31 @@ def test():
 
         runtime_assert_arr_equals([1, 2, 3, 4, 5], target_arr, default_test_name())
 
-    def test_sort_and_permute_mat():
+    def test_prep_attr_create():
         sec_mat = input_matrix([
-            [3, 0, 0],
-            [0, 0, 1],
-            [1, 1, 2],
-            [2, 1, 3],
-            [4, 1, 4],
-            [6, 1, 5],
-            [5, 0, 6]
+            [3, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [4, 1],
+            [6, 1],
+            [5, 0],
+            [7, 1]
         ])
-        actual, perm = sort_and_permute(sec_mat, 0)
-
-        # Un-applying the random permutation should give us a sorted list
-        fixed_shuffle(actual, config=perm, reverse=False)
+        prep_attr = PrepAttribute.create(0, get_col(sec_mat, 0), get_col(sec_mat, 1))
+        actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
         expected = [
-            [0, 0, 1],
-            [1, 1, 2],
-            [2, 1, 3],
-            [3, 0, 0],
-            [4, 1, 4],
-            [5, 0, 6],
-            [6, 1, 5]
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [3, 0],
+            [4, 1],
+            [5, 0],
+            [6, 1],
+            [7, 1]
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
+        # TODO test permutations
 
     def test_c45_single_round():
         sec_mat = input_matrix([
@@ -407,6 +408,6 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
-    test_sort_and_permute_mat()
+    test_prep_attr_create()
     test_c45_single_round()
     test_c45()

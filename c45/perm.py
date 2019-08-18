@@ -179,8 +179,22 @@ def fixed_shuffle(x, config=None, value_type=sint, reverse=False):
 
 def sort_and_permute(rows, attr_idx):
     """Sorts and permutes rows according to specified permutation."""
+    if not is_two_pow(len(rows)):
+        raise Exception("Only powers of two supported for shuffles")
     config_bits = config_shuffle(len(rows), value_type=sint)
     sorted_rows = naive_sort_by(rows, attr_idx)
     fixed_shuffle(sorted_rows, config=config_bits)
 
     return sorted_rows, config_bits
+
+
+def open_permute(vals, open_perm):
+    """Applies a public permutation to an Array of sints."""
+    # TODO find way to avoid this
+    if not isinstance(vals, Array):
+        vals = Array(len(vals), sint).create_from(vals)
+    reordered = Array(len(vals), sint)
+    for idx, val in enumerate(vals):
+        old_idx = open_perm[idx]
+        reordered[idx] = vals[old_idx]
+    return reordered
