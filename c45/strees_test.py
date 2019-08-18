@@ -157,19 +157,30 @@ def test():
         sec_mat = input_matrix([
             [3, 0, 1],
             [1, 1, 1],
-            [2, 1, 1]
+            [2, 1, 1],
+            [4, 0, 1]
         ])
-        actual = compute_cont_ginis(Samples(sec_mat, 1, 0), 0)
-        runtime_assert_mat_equals([(4, 2, 1), (6, 2, 2), (0, 1, 3)], actual, default_test_name())
+        samples = Samples(sec_mat, 1, 0)
+        actual = compute_cont_ginis(samples, 0, prep_attributes(samples)[0])
+        # TODO double-check these
+        expected = [
+            [8, 3, 1],
+            [16, 4, 2],
+            [8, 3, 3],
+            [0, 1, 4]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
 
     def test_compute_best_gini_cont():
         sec_mat = input_matrix([
             [3, 0, 1],
             [1, 1, 1],
-            [2, 1, 1]
+            [2, 1, 1],
+            [4, 0, 1]
         ])
-        actual = compute_best_gini_cont(Samples(sec_mat, 1, 0), 0)
-        runtime_assert_arr_equals([6, 2, 2], actual, default_test_name())
+        samples = Samples(sec_mat, 1, 0)
+        actual = compute_best_gini_cont(samples, 0, prep_attributes(samples)[0])
+        runtime_assert_arr_equals([16, 4, 2], actual, default_test_name())
 
     def test_obl_select_col_at():
         sec_mat = input_matrix([
@@ -326,6 +337,33 @@ def test():
         runtime_assert_mat_equals(expected, actual, default_test_name())
         # TODO test permutations
 
+    def test_prep_attributes():
+        sec_mat = input_matrix([
+            [8, 1, 0, 1],
+            [5, 2, 0, 1],
+            [7, 4, 1, 1],
+            [6, 3, 1, 1]
+        ])
+        prep_attrs = prep_attributes(Samples(sec_mat, 2, 0))
+
+        actual = zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col)
+        expected = [
+            [5, 0],
+            [6, 1],
+            [7, 1],
+            [8, 0]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
+        actual = zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col)
+        expected = [
+            [1, 0],
+            [2, 0],
+            [3, 1],
+            [4, 1]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
     def test_c45_single_round():
         sec_mat = input_matrix([
             [8, 1, 0, 1],
@@ -333,7 +371,8 @@ def test():
             [7, 3, 1, 1],
             [6, 4, 1, 1]
         ])
-        node, left, right = c45_single_round(Samples(sec_mat, 2, 0))
+        samples = Samples(sec_mat, 2, 0)
+        node, left, right = c45_single_round(samples, prep_attributes(samples))
         runtime_assert_equals(1, node.attr_idx, default_test_name())
         runtime_assert_equals(2, node.threshold, default_test_name())
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
@@ -345,7 +384,8 @@ def test():
             [3, 1, 1],
             [4, 1, 1]
         ])
-        node, left, right = c45_single_round(Samples(sec_mat, 1, 0))
+        samples = Samples(sec_mat, 1, 0)
+        node, left, right = c45_single_round(samples, prep_attributes(samples))
         runtime_assert_equals(0, node.attr_idx, default_test_name())
         runtime_assert_equals(2, node.threshold, default_test_name())
         runtime_assert_arr_equals([1, 1, 0, 0], left.get_active_col(), default_test_name())
@@ -367,7 +407,6 @@ def test():
 
         sec_mat = input_matrix([
             [1, 8, 1, 1],
-            [2, 9, 1, 1],
             [3, 7, 1, 1],
             [4, 2, 0, 1],
             [5, 1, 1, 1]
@@ -409,5 +448,6 @@ def test():
     test_determine_if_leaf()
     test_while()
     test_prep_attr_create()
+    test_prep_attributes()
     test_c45_single_round()
     test_c45()

@@ -166,25 +166,23 @@ def argmax_over_fracs(elements):
     return tree_reduce(_select_larger, elements)
 
 
-def compute_cont_ginis(samples, attr_col_idx):
+def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     """Computes gini values as fractions for given attribute.
 
     :param samples:
     :param attr_col_idx:
+    :param prep_attr:
     :return:
     """
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
 
-    class_col_idx = samples.get_class_col_idx()
-    active_col_idx = samples.get_active_col_idx()
+    val_col = prep_attr.sorted_val_col
+    class_col = prep_attr.sorted_class_col
 
-    # TODO only use necessary columns
-    # TODO Samples class is awkward
-    byattr = Samples(naive_sort_by(samples.samples, attr_col_idx), samples.n, samples.m)
+    # put active col into order induced by this attribute
+    is_active = prep_attr.sort(samples.get_active_col())
 
-    class_col = byattr.get_col(class_col_idx)
-    is_active = byattr.get_col(active_col_idx)
     # all samples of class 1 that are still active
     is_one = prod(class_col, is_active)
     # active 0 samples
@@ -193,14 +191,14 @@ def compute_cont_ginis(samples, attr_col_idx):
     fractions = []
     # we can skip last entry; the fraction here is always (0, 1) since splitting on the last attribute always
     # partitions the samples a set containing all input samples and the empty set
-    for row_idx in range(len(byattr) - 1):
-        threshold = byattr.samples[row_idx][attr_col_idx]
+    for row_idx in range(len(val_col) - 1):
+        threshold = val_col[row_idx]
         # TODO denom should be times alpha + 1
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
         fractions.append([numerator, denominator, threshold])
 
     # include fraction for splitting on last term
-    last_threshold = byattr.samples[-1][attr_col_idx]
+    last_threshold = val_col[-1]
     # TODO this can go away once the alpha fix is implemented
     fractions.append([sint(0), sint(1), last_threshold])
 
@@ -233,16 +231,17 @@ def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
     return numerator, denominator
 
 
-def compute_best_gini_cont(samples, attr_col_idx):
+def compute_best_gini_cont(samples, attr_col_idx, prep_attr):
     """Computes best gini for given attribute.
 
     :param samples:
     :param attr_col_idx:
+    :param prep_attr:
     :return:
     """
     # TODO should we exclude (attribute, splitting point) tuple?
     # only makes sense if we want to leak the index
-    cand_ginis = compute_cont_ginis(samples, attr_col_idx)
+    cand_ginis = compute_cont_ginis(samples, attr_col_idx, prep_attr)
     return argmax_over_fracs(cand_ginis)
 
 
@@ -255,10 +254,10 @@ def select_col_at(samples, idx):
     """
 
     @debug_only
-    def debug_sanity_check(i):
+    def debug_sanity_check(col_idx):
         # INSECURE for debugging only!
         # Verifies that idx is within range
-        @if_((i >= samples.n + samples.m).reveal())
+        @if_((col_idx >= samples.n + samples.m).reveal())
         def _():
             print_ln("%s index is out of range.", MPC_ERROR_FLAG)
 
@@ -339,10 +338,11 @@ def determine_if_leaf(samples):
     return is_leaf, all_inactive, all_ones
 
 
-def c45_single_round(samples):
+def c45_single_round(samples, prep_attrs):
     """Runs single round of C4.5 algorithm.
 
     :param samples:
+    :param prep_attrs:
     :return:
     """
     if samples.m != 0:
@@ -358,7 +358,7 @@ def c45_single_round(samples):
     # compute best attribute and threshold to split on
     candidates = []
     for c in range(samples.n):
-        num, denom, thresh = compute_best_gini_cont(samples, c)
+        num, denom, thresh = compute_best_gini_cont(samples, c, prep_attrs[c])
         candidates.append((num, denom, c, thresh))
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
@@ -376,7 +376,18 @@ def c45_single_round(samples):
     return node, left, right
 
 
-def c45(input_samples, max_iteration_count):
+def prep_attributes(samples):
+    """Pre-processes sorts for all continuous attributes.
+
+    :param samples:
+    :return:
+    """
+    class_col = samples.get_class_col()
+    return [PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col)
+            for attr_idx in range(samples.n)]
+
+
+def c45(input_samples, max_iteration_count, prep_attrs=None):
     """Runs C4.5 algorithm to construct decision tree.
 
     This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
@@ -386,15 +397,19 @@ def c45(input_samples, max_iteration_count):
 
     :param input_samples:
     :param max_iteration_count: upper limit on iterations to generate decision tree for samples
+    :param prep_attrs:
     :return:
     """
+    if prep_attrs is None:
+        prep_attrs = prep_attributes(input_samples)
+
     queue = deque([(None, input_samples)])
     root = None
 
     # Create tree in a BFS-like traversal
     for _ in range(max_iteration_count):
         parent, samples = queue.popleft()
-        node, left_samples, right_samples = c45_single_round(samples)
+        node, left_samples, right_samples = c45_single_round(samples, prep_attrs)
         if parent:
             # if there is a parent, we need to link the current node back to it as a child
             # since we're doing a BFS, the left child will always come first
