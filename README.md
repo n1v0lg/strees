@@ -39,10 +39,10 @@ This is very much work in progress. Some limitations include:
 * A lot of the building blocks are not optimized. The sort I'm using for instance is a naive bubble sort.
 * There are probably a lot of MP-SPDZ primitives that we should use instead of the building blocks I hacked together.
 * Discrete attributes are not yet supported. Only continuous attributes for now.
-* There is only a fully oblivious version of the algorithm implemented, I don't take advantage of revealing some of the tree structure etc. yet 
-* The algorithm runs exactly for the specified number of iterations 
+* There is only a fully oblivious version of the algorithm implemented, I don't take advantage of revealing some of the tree structure etc. yet.
+* The algorithm runs exactly for the specified number of iterations.
 * The continuous attribute values are currently just integer values.
-* The algorithm re-sorts at every new gini computation, which is unnecessary.
+* Currently the number of samples must be a power of 2, as required by the underlying oblivious shuffle.
 * Not well tested, things will probably break when you run the main algorithm on more complicated inputs.
 * Only supports binary discrete attributes, and binary classes.
 
