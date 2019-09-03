@@ -6,7 +6,7 @@ A prototype implementation of the C4.5 algorithm for secure decision tree traini
 
 Requires Docker to run.
 
-Requires MP-SPDZ repo (tested with latest commit `bd60197`) to be in the parent directory. So if you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
+Requires MP-SPDZ repo (tested with latest commit `ed32af4`) to be in the parent directory. So if you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
 
 To set up, run (make sure Docker is running!):
 
