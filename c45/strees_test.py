@@ -7,6 +7,7 @@ try:
     from tree import *
     from strees_utils import *
     from c45 import *
+    from perm import *
 except Exception:
     pass
 
@@ -311,6 +312,35 @@ def test():
 
         runtime_assert_arr_equals([1, 2, 3, 4, 5], target_arr, default_test_name())
 
+    def test_shuffle_rows_invertible():
+        rows = input_matrix([
+            [3, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [4, 1],
+            [6, 1],
+            [5, 0],
+            [7, 1]
+        ])
+
+        config_bits = rec_config_shuffle(rows)
+        shuffled = shuffle_rows(rows, config_bits, reverse=False)
+        actual = shuffle_rows(shuffled, config_bits, reverse=True)
+        # expecting original order
+        expected = [
+            [3, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [4, 1],
+            [6, 1],
+            [5, 0],
+            [7, 1]
+        ]
+
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
     def test_prep_attr_create():
         sec_mat = input_matrix([
             [3, 0],
@@ -322,7 +352,8 @@ def test():
             [5, 0],
             [7, 1]
         ])
-        prep_attr = PrepAttribute.create(0, get_col(sec_mat, 0), get_col(sec_mat, 1))
+        active_col = get_col(sec_mat, 1)
+        prep_attr = PrepAttribute.create(0, get_col(sec_mat, 0), active_col)
         actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
         expected = [
             [0, 0],
@@ -335,6 +366,10 @@ def test():
             [7, 1]
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
+
+        actual = prep_attr.sort(active_col)
+        expected = [0, 1, 1, 0, 1, 0, 1, 1]
+        runtime_assert_arr_equals(expected, actual, default_test_name())
         # TODO test permutations
 
     def test_prep_attributes():
@@ -392,18 +427,18 @@ def test():
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
     def test_c45():
-        sec_mat = input_matrix([
-            [8, 1, 1, 1],
-            [5, 2, 1, 1],
-            [7, 3, 0, 1],
-            [6, 4, 0, 1]
-        ])
-        actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
-        expected = \
-            DN(1, 2) \
-                .l(LN(1)) \
-                .r(LN(0))
-        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
+        # sec_mat = input_matrix([
+        #     [8, 1, 1, 1],
+        #     [5, 2, 1, 1],
+        #     [7, 3, 0, 1],
+        #     [6, 4, 0, 1]
+        # ])
+        # actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
+        # expected = \
+        #     DN(1, 2) \
+        #         .l(LN(1)) \
+        #         .r(LN(0))
+        # runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
         sec_mat = input_matrix([
             [1, 8, 1, 1],
@@ -413,6 +448,8 @@ def test():
         ])
         total_nodes = 2 * (2 ** 2) - 1
         actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
+        # actual.reveal_self()
+        # actual.print_self()
         expected = \
             DN(1, 2) \
                 .l(DN(0, 4)
@@ -447,6 +484,7 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
+    test_shuffle_rows_invertible()
     test_prep_attr_create()
     test_prep_attributes()
     test_c45_single_round()

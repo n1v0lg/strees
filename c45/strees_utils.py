@@ -151,6 +151,11 @@ def reveal_list(lst):
     return [val.reveal() for val in lst]
 
 
+def input_list(lst):
+    """Inputs list of values into MPC."""
+    return [sint(val) for val in lst]
+
+
 def is_two_pow(n):
     """True if 2 power.
 

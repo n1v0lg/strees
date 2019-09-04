@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from Compiler.types import sint
-from library import print_ln, if_
+from library import print_ln, if_, print_str
+from permutation import rec_shuffle
 from util import tree_reduce
 
 # Make IDE happy
@@ -121,7 +122,7 @@ class PrepAttribute:
     def _sort(col, rand_perm, open_perm):
         """Sorts given column using random perm and open perm."""
         sorted_col = open_permute(col, open_perm)
-        fixed_shuffle(sorted_col, config=rand_perm, reverse=True)
+        rec_shuffle(sorted_col, config=rand_perm, value_type=sint, reverse=True)
         return sorted_col
 
     def sort(self, col):
