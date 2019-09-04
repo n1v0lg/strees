@@ -40,7 +40,7 @@ def sort_and_permute(rows, attr_idx):
     if not is_two_pow(len(rows)):
         raise Exception("Only powers of two supported for shuffles")
     config_bits = rec_config_shuffle(rows)
-    sorted_rows = naive_sort_by(rows, attr_idx)
+    sorted_rows = sort_by(rows, attr_idx)
     shuffled_rows = shuffle_rows(sorted_rows, config=config_bits)
 
     return shuffled_rows, config_bits

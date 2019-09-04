@@ -146,7 +146,7 @@ def test():
             [1, 0, 1],
             [0, 1, 0]
         ])
-        actual = naive_sort_by(sec_mat, 0)
+        actual = sort_by(sec_mat, 0)
         runtime_assert_mat_equals(
             [[0, 1, 0],
              [1, 0, 1],

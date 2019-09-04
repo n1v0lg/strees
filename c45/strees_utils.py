@@ -1,5 +1,6 @@
 from Compiler.types import sint
 from library import print_ln, print_str
+from permutation import odd_even_merge_sort
 from util import if_else
 
 MPC_ERROR_FLAG = "MPC_ERROR"
@@ -47,7 +48,9 @@ def prod(left, right):
 
 
 def inner_prod(left, right):
-    """Inner product of elements."""
+    """Inner product of elements.
+
+    TODO use native inner prod."""
     return sum(l * r for l, r in zip(left, right))
 
 
@@ -66,31 +69,10 @@ def if_else_row(bit, row_a, row_b):
     return [if_else(bit, a, b) for a, b in zip(row_a, row_b)]
 
 
-def cond_swap_rows(row_x, row_y, key_col_idx):
-    """Copied from MP-SPDZ main repo.
-
-    Modified to support rows as entries instead of single values.
-    """
-    b = row_x[key_col_idx] < row_y[key_col_idx]
-    row_bx = [b * x for x in row_x]
-    row_by = [b * y for y in row_y]
-    new_row_x = [bx + y - by for y, bx, by in zip(row_y, row_bx, row_by)]
-    new_row_y = [x - bx + by for x, bx, by in zip(row_x, row_bx, row_by)]
-    return new_row_x, new_row_y
-
-
-def naive_sort_by(samples, key_col_idx):
-    """Sorts 2D-array by specified column.
-
-    Note: this uses naive bubble-sort.
-    Copied from MP-SPDZ main repo.
-    """
+def sort_by(samples, key_col_idx):
+    """Sorts 2D-array by specified column."""
     res = samples[:]
-
-    for i in range(len(samples)):
-        for j in reversed(range(i)):
-            res[j], res[j + 1] = cond_swap_rows(res[j], res[j + 1], key_col_idx)
-
+    odd_even_merge_sort(res, lambda a, b: a[key_col_idx] < b[key_col_idx])
     return res
 
 
