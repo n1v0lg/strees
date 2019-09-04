@@ -6,7 +6,7 @@ A prototype implementation of the C4.5 algorithm for secure decision tree traini
 
 Requires Docker to run.
 
-Requires MP-SPDZ repo (tested with latest commit `bd60197`) to be in the parent directory. So if you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
+Requires MP-SPDZ repo (tested with latest commit `ed32af4`) to be in the parent directory. So if you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
 
 To set up, run (make sure Docker is running!):
 
@@ -39,10 +39,10 @@ This is very much work in progress. Some limitations include:
 * A lot of the building blocks are not optimized. The sort I'm using for instance is a naive bubble sort.
 * There are probably a lot of MP-SPDZ primitives that we should use instead of the building blocks I hacked together.
 * Discrete attributes are not yet supported. Only continuous attributes for now.
-* There is only a fully oblivious version of the algorithm implemented, I don't take advantage of revealing some of the tree structure etc. yet 
-* The algorithm runs exactly for the specified number of iterations 
+* There is only a fully oblivious version of the algorithm implemented, I don't take advantage of revealing some of the tree structure etc. yet.
+* The algorithm runs exactly for the specified number of iterations.
 * The continuous attribute values are currently just integer values.
-* The algorithm re-sorts at every new gini computation, which is unnecessary.
+* Currently the number of samples must be a power of 2, as required by the underlying oblivious shuffle.
 * Not well tested, things will probably break when you run the main algorithm on more complicated inputs.
 * Only supports binary discrete attributes, and binary classes.
 
