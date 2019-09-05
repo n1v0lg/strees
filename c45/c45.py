@@ -300,9 +300,9 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
 
     # mask out rows that are already inactive
     active_col = samples.get_active_col()
-    go_left = prod(go_left, active_col)
+    go_left = pairwise_and(go_left, active_col)
     # TODO can we derive this from go_left?
-    go_right = prod(go_right, active_col)
+    go_right = pairwise_and(go_right, active_col)
 
     # set both indicator vectors to 0 if we're at a leaf node
     is_internal = 1 - is_leaf
@@ -327,8 +327,8 @@ def determine_if_leaf(samples):
     is_category_one = samples.get_class_col()
     is_category_zero = neg(is_category_one)
 
-    active_ones = prod(is_category_one, active_col)
-    active_zeroes = prod(is_category_zero, active_col)
+    active_ones = pairwise_and(is_category_one, active_col)
+    active_zeroes = pairwise_and(is_category_zero, active_col)
 
     total_actives = sum(active_col)
 

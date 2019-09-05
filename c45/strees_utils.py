@@ -51,6 +51,11 @@ def toggle(bit, elements):
     return elements * bit
 
 
+def pairwise_and(bits_a, bits_b):
+    """Pairwise AND of bits."""
+    return prod(bits_a, bits_b)
+
+
 def prod(left, right):
     """Pairwise product of elements."""
     same_len(left, right)
