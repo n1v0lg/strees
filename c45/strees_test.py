@@ -433,7 +433,7 @@ def test():
             [7, 3, 0, 1],
             [6, 4, 0, 1]
         ])
-        actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
+        actual = c45(Samples(sec_mat, 2), max_tree_depth=2)
         expected = \
             DN(1, 2) \
                 .l(LN(1)) \
@@ -446,8 +446,7 @@ def test():
             [4, 2, 0, 1],
             [5, 1, 1, 1]
         ])
-        total_nodes = 2 * (2 ** 2) - 1
-        actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
+        actual = c45(Samples(sec_mat, 2), max_tree_depth=3)
         expected = \
             DN(1, 2) \
                 .l(DN(0, 4)
@@ -464,7 +463,7 @@ def test():
             [3, 1, 1],
             [4, 1, 1]
         ])
-        actual = c45(Samples(sec_mat, 1), max_iteration_count=3)
+        actual = c45(Samples(sec_mat, 1), max_tree_depth=2)
         # TODO this makes sense, but is it right?
         # since all samples have the same class,
         # we don't partition on any attribute and end up with a leaf for the root

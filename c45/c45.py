@@ -389,7 +389,7 @@ def prep_attributes(samples):
             for attr_idx in range(samples.n)]
 
 
-def c45(input_samples, max_iteration_count, prep_attrs=None):
+def _c45(input_samples, max_iteration_count, prep_attrs=None):
     """Runs C4.5 algorithm to construct decision tree.
 
     This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
@@ -436,6 +436,17 @@ def c45(input_samples, max_iteration_count, prep_attrs=None):
     return Tree(root)
 
 
+def c45(input_samples, max_tree_depth, prep_attrs=None):
+    """Runs C4.5 algorithm to construct decision tree.
+
+    :param input_samples:
+    :param max_tree_depth: depth of resulting tree (may include dummy nodes)
+    :param prep_attrs:
+    :return:"""
+    max_iteration_count = (2 ** max_tree_depth) - 1
+    return _c45(input_samples, max_iteration_count, prep_attrs)
+
+
 def main():
     sec_mat = input_matrix([
         [8, 1, 0, 1],
@@ -443,7 +454,7 @@ def main():
         [7, 3, 1, 1],
         [6, 4, 1, 1]
     ])
-    tree = c45(Samples(sec_mat, 2), 3)
+    tree = c45(Samples(sec_mat, 2), 2)
     tree.reveal_self()
     tree.print_self()
 
