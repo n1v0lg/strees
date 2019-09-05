@@ -8,7 +8,7 @@ try:
     from strees_utils import *
     from c45 import *
     from perm import *
-except Exception:
+except ImportError:
     pass
 
 

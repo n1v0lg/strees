@@ -11,7 +11,7 @@ try:
     from strees_utils import *
     from perm import *
     from strees_test import test
-except Exception:
+except ImportError:
     pass
 
 

@@ -6,7 +6,7 @@ from permutation import configure_waksman, random_perm, rec_shuffle
 # Make IDE happy
 try:
     from strees_utils import *
-except Exception:
+except ImportError:
     pass
 
 
