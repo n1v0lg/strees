@@ -191,6 +191,7 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     # active 0 samples
     is_zero = pairwise_and(neg(is_one), is_active)
 
+    # TODO turn into runtime loop
     fractions = []
     for row_idx in range(len(val_col) - 1):
         threshold = val_col[row_idx]
@@ -268,12 +269,7 @@ def select_col_at(samples, idx):
 
     debug_sanity_check(idx)
     eq_flags = Array.create_from(idx == i for i in range(samples.n + samples.m))
-    # TODO this is matrix by row mul?
     return sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
-    # res = []
-    # for idx, col in enumerate(samples.columns[0:samples.n + samples.m]):
-    #     res.append(toggle(eq_flags[idx], col))
-    # return pairwise_sum(res)
 
 
 def partition_on(samples, attr_idx, threshold, is_leaf):
@@ -354,6 +350,7 @@ def c45_single_round(samples, prep_attrs):
 
     # compute best attribute and threshold to split on
     candidates = []
+    # TODO turn into runtime loop
     for c in range(samples.n):
         num, denom, thresh = compute_best_gini_cont(samples, c, prep_attrs[c])
         candidates.append((num, denom, c, thresh))
