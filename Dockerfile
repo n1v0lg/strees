@@ -17,5 +17,6 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /home/MP-SPDZ
 ADD . /home/MP-SPDZ
-RUN make tldr && make mascot-party.x
+RUN make tldr && make rep-ring
 RUN mkdir Player-Data 2> /dev/null
+RUN Scripts/setup-ssl.sh 3
