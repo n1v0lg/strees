@@ -448,8 +448,6 @@ def test():
         ])
         total_nodes = 2 * (2 ** 2) - 1
         actual = c45(Samples(sec_mat, 2), max_iteration_count=total_nodes)
-        # actual.reveal_self()
-        # actual.print_self()
         expected = \
             DN(1, 2) \
                 .l(DN(0, 4)

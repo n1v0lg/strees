@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from Compiler.types import sint
-from library import print_ln, if_, print_str
+from library import print_ln, if_
 from permutation import rec_shuffle
 from util import tree_reduce
 
@@ -410,6 +410,8 @@ def c45(input_samples, max_iteration_count, prep_attrs=None):
 
     # Create tree in a BFS-like traversal
     for _ in range(max_iteration_count):
+        # TODO this fixes the open instruction merge issue
+        program.curr_tape.start_new_basicblock()
         parent, samples = queue.popleft()
         node, left_samples, right_samples = c45_single_round(samples, prep_attrs)
         if parent:
