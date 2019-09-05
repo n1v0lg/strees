@@ -240,8 +240,6 @@ def compute_best_gini_cont(samples, attr_col_idx, prep_attr):
     :param prep_attr:
     :return:
     """
-    # TODO should we exclude (attribute, splitting point) tuple?
-    # only makes sense if we want to leak the index
     cand_ginis = compute_cont_ginis(samples, attr_col_idx, prep_attr)
     return argmax_over_fracs(cand_ginis)
 
@@ -290,11 +288,7 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
     """
     selected_col = select_col_at(samples, attr_idx)
 
-    # TODO only logical ops over bits below
-
     # TODO this only works for binary discrete attributes,
-    # else have to obliviously distinguish whether to use an eq or a leq
-    # go_left = [v <= threshold for v in selected_col]
     go_left = lt_threshold(selected_col, threshold)
     go_right = neg(go_left)
 
@@ -456,4 +450,3 @@ def main():
 
 
 test()
-# main()
