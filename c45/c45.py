@@ -51,7 +51,7 @@ class Samples:
 
     @staticmethod
     def from_rows(rows, n, m=0):
-        return Samples(transpose(rows), n, m)
+        return Samples(to_col_arrays(rows), n, m)
 
     def get_col(self, col_idx):
         return self.columns[col_idx]
@@ -74,14 +74,8 @@ class Samples:
         return self.get_col(self.get_class_col_idx())
 
     def with_updated_actives(self, updated_actives):
-        # TODO hacky
         if len(updated_actives) != len(self):
             raise Exception("Incorrect number of values")
-        # new_samples = []
-        # for active_flag, row in zip(updated_actives, self.samples):
-        #     updated_row = row[:]
-        #     updated_row[self.get_active_col_idx()] = active_flag
-        #     new_samples.append(updated_row)
         new_columns = [col[:] for col in self.columns[:-1]]
         new_columns.append(updated_actives)
         return Samples(new_columns, self.n, self.m)
@@ -300,9 +294,8 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
 
     # TODO this only works for binary discrete attributes,
     # else have to obliviously distinguish whether to use an eq or a leq
-    # IDEA if we have few classes, we can represent these as via separate indicator columns, one for each class
-    # this lets us avoid using equality checks
-    go_left = [v <= threshold for v in selected_col]
+    # go_left = [v <= threshold for v in selected_col]
+    go_left = lt_threshold(selected_col, threshold)
     go_right = neg(go_left)
 
     # mask out rows that are already inactive

@@ -1,4 +1,4 @@
-from Compiler.types import sint, Matrix
+from Compiler.types import sint, Matrix, Array
 from library import print_ln, print_str
 from permutation import odd_even_merge_sort
 
@@ -46,16 +46,17 @@ def log_or(bit_a, bit_b):
 
 def toggle(bit, elements):
     """Keeps elements same if bit is 1, sets all to 0 otherwise"""
-    return [el * bit for el in elements]
+    if not isinstance(elements, Array):
+        raise Exception("Call this with array")
+    return elements * bit
 
 
 def prod(left, right):
     """Pairwise product of elements."""
     same_len(left, right)
-    # if not isinstance(left, Array) or not isinstance(right, Array):
-    #     raise Exception("Must be Arrays")
-    # return left * right
-    return [l * r for l, r in zip(left, right)]
+    if not isinstance(left, Array) or not isinstance(right, Array):
+        raise Exception("Must be Arrays")
+    return Array.create_from(l * r for l, r in zip(left, right))
 
 
 def inner_prod(left, right):
@@ -69,11 +70,18 @@ def inner_prod(left, right):
 
 def neg(bits):
     """Bitwise not of each element in bits."""
-    return [1 - bit for bit in bits]
+    return Array.create_from(1 - bit for bit in bits)
+
+
+def lt_threshold(elements, threshold):
+    """Compares all values to threshold value and returns result sints."""
+    return Array.create_from(v <= threshold for v in elements)
 
 
 def pairwise_sum(columns):
-    return [sum(zipped) for zipped in zip(*columns)]
+    if not all(isinstance(a, Array) for a in columns):
+        raise Exception("All operands must be arrays")
+    return reduce(lambda x, y: x + y, columns)
 
 
 def same_len(row_a, row_b):
@@ -171,14 +179,26 @@ def input_list(lst):
     return [sint(val) for val in lst]
 
 
-def transpose(rows):
+def to_col_arrays(rows):
+    """Converts rows to list of arrays representing columns."""
+    if not rows or not rows[0]:
+        raise Exception("Can't call this with empty matrix")
+    n = len(rows)
+    columns = [Array(n, sint) for _ in rows[0]]
+    for row_idx, row in enumerate(rows):
+        for col_idx, val in enumerate(row):
+            columns[col_idx][row_idx] = val
+    return columns
+
+
+def transpose(mat):
     """Transposes matrix."""
-    if not rows:
+    if not mat:
         return []
-    if not rows[0]:
+    if not mat[0]:
         return []
-    columns = [[] for _ in rows[0]]
-    for row in rows:
+    columns = [[] for _ in mat[0]]
+    for row in mat:
         for idx, val in enumerate(row):
             columns[idx].append(val)
     return columns
