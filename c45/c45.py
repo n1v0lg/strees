@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint, Array
+from Compiler.types import sint, Array, MultiArray
 from library import print_ln, if_
 from permutation import rec_shuffle
 from util import tree_reduce
@@ -192,17 +192,21 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     is_zero = pairwise_and(neg(is_one), is_active)
 
     # TODO turn into runtime loop
-    fractions = []
+    fractions = MultiArray(sizes=[len(val_col), 3], value_type=sint)
     for row_idx in range(len(val_col) - 1):
         threshold = val_col[row_idx]
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
         denominator = alpha_scale(denominator)
-        fractions.append([numerator, denominator, threshold])
+        fractions[row_idx][0] = numerator
+        fractions[row_idx][1] = denominator
+        fractions[row_idx][2] = threshold
 
+    # TODO this can go away once the alpha fix is implemented
     # include fraction for splitting on last term
     last_threshold = val_col[-1]
-    # TODO this can go away once the alpha fix is implemented
-    fractions.append([sint(0), alpha_scale(sint(0)), last_threshold])
+    fractions[len(val_col) - 1][0] = sint(0)
+    fractions[len(val_col) - 1][1] = alpha_scale(sint(0))
+    fractions[len(val_col) - 1][2] = last_threshold
 
     return fractions
 
@@ -353,7 +357,7 @@ def c45_single_round(samples, prep_attrs):
     # TODO turn into runtime loop
     for c in range(samples.n):
         num, denom, thresh = compute_best_gini_cont(samples, c, prep_attrs[c])
-        candidates.append((num, denom, c, thresh))
+        candidates.append([num, denom, c, thresh])
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
     # TODO Base case: check if partitioning on best attribute doesn't actually further partition the data
