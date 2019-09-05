@@ -191,18 +191,16 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     is_zero = prod(neg(is_one), is_active)
 
     fractions = []
-    # we can skip last entry; the fraction here is always (0, 1) since splitting on the last attribute always
-    # partitions the samples a set containing all input samples and the empty set
     for row_idx in range(len(val_col) - 1):
         threshold = val_col[row_idx]
-        # TODO denom should be times alpha + 1
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
+        denominator = alpha_scale(denominator)
         fractions.append([numerator, denominator, threshold])
 
     # include fraction for splitting on last term
     last_threshold = val_col[-1]
     # TODO this can go away once the alpha fix is implemented
-    fractions.append([sint(0), sint(1), last_threshold])
+    fractions.append([sint(0), alpha_scale(sint(0)), last_threshold])
 
     return fractions
 

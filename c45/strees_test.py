@@ -165,10 +165,10 @@ def test():
         actual = compute_cont_ginis(samples, 0, prep_attributes(samples)[0])
         # TODO double-check these
         expected = [
-            [8, 3, 1],
-            [16, 4, 2],
-            [8, 3, 3],
-            [0, 1, 4]
+            [8, alpha_scale(3), 1],
+            [16, alpha_scale(4), 2],
+            [8, alpha_scale(3), 3],
+            [0, alpha_scale(0), 4]
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
 
@@ -181,7 +181,7 @@ def test():
         ])
         samples = Samples(sec_mat, 1, 0)
         actual = compute_best_gini_cont(samples, 0, prep_attributes(samples)[0])
-        runtime_assert_arr_equals([16, 4, 2], actual, default_test_name())
+        runtime_assert_arr_equals([16, alpha_scale(4), 2], actual, default_test_name())
 
     def test_obl_select_col_at():
         sec_mat = input_matrix([
@@ -449,9 +449,9 @@ def test():
         actual = c45(Samples(sec_mat, 2), max_tree_depth=3)
         expected = \
             DN(1, 2) \
-                .l(DN(0, 4)
-                   .l(LN(0))
-                   .r(LN(1))) \
+                .l(DN(1, 1)
+                   .l(LN(1))
+                   .r(LN(0))) \
                 .r(LN(1)
                    .l(LN(-1, is_dummy=True))
                    .r(LN(-1, is_dummy=True)))

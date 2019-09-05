@@ -6,6 +6,9 @@ MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
 DEBUG = True
 
+# Parameter for scaling denominator in GINI index computation
+ALPHA = 10
+
 
 def debug_only(f):
     def wrapper(*args, **kwargs):
@@ -29,6 +32,11 @@ def print_mat(mat):
         print_str(" ")
         print_list(row)
     print_ln("]")
+
+
+def alpha_scale(val):
+    """Scales value according to ALPHA param."""
+    return ALPHA * val + 1
 
 
 def log_or(bit_a, bit_b):
