@@ -1,7 +1,6 @@
 from Compiler.types import sint
 from library import print_ln, print_str
 from permutation import odd_even_merge_sort
-from util import if_else
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
@@ -69,7 +68,7 @@ def same_len(row_a, row_b):
 
 def if_else_row(bit, row_a, row_b):
     same_len(row_a, row_b)
-    return [if_else(bit, a, b) for a, b in zip(row_a, row_b)]
+    return [bit.if_else(a, b) for a, b in zip(row_a, row_b)]
 
 
 def sort_by(samples, key_col_idx):
