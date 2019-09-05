@@ -1,10 +1,10 @@
-from Compiler.types import sint, Matrix, Array
+from Compiler.types import sint, Matrix
 from library import print_ln, print_str
 from permutation import odd_even_merge_sort
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
-DEBUG = True
+DEBUG = False
 
 # Parameter for scaling denominator in GINI index computation
 ALPHA = 10
@@ -165,6 +165,19 @@ def reveal_list(lst):
 def input_list(lst):
     """Inputs list of values into MPC."""
     return [sint(val) for val in lst]
+
+
+def to_cols(rows):
+    """Converts row-format to column-format."""
+    if not rows:
+        return []
+    if not rows[0]:
+        return []
+    columns = [[] for _ in rows[0]]
+    for row in rows:
+        for idx, val in enumerate(row):
+            columns[idx].append(val)
+    return columns
 
 
 def is_two_pow(n):

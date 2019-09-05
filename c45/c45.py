@@ -48,7 +48,7 @@ class Samples:
         self.samples = samples
         self.n = n
         self.m = m
-        self.columns = [get_col(samples, i) for i in range(total_cols)]
+        self.columns = to_cols(samples)
 
     def get_col(self, col_idx):
         return self.columns[col_idx]
@@ -82,7 +82,7 @@ class Samples:
         return Samples(new_samples, self.n, self.m)
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.get_active_col())
 
 
 class PrepAttribute:
