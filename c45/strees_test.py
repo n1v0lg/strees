@@ -427,18 +427,18 @@ def test():
         runtime_assert_arr_equals([0, 0, 1, 1], right.get_active_col(), default_test_name())
 
     def test_c45():
-        # sec_mat = input_matrix([
-        #     [8, 1, 1, 1],
-        #     [5, 2, 1, 1],
-        #     [7, 3, 0, 1],
-        #     [6, 4, 0, 1]
-        # ])
-        # actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
-        # expected = \
-        #     DN(1, 2) \
-        #         .l(LN(1)) \
-        #         .r(LN(0))
-        # runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
+        sec_mat = input_matrix([
+            [8, 1, 1, 1],
+            [5, 2, 1, 1],
+            [7, 3, 0, 1],
+            [6, 4, 0, 1]
+        ])
+        actual = c45(Samples(sec_mat, 2), max_iteration_count=3)
+        expected = \
+            DN(1, 2) \
+                .l(LN(1)) \
+                .r(LN(0))
+        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
         sec_mat = input_matrix([
             [1, 8, 1, 1],

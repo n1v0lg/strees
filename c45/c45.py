@@ -164,6 +164,7 @@ def argmax_over_fracs(elements):
         raise Exception("No elements to argmax on")
     if len(elements) == 1:
         return elements[0]
+
     return tree_reduce(_select_larger, elements)
 
 
