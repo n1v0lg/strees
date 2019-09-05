@@ -187,9 +187,9 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     is_active = prep_attr.sort(samples.get_active_col())
 
     # all samples of class 1 that are still active
-    is_one = prod(class_col, is_active)
+    is_one = pairwise_and(class_col, is_active)
     # active 0 samples
-    is_zero = prod(neg(is_one), is_active)
+    is_zero = pairwise_and(neg(is_one), is_active)
 
     fractions = []
     for row_idx in range(len(val_col) - 1):
