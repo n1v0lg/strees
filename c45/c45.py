@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from Compiler.types import sint, Array, MultiArray
-from library import print_ln, if_
+from library import print_ln, if_, for_range_parallel
 from permutation import rec_shuffle
 from util import tree_reduce
 
@@ -191,9 +191,10 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     # active 0 samples
     is_zero = pairwise_and(neg(is_one), is_active)
 
-    # TODO turn into runtime loop
     fractions = MultiArray(sizes=[len(val_col), 3], value_type=sint)
-    for row_idx in range(len(val_col) - 1):
+
+    @for_range_parallel(NUM_PAR_PER_LOOP, len(val_col) - 1)
+    def f(row_idx):
         threshold = val_col[row_idx]
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
         denominator = alpha_scale(denominator)
