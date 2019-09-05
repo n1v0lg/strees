@@ -1,4 +1,4 @@
-from Compiler.types import sint, Matrix
+from Compiler.types import sint, Matrix, Array
 from library import print_ln, print_str
 from permutation import odd_even_merge_sort
 
@@ -52,6 +52,9 @@ def toggle(bit, elements):
 def prod(left, right):
     """Pairwise product of elements."""
     same_len(left, right)
+    # if not isinstance(left, Array) or not isinstance(right, Array):
+    #     raise Exception("Must be Arrays")
+    # return left * right
     return [l * r for l, r in zip(left, right)]
 
 

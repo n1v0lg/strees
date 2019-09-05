@@ -42,16 +42,16 @@ class Samples:
         :param n: number of continuous attributes
         :param m: number of discrete attributes
         """
-        if len(samples[0]) != n + m + 2:
+        total_cols = n + m + 2
+        if len(samples[0]) != total_cols:
             raise Exception("Wrong number of cols. in samples matrix")
         self.samples = samples
         self.n = n
         self.m = m
-        self.cached_class_col = self.get_col(self.get_class_col_idx())
-        self.cached_active_col = self.get_col(self.get_active_col_idx())
+        self.columns = [get_col(samples, i) for i in range(total_cols)]
 
     def get_col(self, col_idx):
-        return get_col(self.samples, col_idx)
+        return self.columns[col_idx]
 
     def is_cont_attribute(self, col_idx):
         if col_idx > self.n + self.m:
@@ -65,10 +65,10 @@ class Samples:
         return self.n + self.m + 1
 
     def get_active_col(self):
-        return self.cached_active_col
+        return self.get_col(self.get_active_col_idx())
 
     def get_class_col(self):
-        return self.cached_class_col
+        return self.get_col(self.get_class_col_idx())
 
     def with_updated_actives(self, updated_actives):
         # TODO hacky
@@ -291,6 +291,8 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
     """
     selected_col = select_col_at(samples, attr_idx)
 
+    # TODO only logical ops over bits below
+
     # TODO this only works for binary discrete attributes,
     # else have to obliviously distinguish whether to use an eq or a leq
     # IDEA if we have few classes, we can represent these as via separate indicator columns, one for each class
@@ -384,7 +386,7 @@ def prep_attributes(samples):
     :param samples:
     :return:
     """
-    class_col = samples.get_class_col()
+    class_col = samples.get_class_col()[:]
     return [PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col)
             for attr_idx in range(samples.n)]
 
