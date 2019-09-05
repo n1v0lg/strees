@@ -44,14 +44,17 @@ def toggle(bit, elements):
 
 def prod(left, right):
     """Pairwise product of elements."""
+    same_len(left, right)
     return [l * r for l, r in zip(left, right)]
 
 
 def inner_prod(left, right):
-    """Inner product of elements.
-
-    TODO use native inner prod."""
-    return sum(l * r for l, r in zip(left, right))
+    """Inner product of elements."""
+    same_len(left, right)
+    if not left:
+        return []
+    cls = left[0].get_type(0)
+    return cls.dot_product(left, right)
 
 
 def neg(bits):
@@ -61,7 +64,7 @@ def neg(bits):
 
 def same_len(row_a, row_b):
     if len(row_a) != len(row_b):
-        raise Exception("Must be same length")
+        raise Exception("Must be same length but was {} and {}".format(len(row_a), len(row_b)))
 
 
 def if_else_row(bit, row_a, row_b):

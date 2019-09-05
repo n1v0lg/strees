@@ -274,7 +274,7 @@ def select_col_at(samples, idx):
     res = []
     eq_flags = [idx == i for i in range(samples.n + samples.m)]
     for row in samples.samples:
-        res.append(inner_prod(eq_flags, row))
+        res.append(inner_prod(eq_flags, row[0:samples.n + samples.m]))
     return res
 
 
