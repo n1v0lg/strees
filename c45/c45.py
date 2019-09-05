@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint
+from Compiler.types import sint, Array
 from library import print_ln, if_
 from permutation import rec_shuffle
 from util import tree_reduce
@@ -267,12 +267,13 @@ def select_col_at(samples, idx):
         raise Exception("Only use this if index is secret or int")
 
     debug_sanity_check(idx)
-    eq_flags = [idx == i for i in range(samples.n + samples.m)]
+    eq_flags = Array.create_from(idx == i for i in range(samples.n + samples.m))
     # TODO this is matrix by row mul?
-    res = []
-    for idx, col in enumerate(samples.columns[0:samples.n + samples.m]):
-        res.append(toggle(eq_flags[idx], col))
-    return pairwise_sum(res)
+    return sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
+    # res = []
+    # for idx, col in enumerate(samples.columns[0:samples.n + samples.m]):
+    #     res.append(toggle(eq_flags[idx], col))
+    # return pairwise_sum(res)
 
 
 def partition_on(samples, attr_idx, threshold, is_leaf):
@@ -288,7 +289,7 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
     """
     selected_col = select_col_at(samples, attr_idx)
 
-    # TODO this only works for binary discrete attributes,
+    # TODO this only works for binary discrete attributes
     go_left = lt_threshold(selected_col, threshold)
     go_right = neg(go_left)
 
