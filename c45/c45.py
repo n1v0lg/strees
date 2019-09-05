@@ -395,8 +395,6 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
     This implementation uses an iterative approach as opposed to the more obvious recursive approach since this seems
     better aligned with MP-SPDZ.
 
-    TODO Executes exactly max_iteration_count iterations for now
-
     :param input_samples:
     :param max_iteration_count: upper limit on iterations to generate decision tree for samples
     :param prep_attrs:
@@ -431,8 +429,6 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
-    # TODO post-process tree to fill dummy leaves that have real sibling with actual categories
-    # TODO can this still ever happen? seems like the parent of those will have invariably been a leaf node already
     return Tree(root)
 
 
