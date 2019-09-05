@@ -24,7 +24,7 @@ class Node:
 
 class TreeNode(Node):
 
-    def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class):
+    def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class, is_secret=True):
         """Represents tree node.
 
          Holds following secret flags and values.
@@ -42,18 +42,27 @@ class TreeNode(Node):
         self.threshold = threshold
         self.is_dummy = is_dummy
         self.node_class = node_class
+        self.is_secret = is_secret
         self.left = None
         self.right = None
 
-    def reveal_self(self):
-        """Opens all secret values (modifies self)."""
-        self.is_leaf = self.is_leaf.reveal()
-        self.attr_idx = self.attr_idx.reveal()
-        self.threshold = self.threshold.reveal()
-        self.is_dummy = self.is_dummy.reveal()
-        self.node_class = self.node_class.reveal()
+    def reveal(self):
+        """Opens all secret values and returns new node.
+
+        NOTE resulting node loses reference to original node's children."""
+        return TreeNode(
+            self.is_leaf.reveal(),
+            self.attr_idx.reveal(),
+            self.threshold.reveal(),
+            self.is_dummy.reveal(),
+            self.node_class.reveal(),
+            is_secret=False
+        )
 
     def print_self(self):
+        if self.is_secret:
+            raise Exception("Can't print secret node")
+
         @if_e(self.is_leaf)
         def _():
             @if_e(self.is_dummy)
@@ -74,14 +83,22 @@ class Tree:
     def __init__(self, root):
         self.root = root
 
+    def is_secret(self):
+        return self.root.is_secret
+
     def _reveal(self, node):
         if node:
-            node.reveal_self()
-            self._reveal(node.left)
-            self._reveal(node.right)
+            revealed = node.reveal()
+            revealed.left = self._reveal(node.left)
+            revealed.right = self._reveal(node.right)
+            return revealed
+        else:
+            return None
 
-    def reveal_self(self):
-        self._reveal(self.root)
+    def reveal(self):
+        if not self.is_secret():
+            return self
+        return Tree(self._reveal(self.root))
 
     @staticmethod
     def _bfs_print(node):
@@ -98,6 +115,8 @@ class Tree:
         print_ln("")
 
     def print_self(self):
+        if self.is_secret():
+            raise Exception("Can't print secret tree")
         self._bfs_print(self.root)
 
     def _num_nodes(self, node):

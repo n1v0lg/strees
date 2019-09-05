@@ -91,7 +91,7 @@ def test():
 
     def runtime_assert_tree_equals(expected, actual, test_name):
         # TODO how should dummy nodes be handled?
-        actual.reveal_self()
+        actual = actual.reveal()
         expected_num_nodes = expected.num_nodes()
         actual_num_nodes = actual.num_nodes()
         if expected_num_nodes != actual_num_nodes:

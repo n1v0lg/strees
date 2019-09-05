@@ -445,7 +445,7 @@ def main():
         [6, 4, 1, 1]
     ])
     tree = c45(Samples(sec_mat, 2), 2)
-    tree.reveal_self()
+    tree.reveal()
     tree.print_self()
 
 
