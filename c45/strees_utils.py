@@ -74,7 +74,9 @@ def inner_prod(left, right):
 
 
 def neg(bits):
-    """Bitwise not of each element in bits."""
+    """Bitwise not of each element in bits (or singleton bit)."""
+    if isinstance(bits, sint) or isinstance(bits, int):
+        return 1 - bits
     return Array.create_from(1 - bit for bit in bits)
 
 

@@ -299,7 +299,7 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
     go_right = pairwise_and(go_right, active_col)
 
     # set both indicator vectors to 0 if we're at a leaf node
-    is_internal = 1 - is_leaf
+    is_internal = neg(is_leaf)
     go_left = toggle(is_internal, go_left)
     go_right = toggle(is_internal, go_right)
 
