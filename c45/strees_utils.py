@@ -72,6 +72,10 @@ def neg(bits):
     return [1 - bit for bit in bits]
 
 
+def pairwise_sum(columns):
+    return [sum(zipped) for zipped in zip(*columns)]
+
+
 def same_len(row_a, row_b):
     if len(row_a) != len(row_b):
         raise Exception("Must be same length but was {} and {}".format(len(row_a), len(row_b)))
@@ -167,8 +171,8 @@ def input_list(lst):
     return [sint(val) for val in lst]
 
 
-def to_cols(rows):
-    """Converts row-format to column-format."""
+def transpose(rows):
+    """Transposes matrix."""
     if not rows:
         return []
     if not rows[0]:

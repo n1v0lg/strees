@@ -34,21 +34,24 @@ super_hacky_import_hack([
 
 class Samples:
 
-    def __init__(self, samples, n, m=0):
+    def __init__(self, columns, n, m=0):
         """Create Samples object.
 
-        :param samples: raw matrix containing continuous and discrete (binary) attribute values, category (binary),
-        and indicator vector, each row represents a sample
+        :param columns: raw matrix containing continuous and discrete (binary) attribute values, category (binary),
+        and indicator vector, in column format
         :param n: number of continuous attributes
         :param m: number of discrete attributes
         """
         total_cols = n + m + 2
-        if len(samples[0]) != total_cols:
+        if len(columns) != total_cols:
             raise Exception("Wrong number of cols. in samples matrix")
-        self.samples = samples
         self.n = n
         self.m = m
-        self.columns = to_cols(samples)
+        self.columns = columns
+
+    @staticmethod
+    def from_rows(rows, n, m=0):
+        return Samples(transpose(rows), n, m)
 
     def get_col(self, col_idx):
         return self.columns[col_idx]
@@ -74,12 +77,14 @@ class Samples:
         # TODO hacky
         if len(updated_actives) != len(self):
             raise Exception("Incorrect number of values")
-        new_samples = []
-        for active_flag, row in zip(updated_actives, self.samples):
-            updated_row = row[:]
-            updated_row[self.get_active_col_idx()] = active_flag
-            new_samples.append(updated_row)
-        return Samples(new_samples, self.n, self.m)
+        # new_samples = []
+        # for active_flag, row in zip(updated_actives, self.samples):
+        #     updated_row = row[:]
+        #     updated_row[self.get_active_col_idx()] = active_flag
+        #     new_samples.append(updated_row)
+        new_columns = [col[:] for col in self.columns[:-1]]
+        new_columns.append(updated_actives)
+        return Samples(new_columns, self.n, self.m)
 
     def __len__(self):
         return len(self.get_active_col())
@@ -271,11 +276,11 @@ def select_col_at(samples, idx):
 
     debug_sanity_check(idx)
     eq_flags = [idx == i for i in range(samples.n + samples.m)]
-    # TODO this is matrix by row mul
+    # TODO this is matrix by row mul?
     res = []
-    for row in samples.samples:
-        res.append(inner_prod(eq_flags, row[0:samples.n + samples.m]))
-    return res
+    for idx, col in enumerate(samples.columns[0:samples.n + samples.m]):
+        res.append(toggle(eq_flags[idx], col))
+    return pairwise_sum(res)
 
 
 def partition_on(samples, attr_idx, threshold, is_leaf):

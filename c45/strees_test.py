@@ -161,7 +161,7 @@ def test():
             [2, 1, 1],
             [4, 0, 1]
         ])
-        samples = Samples(sec_mat, 1, 0)
+        samples = Samples.from_rows(sec_mat, 1, 0)
         actual = compute_cont_ginis(samples, 0, prep_attributes(samples)[0])
         # TODO double-check these
         expected = [
@@ -179,7 +179,7 @@ def test():
             [2, 1, 1],
             [4, 0, 1]
         ])
-        samples = Samples(sec_mat, 1, 0)
+        samples = Samples.from_rows(sec_mat, 1, 0)
         actual = compute_best_gini_cont(samples, 0, prep_attributes(samples)[0])
         runtime_assert_arr_equals([16, alpha_scale(4), 2], actual, default_test_name())
 
@@ -189,7 +189,7 @@ def test():
             [4, 5, 6, 1, 1],
             [7, 8, 9, 1, 1]
         ])
-        actual = select_col_at(Samples(sec_mat, 3, 0), sint(1))
+        actual = select_col_at(Samples.from_rows(sec_mat, 3, 0), sint(1))
         runtime_assert_arr_equals([2, 5, 8], actual, default_test_name())
 
     def test_partition_on():
@@ -199,14 +199,14 @@ def test():
             [7, 8, 9, 1, 1],
             [10, 11, 12, 1, 1]
         ])
-        left, right = partition_on(Samples(sec_mat, 3, 0),
+        left, right = partition_on(Samples.from_rows(sec_mat, 3, 0),
                                    attr_idx=sint(1), threshold=5, is_leaf=sint(0))
         runtime_assert_mat_equals(
             [[1, 2, 3, 1, 1],
              [4, 5, 6, 1, 1],
              [7, 8, 9, 1, 0],
              [10, 11, 12, 1, 0]],
-            left.samples,
+            transpose(left.columns),
             default_test_name()
         )
         runtime_assert_mat_equals(
@@ -214,7 +214,7 @@ def test():
              [4, 5, 6, 1, 0],
              [7, 8, 9, 1, 1],
              [10, 11, 12, 1, 1]],
-            right.samples,
+            transpose(right.columns),
             default_test_name()
         )
 
@@ -224,7 +224,7 @@ def test():
             [7, 8, 9, 1, 0],
             [10, 11, 12, 1, 1]
         ])
-        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
+        left, right = partition_on(Samples.from_rows(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
                                    is_leaf=0)
         runtime_assert_arr_equals(
             [0, 1, 0, 0],
@@ -243,7 +243,7 @@ def test():
             [7, 8, 9, 1, 0],
             [10, 11, 12, 1, 1]
         ])
-        left, right = partition_on(Samples(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
+        left, right = partition_on(Samples.from_rows(sec_mat, 3, 0), attr_idx=sint(1), threshold=5,
                                    is_leaf=sint(1))
         runtime_assert_arr_equals(
             [0, 0, 0, 0],
@@ -263,7 +263,7 @@ def test():
             [3, 0, 0],
             [4, 1, 1]
         ])
-        is_leaf, _, _ = determine_if_leaf(Samples(sec_mat, 1))
+        is_leaf, _, _ = determine_if_leaf(Samples.from_rows(sec_mat, 1))
         runtime_assert_equals(0, is_leaf, default_test_name())
 
         sec_mat = input_matrix([
@@ -272,7 +272,7 @@ def test():
             [3, 0, 0],
             [4, 1, 1]
         ])
-        is_leaf, is_dummy, node_class = determine_if_leaf(Samples(sec_mat, 1))
+        is_leaf, is_dummy, node_class = determine_if_leaf(Samples.from_rows(sec_mat, 1))
         runtime_assert_arr_equals([1, 0, 1], [is_leaf, is_dummy, node_class], default_test_name())
 
         sec_mat = input_matrix([
@@ -281,7 +281,7 @@ def test():
             [3, 0, 0],
             [4, 1, 0]
         ])
-        is_leaf, is_dummy, node_class = determine_if_leaf(Samples(sec_mat, 1))
+        is_leaf, is_dummy, node_class = determine_if_leaf(Samples.from_rows(sec_mat, 1))
         runtime_assert_arr_equals([1, 0, 0], [is_leaf, is_dummy, node_class], default_test_name())
 
         sec_mat = input_matrix([
@@ -290,7 +290,7 @@ def test():
             [3, 0, 0],
             [4, 1, 0]
         ])
-        is_leaf, is_dummy, _ = determine_if_leaf(Samples(sec_mat, 1))
+        is_leaf, is_dummy, _ = determine_if_leaf(Samples.from_rows(sec_mat, 1))
         runtime_assert_arr_equals([1, 1], [is_leaf, is_dummy], default_test_name())
 
     def test_while():
@@ -379,7 +379,7 @@ def test():
             [7, 4, 1, 1],
             [6, 3, 1, 1]
         ])
-        prep_attrs = prep_attributes(Samples(sec_mat, 2, 0))
+        prep_attrs = prep_attributes(Samples.from_rows(sec_mat, 2, 0))
 
         actual = zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col)
         expected = [
@@ -406,7 +406,7 @@ def test():
             [7, 3, 1, 1],
             [6, 4, 1, 1]
         ])
-        samples = Samples(sec_mat, 2, 0)
+        samples = Samples.from_rows(sec_mat, 2, 0)
         node, left, right = c45_single_round(samples, prep_attributes(samples))
         runtime_assert_equals(1, node.attr_idx, default_test_name())
         runtime_assert_equals(2, node.threshold, default_test_name())
@@ -419,7 +419,7 @@ def test():
             [3, 1, 1],
             [4, 1, 1]
         ])
-        samples = Samples(sec_mat, 1, 0)
+        samples = Samples.from_rows(sec_mat, 1, 0)
         node, left, right = c45_single_round(samples, prep_attributes(samples))
         runtime_assert_equals(0, node.attr_idx, default_test_name())
         runtime_assert_equals(2, node.threshold, default_test_name())
@@ -433,7 +433,7 @@ def test():
             [7, 3, 0, 1],
             [6, 4, 0, 1]
         ])
-        actual = c45(Samples(sec_mat, 2), max_tree_depth=2)
+        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=2)
         expected = \
             DN(1, 2) \
                 .l(LN(1)) \
@@ -446,7 +446,7 @@ def test():
             [4, 2, 0, 1],
             [5, 1, 1, 1]
         ])
-        actual = c45(Samples(sec_mat, 2), max_tree_depth=3)
+        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=3)
         expected = \
             DN(1, 2) \
                 .l(DN(1, 1)
@@ -463,7 +463,7 @@ def test():
             [3, 1, 1],
             [4, 1, 1]
         ])
-        actual = c45(Samples(sec_mat, 1), max_tree_depth=2)
+        actual = c45(Samples.from_rows(sec_mat, 1), max_tree_depth=2)
         # TODO this makes sense, but is it right?
         # since all samples have the same class,
         # we don't partition on any attribute and end up with a leaf for the root
