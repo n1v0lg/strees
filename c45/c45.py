@@ -447,9 +447,9 @@ def main():
         [7, 3, 1, 1],
         [6, 4, 1, 1]
     ])
-    tree = c45(Samples(sec_mat, 2), 2)
-    tree.reveal()
-    tree.print_self()
+    c45(Samples.from_rows(sec_mat, 2), 3) \
+        .reveal() \
+        .print_self()
 
 
 test()
