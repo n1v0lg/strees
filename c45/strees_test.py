@@ -139,7 +139,7 @@ def test():
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([1, 9, 0], actual, default_test_name())
 
-    def test_naive_sort_by():
+    def test_sort_by():
         sec_mat = input_matrix([
             [2, 0, 0],
             [3, 1, 1],
@@ -474,7 +474,7 @@ def test():
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
     test_argmax()
-    test_naive_sort_by()
+    test_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
     test_obl_select_col_at()

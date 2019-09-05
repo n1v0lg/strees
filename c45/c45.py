@@ -47,6 +47,8 @@ class Samples:
         self.samples = samples
         self.n = n
         self.m = m
+        self.cached_class_col = self.get_col(self.get_class_col_idx())
+        self.cached_active_col = self.get_col(self.get_active_col_idx())
 
     def get_col(self, col_idx):
         return get_col(self.samples, col_idx)
@@ -63,10 +65,10 @@ class Samples:
         return self.n + self.m + 1
 
     def get_active_col(self):
-        return self.get_col(self.get_active_col_idx())
+        return self.cached_active_col
 
     def get_class_col(self):
-        return self.get_col(self.get_class_col_idx())
+        return self.cached_class_col
 
     def with_updated_actives(self, updated_actives):
         # TODO hacky
@@ -268,9 +270,9 @@ def select_col_at(samples, idx):
         raise Exception("Only use this if index is secret or int")
 
     debug_sanity_check(idx)
-    # TODO optimize
-    res = []
     eq_flags = [idx == i for i in range(samples.n + samples.m)]
+    # TODO this is matrix by row mul
+    res = []
     for row in samples.samples:
         res.append(inner_prod(eq_flags, row[0:samples.n + samples.m]))
     return res

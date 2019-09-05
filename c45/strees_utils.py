@@ -1,4 +1,4 @@
-from Compiler.types import sint
+from Compiler.types import sint, Matrix
 from library import print_ln, print_str
 from permutation import odd_even_merge_sort
 
@@ -86,6 +86,21 @@ def sort_by(samples, key_col_idx):
     return res
 
 
+def _mat_assign_op(raw_mat, f):
+    if len(raw_mat) == 0:
+        raise Exception("Empty matrix")
+    if not raw_mat[0]:
+        raise Exception("Empty matrix")
+    num_rows = len(raw_mat)
+    num_cols = len(raw_mat[0])
+
+    mat = Matrix(num_rows, num_cols, sint)
+    for r in range(num_rows):
+        for c in range(num_cols):
+            mat[r][c] = f(raw_mat[r][c])
+    return mat
+
+
 def mat_assign_op(raw_mat, f):
     if len(raw_mat) == 0:
         raise Exception("Empty matrix")
@@ -93,6 +108,7 @@ def mat_assign_op(raw_mat, f):
         raise Exception("Empty matrix")
     num_rows = len(raw_mat)
     num_cols = len(raw_mat[0])
+
     mat = []
     for r in range(num_rows):
         row = []
