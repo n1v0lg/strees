@@ -1,4 +1,5 @@
-from Compiler.types import sint, Array
+from Compiler.types import sint, Array, Matrix
+from library import for_range_parallel
 from permutation import rec_shuffle
 
 try:
@@ -53,6 +54,29 @@ def bench_shuffle(num_values):
     print_list(values)
 
 
+def bench_comp_mat(num_values):
+    """Benchmarks naively computing O(n**2) comparison matrix."""
+    values = Array(num_values, sint)
+    comp_mat = Matrix(num_values, num_values, sint)
+    n_parallel = 32
+
+    @for_range_parallel(n_parallel, num_values)
+    def loop(i):
+        @for_range_parallel(n_parallel, num_values - i)
+        def inner(j):
+            comp_mat[i][i + j] = values[i] <= values[i + j]
+
+    print_mat(comp_mat)
+
+
+def bench_sort(num_values):
+    """Benchmarks stand-alone sort."""
+    values = Array(num_values, sint)
+    values.assign_all(0)
+    default_sort(values)
+    print_list(values)
+
+
 def bench_prep_attributes(num_samples, num_cont_attrs):
     """Runs attribute pre-processing (sorting and permuting) on sample data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs)
@@ -69,9 +93,11 @@ def bench_c45(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
 
 
 def bench_all():
+    # bench_comp_mat(32)
+    # bench_sort(32)
     # bench(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
-    bench_shuffle(128)
-    # bench_prep_attributes(num_samples=128, num_cont_attrs=1)
+    bench_shuffle(32)
+    # bench_prep_attributes(num_samples=32, num_cont_attrs=1)
     # bench_c45(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
     # bench(num_samples=8, max_tree_depth=4, num_cont_attrs=2, num_disc_attrs=0)
 

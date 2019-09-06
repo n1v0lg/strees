@@ -17,10 +17,12 @@ def sort_and_permute(rows, attr_idx):
     """Sorts and permutes rows according to specified permutation."""
     if not is_two_pow(len(rows)):
         raise Exception("Only powers of two supported for shuffles")
-    config_bits = rec_config_shuffle(rows)
+
     sorted_rows = sort_by(rows, attr_idx)
     sorted_value_col = get_col(sorted_rows, 0)
     order_col = get_col(sorted_rows, 1)
+
+    config_bits = rec_config_shuffle(rows)
     rec_shuffle(order_col, config=config_bits, value_type=sint)
 
     return sorted_value_col, order_col, config_bits

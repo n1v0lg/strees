@@ -1,5 +1,5 @@
 from Compiler.types import sint, Array
-from library import print_ln, print_str
+from library import print_ln, print_str, for_range_parallel
 from permutation import odd_even_merge_sort
 
 MPC_ERROR_FLAG = "MPC_ERROR"
@@ -104,9 +104,43 @@ def if_else_row(bit, row_a, row_b):
     return [bit.if_else(a, b) for a, b in zip(row_a, row_b)]
 
 
+# Largely copied from MP-SPDZ
+def default_sort(a, sorted_length=1, n_parallel=32):
+    def cond_swap(x, y):
+        b = x < y
+        bx = b * x
+        by = b * y
+        return bx + y - by, x - bx + by
+
+    l = sorted_length
+    while l < len(a):
+        l *= 2
+        k = 1
+        while k < l:
+            k *= 2
+            n_outer = len(a) / l
+            n_inner = l / k
+            n_innermost = 1 if k == 2 else k / 2 - 1
+
+            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            def loop(i):
+                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                def inner(j):
+                    base = i * l + j
+                    step = l / k
+                    if k == 2:
+                        a[base], a[base + step] = cond_swap(a[base], a[base + step])
+                    else:
+                        @for_range_parallel(n_parallel, n_innermost)
+                        def f(i):
+                            m1 = step + i * 2 * step
+                            m2 = m1 + base
+                            a[m2], a[m2 + step] = cond_swap(a[m2], a[m2 + step])
+
+
 def sort_by(samples, key_col_idx):
     """Sorts 2D-array by specified column."""
-    res = samples[:]
+    res = samples
     odd_even_merge_sort(res, lambda a, b: a[key_col_idx] < b[key_col_idx])
     return res
 
@@ -148,12 +182,13 @@ def input_matrix(mat):
 
 def enumerate_vals(rows):
     """Adds index to end of each val."""
+    # TODO optimize?
     return [[val, i] for i, val in enumerate(rows)]
 
 
 def get_col(rows, col_idx):
     """Returns column at index as list."""
-    return Array.create_from([row[col_idx] for row in rows])
+    return Array.create_from(row[col_idx] for row in rows)
 
 
 def reveal_list(lst):
