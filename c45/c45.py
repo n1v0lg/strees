@@ -95,7 +95,7 @@ class PrepAttribute:
         with_idx = enumerate_vals(val_col)
         # val col always in first pos. in this case
         reordered, rand_perm = sort_and_permute(with_idx, 0)
-        open_perm = reveal_list(get_col(reordered, 1))
+        open_perm = get_col(reordered, 1).reveal()
         # TODO this is unnecessary
         sorted_val_col = PrepAttribute._sort(val_col, rand_perm, open_perm)
         sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)
@@ -369,7 +369,7 @@ def prep_attributes(samples):
     :param samples:
     :return:
     """
-    class_col = samples.get_class_col()[:]
+    class_col = samples.get_class_col()
     return [PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col)
             for attr_idx in range(samples.n)]
 

@@ -27,6 +27,8 @@ def shuffle_rows(rows, config, reverse=False):
     shuffled_cols = []
     for col_idx in range(len(rows[0])):
         col = get_col(rows, col_idx)
+        if not isinstance(col, Array):
+            raise Exception("Must be array")
         rec_shuffle(col, config=config, value_type=sint, reverse=reverse)
         shuffled_cols.append(col)
     shuffled_rows = []
@@ -48,9 +50,8 @@ def sort_and_permute(rows, attr_idx):
 
 def open_permute(values, open_perm):
     """Applies a public permutation to an Array of sints."""
-    # TODO find way to avoid this
     if not isinstance(values, Array):
-        values = Array(len(values), sint).create_from(values)
+        raise Exception("Must be array")
     reordered = Array(len(values), sint)
     for idx, val in enumerate(values):
         old_idx = open_perm[idx]

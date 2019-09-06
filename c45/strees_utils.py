@@ -146,11 +146,6 @@ def input_matrix(mat):
     return mat_assign_op(mat, lambda x: sint(x))
 
 
-def enumerate_rows(rows):
-    """Adds index to end of each row."""
-    return [row + [i] for i, row in enumerate(rows)]
-
-
 def enumerate_vals(rows):
     """Adds index to end of each val."""
     return [[val, i] for i, val in enumerate(rows)]
@@ -158,7 +153,7 @@ def enumerate_vals(rows):
 
 def get_col(rows, col_idx):
     """Returns column at index as list."""
-    return [row[col_idx] for row in rows]
+    return Array.create_from([row[col_idx] for row in rows])
 
 
 def reveal_list(lst):
@@ -166,12 +161,14 @@ def reveal_list(lst):
 
     TODO probably already exists somewhere.
     """
-    return [val.reveal() for val in lst]
+    if not isinstance(lst, Array):
+        raise Exception("Must be array")
+    return [val for val in lst.reveal()]
 
 
 def input_list(lst):
     """Inputs list of values into MPC."""
-    return [sint(val) for val in lst]
+    return Array.create_from(sint(val) for val in lst)
 
 
 def to_col_arrays(rows):

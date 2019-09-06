@@ -42,7 +42,14 @@ def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
     return Samples(columns, num_cont_attrs, num_disc_attrs)
 
 
-def bench(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
+def bench_prep_attributes(num_samples, num_cont_attrs):
+    """Runs attribute pre-processing (sorting and permuting) on sample data with given dimensions."""
+    samples = gen_dummy_samples(num_samples, num_cont_attrs)
+    prepped = prep_attributes(samples)
+    prepped[0].sorted_val_col.reveal()
+
+
+def bench_c45(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
     """Runs c45 algorithm on dummy data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
     c45(samples, max_tree_depth) \
@@ -52,7 +59,8 @@ def bench(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
 
 def bench_all():
     # bench(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
-    bench(num_samples=16, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
+    bench_prep_attributes(num_samples=128, num_cont_attrs=1)
+    # bench_c45(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
     # bench(num_samples=8, max_tree_depth=4, num_cont_attrs=2, num_disc_attrs=0)
 
 
