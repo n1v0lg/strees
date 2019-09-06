@@ -426,15 +426,3 @@ def c45(input_samples, max_tree_depth, prep_attrs=None):
     :return:"""
     max_iteration_count = (2 ** max_tree_depth) - 1
     return _c45(input_samples, max_iteration_count, prep_attrs)
-
-
-def main():
-    sec_mat = input_matrix([
-        [8, 1, 0, 1],
-        [5, 2, 0, 1],
-        [7, 3, 1, 1],
-        [6, 4, 1, 1]
-    ])
-    c45(Samples.from_rows(sec_mat, 2), 3) \
-        .reveal() \
-        .print_self()
