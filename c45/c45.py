@@ -191,9 +191,10 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     # active 0 samples
     is_zero = pairwise_and(neg(is_one), is_active)
 
-    fractions = MultiArray(sizes=[len(val_col), 3], value_type=sint)
+    num_samples = len(val_col)
+    fractions = MultiArray(sizes=[num_samples, 3], value_type=sint)
 
-    @for_range_parallel(NUM_PAR_PER_LOOP, len(val_col) - 1)
+    @for_range_parallel(NUM_PAR_PER_LOOP, num_samples - 1)
     def f(row_idx):
         threshold = val_col[row_idx]
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
@@ -205,9 +206,9 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     # TODO this can go away once the alpha fix is implemented
     # include fraction for splitting on last term
     last_threshold = val_col[-1]
-    fractions[len(val_col) - 1][0] = sint(0)
-    fractions[len(val_col) - 1][1] = alpha_scale(sint(0))
-    fractions[len(val_col) - 1][2] = last_threshold
+    fractions[num_samples - 1][0] = sint(0)
+    fractions[num_samples - 1][1] = alpha_scale(sint(0))
+    fractions[num_samples - 1][2] = last_threshold
 
     return fractions
 
@@ -354,11 +355,15 @@ def c45_single_round(samples, prep_attrs):
     is_leaf, is_dummy, node_class = determine_if_leaf(samples)
 
     # compute best attribute and threshold to split on
-    candidates = []
-    # TODO turn into runtime loop
-    for c in range(samples.n):
-        num, denom, thresh = compute_best_gini_cont(samples, c, prep_attrs[c])
-        candidates.append([num, denom, c, thresh])
+    candidates = MultiArray(sizes=[samples.n, 4], value_type=sint)
+
+    @for_range_parallel(NUM_PAR_PER_LOOP, samples.n)
+    def f(c):
+        num, denom, th = compute_best_gini_cont(samples, c, prep_attrs[c])
+        candidates[c][0] = num
+        candidates[c][1] = denom
+        candidates[c][2] = c
+        candidates[c][3] = th
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
     # TODO Base case: check if partitioning on best attribute doesn't actually further partition the data
