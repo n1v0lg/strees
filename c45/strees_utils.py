@@ -1,6 +1,5 @@
 from Compiler.types import sint, Array
 from library import print_ln, print_str, for_range_parallel
-from permutation import odd_even_merge_sort
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
@@ -105,20 +104,23 @@ def if_else_row(bit, row_a, row_b):
 
 
 # Largely copied from MP-SPDZ
-def default_sort(a, sorted_length=1, n_parallel=32):
-    def cond_swap(x, y):
-        b = x < y
+def default_sort(keys, values, sorted_length=1, n_parallel=32):
+    def cond_swap_with_bit(b, x, y):
         bx = b * x
         by = b * y
-        return bx + y - by, x - bx + by
+        return b, bx + y - by, x - bx + by
+
+    def cond_swap(x, y):
+        b = x < y
+        return cond_swap_with_bit(b, x, y)
 
     l = sorted_length
-    while l < len(a):
+    while l < len(keys):
         l *= 2
         k = 1
         while k < l:
             k *= 2
-            n_outer = len(a) / l
+            n_outer = len(keys) / l
             n_inner = l / k
             n_innermost = 1 if k == 2 else k / 2 - 1
 
@@ -129,20 +131,24 @@ def default_sort(a, sorted_length=1, n_parallel=32):
                     base = i * l + j
                     step = l / k
                     if k == 2:
-                        a[base], a[base + step] = cond_swap(a[base], a[base + step])
+                        outer_comp_bit, keys[base], keys[base + step] = cond_swap(keys[base], keys[base + step])
+                        _, values[base], values[base + step] = cond_swap_with_bit(
+                            outer_comp_bit, values[base], values[base + step])
                     else:
                         @for_range_parallel(n_parallel, n_innermost)
                         def f(i):
                             m1 = step + i * 2 * step
                             m2 = m1 + base
-                            a[m2], a[m2 + step] = cond_swap(a[m2], a[m2 + step])
+                            inner_comp_bit, keys[m2], keys[m2 + step] = cond_swap(keys[m2], keys[m2 + step])
+                            _, values[m2], values[m2 + step] = cond_swap_with_bit(
+                                inner_comp_bit, values[m2], values[m2 + step])
 
 
-def sort_by(samples, key_col_idx):
-    """Sorts 2D-array by specified column."""
-    res = samples
-    odd_even_merge_sort(res, lambda a, b: a[key_col_idx] < b[key_col_idx])
-    return res
+def sort_by(keys, values):
+    """Sorts keys and values keys."""
+    same_len(keys, values)
+    default_sort(keys, values)
+    return keys, values
 
 
 def mat_assign_op(raw_mat, f):
@@ -183,7 +189,7 @@ def input_matrix(mat):
 def enumerate_vals(rows):
     """Adds index to end of each val."""
     # TODO optimize?
-    return [[val, i] for i, val in enumerate(rows)]
+    return [[val, sint(i)] for i, val in enumerate(rows)]
 
 
 def get_col(rows, col_idx):

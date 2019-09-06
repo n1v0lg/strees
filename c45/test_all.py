@@ -159,18 +159,15 @@ def test():
 
     def test_sort_by():
         sec_mat = input_matrix([
-            [2, 0, 0],
-            [3, 1, 1],
-            [1, 0, 1],
-            [0, 1, 0]
+            [2, 0],
+            [3, 1],
+            [1, 2],
+            [0, 3]
         ])
-        actual = sort_by(sec_mat, 0)
-        runtime_assert_mat_equals(
-            [[0, 1, 0],
-             [1, 0, 1],
-             [2, 0, 0],
-             [3, 1, 1]],
-            actual, default_test_name())
+        actual_keys, actual_vals = sort_by(get_col(sec_mat, 0), get_col(sec_mat, 1))
+
+        runtime_assert_arr_equals([0, 1, 2, 3], actual_keys, default_test_name())
+        runtime_assert_arr_equals([3, 2, 0, 1], actual_vals, default_test_name())
 
     def test_compute_cont_ginis():
         sec_mat = input_matrix([
