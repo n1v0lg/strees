@@ -92,14 +92,9 @@ class PrepAttribute:
         :param class_col:
         :return:
         """
-        with_idx = enumerate_vals(val_col)
         n = len(val_col)
         indexes = Array(n, sint).create_from(sint(i) for i in range(n))
-        # print_list(indexes)
-        # val col always in first pos. in this case
-        # other_indexes = get_col(with_idx, 1)
-        # print_list(other_indexes)
-        sorted_val_col, order_col, rand_perm = sort_and_permute(get_col(with_idx, 0), indexes)
+        sorted_val_col, order_col, rand_perm = sort_and_permute(val_col, indexes)
         open_perm = order_col.reveal()
         sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)
         return PrepAttribute(attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm)

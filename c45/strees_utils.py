@@ -147,8 +147,11 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
 def sort_by(keys, values):
     """Sorts keys and values keys."""
     same_len(keys, values)
-    default_sort(keys, values)
-    return keys, values
+    # default_sort has side-effect
+    sorted_keys = keys[:]
+    sorted_values = values[:]
+    default_sort(sorted_keys, sorted_values)
+    return sorted_keys, sorted_values
 
 
 def mat_assign_op(raw_mat, f):

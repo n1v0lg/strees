@@ -96,9 +96,9 @@ def bench_all():
     # bench_comp_mat(32)
     # bench_sort(32)
     # bench(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
-    bench_shuffle(32)
+    # bench_shuffle(32)
     # bench_prep_attributes(num_samples=32, num_cont_attrs=1)
-    # bench_c45(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
+    bench_c45(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
     # bench(num_samples=8, max_tree_depth=4, num_cont_attrs=2, num_disc_attrs=0)
 
 
