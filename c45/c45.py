@@ -95,7 +95,7 @@ class PrepAttribute:
         with_idx = enumerate_vals(val_col)
         # val col always in first pos. in this case
         reordered, rand_perm = sort_and_permute(with_idx, 0)
-        open_perm = get_col(reordered, 1).reveal()
+        open_perm = reordered.reveal()
         # TODO this is unnecessary
         sorted_val_col = PrepAttribute._sort(val_col, rand_perm, open_perm)
         sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)

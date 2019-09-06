@@ -1,8 +1,10 @@
 from Compiler.types import sint, Array
+from permutation import rec_shuffle
 
 try:
     from strees_utils import *
     from c45 import *
+    from perm import *
 except ImportError:
     pass
 
@@ -42,6 +44,15 @@ def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
     return Samples(columns, num_cont_attrs, num_disc_attrs)
 
 
+def bench_shuffle(num_values):
+    """Benchmarks stand-alone shuffle."""
+    values = Array(num_values, sint)
+    values.assign_all(0)
+    config_bits = rec_config_shuffle(values)
+    rec_shuffle(values, config=config_bits, value_type=sint, reverse=False)
+    print_list(values)
+
+
 def bench_prep_attributes(num_samples, num_cont_attrs):
     """Runs attribute pre-processing (sorting and permuting) on sample data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs)
@@ -58,8 +69,9 @@ def bench_c45(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
 
 
 def bench_all():
+    bench_shuffle(2048)
     # bench(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
-    bench_prep_attributes(num_samples=128, num_cont_attrs=1)
+    # bench_prep_attributes(num_samples=128, num_cont_attrs=1)
     # bench_c45(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
     # bench(num_samples=8, max_tree_depth=4, num_cont_attrs=2, num_disc_attrs=0)
 

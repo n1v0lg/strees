@@ -2,6 +2,7 @@ import sys
 
 from Compiler.types import sint, cint, MemValue, Array
 from library import print_ln, if_e, else_, do_while
+from permutation import rec_shuffle
 
 try:
     from tree import *
@@ -329,34 +330,16 @@ def test():
 
         runtime_assert_arr_equals([1, 2, 3, 4, 5], target_arr, default_test_name())
 
-    def test_shuffle_rows_invertible():
-        rows = input_matrix([
-            [3, 0],
-            [0, 0],
-            [1, 1],
-            [2, 1],
-            [4, 1],
-            [6, 1],
-            [5, 0],
-            [7, 1]
-        ])
+    def test_reverse_shuffle():
+        values = input_list([3, 0, 1, 2, 4, 6, 5, 7])
 
-        config_bits = rec_config_shuffle(rows)
-        shuffled = shuffle_rows(rows, config_bits, reverse=False)
-        actual = shuffle_rows(shuffled, config_bits, reverse=True)
+        config_bits = rec_config_shuffle(values)
+        rec_shuffle(values, config_bits, value_type=sint, reverse=False)
+        rec_shuffle(values, config_bits, value_type=sint, reverse=True)
         # expecting original order
-        expected = [
-            [3, 0],
-            [0, 0],
-            [1, 1],
-            [2, 1],
-            [4, 1],
-            [6, 1],
-            [5, 0],
-            [7, 1]
-        ]
+        expected = [3, 0, 1, 2, 4, 6, 5, 7]
 
-        runtime_assert_mat_equals(expected, actual, default_test_name())
+        runtime_assert_arr_equals(expected, values, default_test_name())
 
     def test_prep_attr_create():
         sec_mat = input_matrix([
@@ -498,7 +481,7 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
-    test_shuffle_rows_invertible()
+    test_reverse_shuffle()
     test_prep_attr_create()
     test_prep_attributes()
     test_c45_single_round()
