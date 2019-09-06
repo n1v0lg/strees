@@ -19,10 +19,11 @@ def sort_and_permute(rows, attr_idx):
         raise Exception("Only powers of two supported for shuffles")
     config_bits = rec_config_shuffle(rows)
     sorted_rows = sort_by(rows, attr_idx)
+    sorted_value_col = get_col(sorted_rows, 0)
     order_col = get_col(sorted_rows, 1)
     rec_shuffle(order_col, config=config_bits, value_type=sint)
 
-    return order_col, config_bits
+    return sorted_value_col, order_col, config_bits
 
 
 def open_permute(values, open_perm):
