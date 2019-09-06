@@ -1,3 +1,5 @@
+from Compiler.types import sint, Array
+
 try:
     from strees_utils import *
     from c45 import *
@@ -22,16 +24,36 @@ super_hacky_import_hack([
 ])
 
 
-def main():
-    sec_mat = input_matrix([
-        [8, 1, 0, 1],
-        [5, 2, 0, 1],
-        [7, 3, 1, 1],
-        [6, 4, 1, 1]
-    ])
-    c45(Samples.from_rows(sec_mat, 2), 3) \
+def gen_dummy_cols(num_rows, num_cols):
+    """Generates list of column arrays for given dimensions."""
+    cols = [Array(num_rows, sint) for _ in range(num_cols)]
+    for col in cols:
+        col.assign_all(0)
+    return cols
+
+
+def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
+    """
+    Generates Samples with provided dimensions.
+
+    Note: all values are 0. This is fine for benchmarking since the whole algorithm is oblivious.
+    """
+    columns = gen_dummy_cols(num_samples, num_cont_attrs + num_disc_attrs + 2)
+    return Samples(columns, num_cont_attrs, num_disc_attrs)
+
+
+def bench(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
+    """Runs c45 algorithm on dummy data with given dimensions."""
+    samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
+    c45(samples, max_tree_depth) \
         .reveal() \
         .print_self()
 
 
-main()
+def bench_all():
+    # bench(num_samples=8, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
+    bench(num_samples=16, max_tree_depth=2, num_cont_attrs=2, num_disc_attrs=0)
+    # bench(num_samples=8, max_tree_depth=4, num_cont_attrs=2, num_disc_attrs=0)
+
+
+bench_all()
