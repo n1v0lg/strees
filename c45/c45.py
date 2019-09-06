@@ -10,26 +10,8 @@ try:
     from tree import *
     from strees_utils import *
     from perm import *
-    from strees_test import test
 except ImportError:
     pass
-
-
-# Workaround for working with multiple source files in MP-SPDZ
-def super_hacky_import_hack(local_module_names):
-    from os.path import dirname, abspath, join
-    root_dir = dirname(abspath(program.infile))
-    for local_module_name in local_module_names:
-        execfile(join(root_dir, local_module_name), globals())
-
-
-# NOTE: Order matters!
-super_hacky_import_hack([
-    "tree.py",
-    "strees_utils.py",
-    "perm.py",
-    "strees_test.py"
-])
 
 
 class Samples:
@@ -364,6 +346,7 @@ def c45_single_round(samples, prep_attrs):
         candidates[c][1] = denom
         candidates[c][2] = c
         candidates[c][3] = th
+
     _, _, attr_idx, thresh = argmax_over_fracs(candidates)
 
     # TODO Base case: check if partitioning on best attribute doesn't actually further partition the data
@@ -455,6 +438,3 @@ def main():
     c45(Samples.from_rows(sec_mat, 2), 3) \
         .reveal() \
         .print_self()
-
-
-test()

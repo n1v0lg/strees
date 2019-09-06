@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MPC_SRC_NAME=c45.py
+MPC_SRC_NAME=$1
 
 HERE=$(cd `dirname $0`; pwd)
 SPDZ_ROOT=${HERE}/../MP-SPDZ

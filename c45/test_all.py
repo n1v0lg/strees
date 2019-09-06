@@ -6,10 +6,27 @@ from library import print_ln, if_e, else_, do_while
 try:
     from tree import *
     from strees_utils import *
-    from c45 import *
     from perm import *
+    from c45 import *
 except ImportError:
     pass
+
+
+# Workaround for working with multiple source files in MP-SPDZ
+def super_hacky_import_hack(local_module_names):
+    from os.path import dirname, abspath, join
+    root_dir = dirname(abspath(program.infile))
+    for local_module_name in local_module_names:
+        execfile(join(root_dir, local_module_name), globals())
+
+
+# NOTE: Order matters!
+super_hacky_import_hack([
+    "tree.py",
+    "strees_utils.py",
+    "perm.py",
+    "c45.py"
+])
 
 
 def test():
@@ -486,3 +503,6 @@ def test():
     test_prep_attributes()
     test_c45_single_round()
     test_c45()
+
+
+test()

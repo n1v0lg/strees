@@ -2,7 +2,7 @@
 
 # this is a pretty clunky test setup...
 ERROR_FLAG="MPC_ERROR"
-if bash run.sh | grep ${ERROR_FLAG}; then
+if bash run.sh test_all.py | grep ${ERROR_FLAG}; then
     echo "Some tests failed."
     exit 1
 else
