@@ -13,16 +13,15 @@ def rec_config_shuffle(rows):
     return configure_waksman(random_perm(len(rows)))
 
 
-def sort_and_permute(rows, attr_idx):
-    """Sorts and permutes rows according to specified permutation."""
-    if not is_two_pow(len(rows)):
+def sort_and_permute(key_col, val_col):
+    """Sorts and permutes columns."""
+    same_len(key_col, val_col)
+    if not is_two_pow(len(key_col)):
         raise Exception("Only powers of two supported for shuffles")
 
-    sorted_value_col, order_col = sort_by(get_col(rows, 0), get_col(rows, 1))
-     # = get_col(sorted_rows, 0)
-     # = get_col(sorted_rows, 1)
+    sorted_value_col, order_col = sort_by(key_col, val_col)
 
-    config_bits = rec_config_shuffle(rows)
+    config_bits = rec_config_shuffle(key_col)
     rec_shuffle(order_col, config=config_bits, value_type=sint)
 
     return sorted_value_col, order_col, config_bits

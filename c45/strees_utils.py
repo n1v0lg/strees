@@ -186,10 +186,10 @@ def input_matrix(mat):
     return mat_assign_op(mat, lambda x: sint(x))
 
 
-def enumerate_vals(rows):
+def enumerate_vals(values):
     """Adds index to end of each val."""
     # TODO optimize?
-    return [[val, sint(i)] for i, val in enumerate(rows)]
+    return [[val, sint(i)] for i, val in enumerate(values)]
 
 
 def get_col(rows, col_idx):
