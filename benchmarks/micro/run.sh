@@ -19,5 +19,7 @@ HERE=$(cd `dirname $0`; pwd)
 SPDZ_ROOT=${HERE}/../../../MP-SPDZ
 cd ${SPDZ_ROOT}
 
+# Format time to only output real in seconds
+TIMEFORMAT='real %3R'
 parse_compile_time "$({ time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME}; } 2>&1)"
 parse_exec_time "$({ time ./Scripts/ring.sh ${MPC_SRC_NAME}; } 2>&1)"
