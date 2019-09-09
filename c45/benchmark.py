@@ -71,9 +71,14 @@ def bench_comp_mat(num_values):
 
 def bench_sort(num_values):
     """Benchmarks stand-alone sort."""
+    keys = Array(num_values, sint)
+    keys.assign_all(0)
+
     values = Array(num_values, sint)
     values.assign_all(0)
-    default_sort(values)
+
+    default_sort(keys, values)
+    print_list(keys)
     print_list(values)
 
 

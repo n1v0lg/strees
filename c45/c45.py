@@ -13,6 +13,16 @@ try:
 except ImportError:
     pass
 
+# Statically cached list of secret, in-order indexes
+INDEXES = dict()
+
+
+def get_indexes(n):
+    """Returns (and generates if necessary) secrete array [0, ..., n]."""
+    if n not in INDEXES:
+        INDEXES[n] = Array(n, sint).create_from(sint(i) for i in range(n))
+    return INDEXES[n]
+
 
 class Samples:
 
@@ -93,7 +103,7 @@ class PrepAttribute:
         :return:
         """
         n = len(val_col)
-        indexes = Array(n, sint).create_from(sint(i) for i in range(n))
+        indexes = get_indexes(n)
         sorted_val_col, order_col, rand_perm = sort_and_permute(val_col, indexes)
         open_perm = order_col.reveal()
         sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)
