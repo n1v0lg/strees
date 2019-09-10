@@ -1,5 +1,5 @@
 from Compiler.types import sint, Array
-from permutation import configure_waksman, random_perm, rec_shuffle
+from permutation import config_shuffle, configure_waksman, random_perm, rec_shuffle, shuffle
 
 # Make IDE happy
 try:
@@ -8,14 +8,20 @@ except ImportError:
     pass
 
 
-def default_config_shuffle(values):
+def default_config_shuffle(values, use_iter=True):
     """Configures waksman network for default shuffle algorithm."""
-    return configure_waksman(random_perm(len(values)))
+    if use_iter:
+        return config_shuffle(len(values), value_type=sint)
+    else:
+        return configure_waksman(random_perm(len(values)))
 
 
-def default_shuffle(values, config, reverse=False):
+def default_shuffle(values, config, reverse=False, use_iter=True):
     """Shuffles values in place using default shuffle algorithm."""
-    rec_shuffle(values, config=config, value_type=sint, reverse=reverse)
+    if use_iter:
+        shuffle(values, config=config, value_type=sint, reverse=reverse)
+    else:
+        rec_shuffle(values, config=config, value_type=sint, reverse=reverse)
 
 
 def sort_and_permute(key_col, val_col):

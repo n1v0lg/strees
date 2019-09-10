@@ -7,9 +7,9 @@ declare -a OPS=(
 
 # Default benchmark sizes
 declare -a SIZES=(
-  16
-  128
-  1024
+    16
+    128
+    1024
 )
 
 for OP in "${OPS[@]}";
