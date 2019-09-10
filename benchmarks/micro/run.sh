@@ -35,7 +35,7 @@ if [ "$#" -eq 3 ]; then
 fi
 
 # fixed parameters
-MPC_SRC_NAME=run.py
+MPC_SRC_NAME=bench.py
 OUT_NAME=timing.csv
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
 PROG_ARGS="${OP} ${NUM_ELS}"
