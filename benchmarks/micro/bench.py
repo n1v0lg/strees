@@ -1,5 +1,4 @@
 from Compiler.types import sint, Array
-from permutation import rec_shuffle
 
 try:
     from c45.strees_utils import *
@@ -54,6 +53,19 @@ def bench_shuffle(num_values):
     print_list(values)
 
 
+def bench_sort(num_values):
+    """Benchmarks stand-alone sort."""
+    keys = Array(num_values, sint)
+    keys.assign_all(0)
+
+    values = Array(num_values, sint)
+    values.assign_all(0)
+
+    default_sort(keys, values)
+    print_list(keys)
+    print_list(values)
+
+
 def run_bench():
     args = program.get_args()
     operation = args[1]
@@ -62,6 +74,8 @@ def run_bench():
 
     if operation == "shuffle":
         bench_shuffle(num_values=num_elements)
+    elif operation == "sort":
+        bench_sort(num_values=num_elements)
     else:
         raise Exception("Unknown operation: %s" % operation)
 

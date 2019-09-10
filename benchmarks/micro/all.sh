@@ -3,13 +3,14 @@
 # Ops to benchmark
 declare -a OPS=(
     "shuffle"
+    "sort"
 )
 
 # Default benchmark sizes
 declare -a SIZES=(
-    16
-    128
-    1024
+    8
+    64
+    512
 )
 
 for OP in "${OPS[@]}";
