@@ -55,8 +55,15 @@ def bench_shuffle(num_values):
 
 
 def bench_all():
-    print program.get_args()
-    bench_shuffle(num_values=1024)
+    args = program.get_args()
+    operation = args[1]
+    num_elements = int(args[2])
+    print "Running %s on %s values." % (operation, num_elements)
+
+    if operation == "shuffle":
+        bench_shuffle(num_values=num_elements)
+    else:
+        raise Exception("Unknown operation: %s" % operation)
 
 
 bench_all()

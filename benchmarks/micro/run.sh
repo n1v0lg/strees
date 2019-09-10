@@ -2,13 +2,13 @@
 
 function parse_compile_time() {
     # TODO this is hacky
-    REAL_TIME=$(cat "$1" | grep -oP "^real \K[0-9](\.[0-9]+)?")
+    REAL_TIME=$(cat "$1" | grep -oP "^real \K[0-9]+(\.[0-9]+)?")
     echo "$REAL_TIME"
 }
 
 function parse_exec_time() {
     # TODO this is hacky
-    REAL_TIME=$(cat "$2" | grep -oP "^real \K[0-9](\.[0-9]+)?")
+    REAL_TIME=$(cat "$2" | grep -oP "^real \K[0-9]+(\.[0-9]+)?")
     echo "$REAL_TIME"
 }
 
@@ -38,6 +38,7 @@ fi
 MPC_SRC_NAME=run.py
 OUT_NAME=timing.csv
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
+PROG_ARGS="${OP} ${NUM_ELS}"
 
 HERE=$(cd `dirname $0`; pwd)
 # TODO hacky
@@ -53,10 +54,10 @@ TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
 
 if [ "$DEBUG" = true ]
 then
-    time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME}
+    time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
     time ./Scripts/ring.sh ${MPC_SRC_NAME}
 else
-    { time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME}; } > ${TMP_OUT} 2>${TMP_ERR}
+    { time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}; } > ${TMP_OUT} 2>${TMP_ERR}
     COMP_TIME=$(parse_compile_time "$TMP_ERR")
 
     # TODO MP-SPDZ appears to exit its main process before finishing all writes
