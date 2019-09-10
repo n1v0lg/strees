@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 
+# Ops to benchmark
+declare -a OPS=(
+    "shuffle"
+)
+
 # Default benchmark sizes
 declare -a SIZES=(
   16
-  32
-  64
   128
   1024
 )
 
-for SIZE in "${SIZES[@]}";
+for OP in "${OPS[@]}";
 do
-    bash run.sh ${SIZE} shuffle;
+    for SIZE in "${SIZES[@]}";
+    do
+        bash run.sh ${SIZE} ${OP};
+    done
 done
-
