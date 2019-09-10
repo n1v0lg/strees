@@ -2,7 +2,6 @@ import sys
 
 from Compiler.types import sint, cint, MemValue, Array
 from library import print_ln, if_e, else_, do_while
-from permutation import rec_shuffle
 
 try:
     from tree import *
@@ -330,9 +329,9 @@ def test():
     def test_reverse_shuffle():
         values = input_list([3, 0, 1, 2, 4, 6, 5, 7])
 
-        config_bits = rec_config_shuffle(values)
-        rec_shuffle(values, config_bits, value_type=sint, reverse=False)
-        rec_shuffle(values, config_bits, value_type=sint, reverse=True)
+        config_bits = default_config_shuffle(values)
+        default_shuffle(values, config_bits, reverse=False)
+        default_shuffle(values, config_bits, reverse=True)
         # expecting original order
         expected = [3, 0, 1, 2, 4, 6, 5, 7]
 

@@ -8,9 +8,14 @@ except ImportError:
     pass
 
 
-def rec_config_shuffle(rows):
-    """Configures waksman network for recursive version of the algorithm."""
-    return configure_waksman(random_perm(len(rows)))
+def default_config_shuffle(values):
+    """Configures waksman network for default shuffle algorithm."""
+    return configure_waksman(random_perm(len(values)))
+
+
+def default_shuffle(values, config, reverse=False):
+    """Shuffles values in place using default shuffle algorithm."""
+    rec_shuffle(values, config=config, value_type=sint, reverse=reverse)
 
 
 def sort_and_permute(key_col, val_col):
@@ -21,8 +26,8 @@ def sort_and_permute(key_col, val_col):
 
     sorted_value_col, order_col = sort_by(key_col, val_col)
 
-    config_bits = rec_config_shuffle(key_col)
-    rec_shuffle(order_col, config=config_bits, value_type=sint)
+    config_bits = default_config_shuffle(key_col)
+    default_shuffle(order_col, config=config_bits)
 
     return sorted_value_col, order_col, config_bits
 

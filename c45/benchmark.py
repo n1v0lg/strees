@@ -49,7 +49,7 @@ def bench_shuffle(num_values):
     """Benchmarks stand-alone shuffle."""
     values = Array(num_values, sint)
     values.assign_all(0)
-    config_bits = rec_config_shuffle(values)
+    config_bits = default_config_shuffle(values)
     rec_shuffle(values, config=config_bits, value_type=sint, reverse=False)
     print_list(values)
 
