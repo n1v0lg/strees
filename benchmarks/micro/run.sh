@@ -34,6 +34,7 @@ if [ "$#" -eq 3 ]; then
     DEBUG=true
 fi
 
+
 # fixed parameters
 MPC_SRC_NAME=bench.py
 OUT_NAME=timing.csv
@@ -57,6 +58,8 @@ then
     time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
     time ./Scripts/ring.sh ${MPC_SRC_NAME}
 else
+    echo "Benchmarking ${OP} on ${NUM_ELS} els"
+
     { time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}; } > ${TMP_OUT} 2>${TMP_ERR}
     COMP_TIME=$(parse_compile_time "$TMP_ERR")
 
@@ -66,7 +69,7 @@ else
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
     # output results
-    echo ${OP}, ${NUM_ELS}, ${COMP_TIME}, ${EXEC_TIME}
+    echo ${OP},${NUM_ELS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
 
     # clean up temp files
     rm "$TMP_OUT" "$TMP_ERR"

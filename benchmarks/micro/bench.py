@@ -54,7 +54,7 @@ def bench_shuffle(num_values):
     print_list(values)
 
 
-def bench_all():
+def run_bench():
     args = program.get_args()
     operation = args[1]
     num_elements = int(args[2])
@@ -66,4 +66,4 @@ def bench_all():
         raise Exception("Unknown operation: %s" % operation)
 
 
-bench_all()
+run_bench()
