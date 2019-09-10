@@ -12,23 +12,50 @@ function parse_exec_time() {
     echo "$REAL_TIME"
 }
 
-main() {
-    MPC_SRC_NAME=run.py
-    OUT_NAME=timing.csv
-    COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
+# configurable parameters
+# TODO make argument handling more robust
+NUM_ELS=$1
+OP=$2
+if [ -z ${NUM_ELS} ]
+then
+    echo "Supply number of elements for benchmark"
+    exit 1
+fi
 
-    HERE=$(cd `dirname $0`; pwd)
-    # TODO hacky
-    SPDZ_ROOT=${HERE}/../../../MP-SPDZ
-    cd ${SPDZ_ROOT}
+if [ -z ${OP} ]
+then
+    echo "Supply benchmark type"
+    exit 1
+fi
 
-    # Format time to only output real in seconds
-    TIMEFORMAT='real %3R'
+DEBUG=false
+if [ "$#" -eq 3 ]; then
+    echo "Running benchmark in debug mode"
+    DEBUG=true
+fi
 
-    # Temp files for redirecting stdout and err to separate streams
-    TMP_OUT=$(mktemp /tmp/bench.out.XXXXXX)
-    TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
+# fixed parameters
+MPC_SRC_NAME=run.py
+OUT_NAME=timing.csv
+COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
 
+HERE=$(cd `dirname $0`; pwd)
+# TODO hacky
+SPDZ_ROOT=${HERE}/../../../MP-SPDZ
+cd ${SPDZ_ROOT}
+
+# Format time to only output real in seconds
+TIMEFORMAT='real %3R'
+
+# Temp files for redirecting stdout and err to separate streams
+TMP_OUT=$(mktemp /tmp/bench.out.XXXXXX)
+TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
+
+if [ "$DEBUG" = true ]
+then
+    time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME}
+    time ./Scripts/ring.sh ${MPC_SRC_NAME}
+else
     { time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME}; } > ${TMP_OUT} 2>${TMP_ERR}
     COMP_TIME=$(parse_compile_time "$TMP_ERR")
 
@@ -37,8 +64,9 @@ main() {
     { time ./Scripts/ring.sh ${MPC_SRC_NAME}; } > ${TMP_OUT} 2>${TMP_ERR}
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
-    echo ${COMP_TIME}, ${EXEC_TIME}
-    rm "$TMP_OUT" "$TMP_ERR"
-}
+    # output results
+    echo ${OP}, ${NUM_ELS}, ${COMP_TIME}, ${EXEC_TIME}
 
-main
+    # clean up temp files
+    rm "$TMP_OUT" "$TMP_ERR"
+fi
