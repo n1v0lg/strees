@@ -55,14 +55,6 @@ HERE=$(cd `dirname $0`; pwd)
 SPDZ_ROOT=${HERE}/../../../MP-SPDZ
 cd ${SPDZ_ROOT}
 
-# Format time to only output real in seconds
-TIMEFORMAT='real %3R'
-
-# Temp files for redirecting stdout and err to separate streams
-TMP_OUT=$(mktemp /tmp/bench.out.XXXXXX)
-TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
-
-
 if [ "$DEBUG" = true ]
 then
     compile && run_program
@@ -72,6 +64,13 @@ then
     fi
 else
     echo "Benchmarking ${OP} on ${NUM_ELS} els"
+
+    # Format time to only output real in seconds
+    TIMEFORMAT='real %3R'
+
+    # Temp files for redirecting stdout and err to separate streams
+    TMP_OUT=$(mktemp /tmp/bench.out.XXXXXX)
+    TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
 
     { time compile; } > ${TMP_OUT} 2>${TMP_ERR}
     COMP_TIME=$(parse_compile_time "$TMP_ERR")
