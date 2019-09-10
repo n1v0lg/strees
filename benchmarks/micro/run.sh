@@ -12,6 +12,14 @@ function parse_exec_time() {
     echo "$REAL_TIME"
 }
 
+function compile() {
+    ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
+}
+
+function run_program() {
+    ./Scripts/ring.sh ${MPC_PROG_NAME}
+}
+
 # configurable parameters
 # TODO make argument handling more robust
 NUM_ELS=$1
@@ -39,6 +47,7 @@ fi
 MPC_SRC_NAME=bench.py
 OUT_NAME=timing.csv
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
+MPC_PROG_NAME="${MPC_SRC_NAME}-${OP}-${NUM_ELS}"
 PROG_ARGS="${OP} ${NUM_ELS}"
 
 HERE=$(cd `dirname $0`; pwd)
@@ -53,19 +62,23 @@ TIMEFORMAT='real %3R'
 TMP_OUT=$(mktemp /tmp/bench.out.XXXXXX)
 TMP_ERR=$(mktemp /tmp/bench.err.XXXXXX)
 
+
 if [ "$DEBUG" = true ]
 then
-    time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
-    time ./Scripts/ring.sh ${MPC_SRC_NAME}
+    compile && run_program
+    if [ "$?" -ne 0 ]; then
+        echo "Debug run failed"
+        exit 1
+    fi
 else
     echo "Benchmarking ${OP} on ${NUM_ELS} els"
 
-    { time ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}; } > ${TMP_OUT} 2>${TMP_ERR}
+    { time compile; } > ${TMP_OUT} 2>${TMP_ERR}
     COMP_TIME=$(parse_compile_time "$TMP_ERR")
 
     # TODO MP-SPDZ appears to exit its main process before finishing all writes
     #  need to figure out a way to wait for all subprocesses to finish before parsing stdout
-    { time ./Scripts/ring.sh ${MPC_SRC_NAME}; } > ${TMP_OUT} 2>${TMP_ERR}
+    { time run_program; } > ${TMP_OUT} 2>${TMP_ERR}
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
     # output results
