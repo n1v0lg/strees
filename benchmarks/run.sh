@@ -21,6 +21,9 @@ function run_program_local() {
 }
 
 function run_program_networked() {
+    PORT=8042
+    HOST="MP-SPDZ-0"
+    RUN_OPTS="${PID} -pn ${PORT} -h ${HOST} -u"
     ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
 }
 
@@ -95,9 +98,6 @@ LOCAL=true
 RUN_OPTS=""
 if [ "$PID" -ne -1 ]; then
     echo "Running benchmark in networked mode"
-    PORT=8042
-    HOST="MP-SPDZ-${PID}"
-    RUN_OPTS="${PID} -pn ${PORT} -h ${HOST}"
     LOCAL=false
 fi
 
