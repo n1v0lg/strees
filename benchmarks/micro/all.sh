@@ -14,6 +14,15 @@ declare -a SIZES=(
     16
 )
 
+PID=-1
+if [ "$#" -eq 1 ]
+then
+    echo "Running benchmarks in networked mode"
+    PID=$1
+else
+    echo "Running benchmarks in local mode"
+fi
+
 for OP in "${OPS[@]}";
 do
     for SIZE in "${SIZES[@]}";
@@ -22,6 +31,6 @@ do
             echo "Benchmarking failed"
             exit 1
         fi
-        bash run.sh ${SIZE} ${OP} -1;
+        bash run.sh ${SIZE} ${OP} ${PID};
     done
 done
