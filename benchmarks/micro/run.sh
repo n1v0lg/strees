@@ -21,11 +21,17 @@ function run_program_local() {
 }
 
 function run_program_networked() {
-    replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
+    ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
 }
 
 function debug_mode() {
-    compile && run_program_local
+    if [ "$LOCAL" = true ]
+    then
+        compile && run_program_local
+    else
+        compile && run_program_networked
+    fi
+
     if [ "$?" -ne 0 ]; then
         echo "Debug run failed"
         exit 1
@@ -51,7 +57,13 @@ function benchmark_mode() {
 
     # TODO MP-SPDZ appears to exit its main process before finishing all writes
     #  need to figure out a way to wait for all subprocesses to finish before parsing stdout
-    { time run_program_local; } > ${TMP_OUT} 2>${TMP_ERR}
+    if [ "$LOCAL" = true ]
+    then
+        { time run_program_local; } > ${TMP_OUT} 2>${TMP_ERR}
+    else
+        { time run_program_networked; } > ${TMP_OUT} 2>${TMP_ERR}
+    fi
+
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
     # output results
@@ -84,9 +96,9 @@ RUN_OPTS=""
 if [ "$PID" -ne -1 ]; then
     echo "Running benchmark in networked mode"
     PORT=8042
-    RUN_OPTS="${PID} -pn ${PORT} -h MP-SPDZ-${PID} -u"
+    HOST="MP-SPDZ-${PID}"
+    RUN_OPTS="${PID} -pn ${PORT} -h ${HOST}"
     LOCAL=false
-    exit 1
 fi
 
 DEBUG=false
@@ -109,7 +121,6 @@ cd ${SPDZ_ROOT}
 
 if [ "$DEBUG" = true ]
 then
-    # TODO own function
     debug_mode
 else
     benchmark_mode
