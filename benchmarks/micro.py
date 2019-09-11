@@ -18,7 +18,7 @@ def super_hacky_import_hack(local_module_names):
 
 
 # NOTE: Order matters!
-base_dir = "../../c45/"
+base_dir = "../c45/"
 super_hacky_import_hack([
     base_dir + "tree.py",
     base_dir + "strees_utils.py",

@@ -108,15 +108,15 @@ if [ "$#" -eq 4 ]; then
 fi
 
 # fixed parameters
-MPC_SRC_NAME=bench.py
-OUT_NAME=timing.csv
+MPC_SRC_NAME=micro.py
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
 MPC_PROG_NAME="${MPC_SRC_NAME}-${OP}-${NUM_ELS}"
+OUT_NAME="timing-${MPC_SRC_NAME}.csv"
 PROG_ARGS="${OP} ${NUM_ELS}"
 
 HERE=$(cd `dirname $0`; pwd)
 # TODO hacky
-SPDZ_ROOT=${HERE}/../../../MP-SPDZ
+SPDZ_ROOT=${HERE}/../../MP-SPDZ
 cd ${SPDZ_ROOT}
 
 if [ "$DEBUG" = true ]
