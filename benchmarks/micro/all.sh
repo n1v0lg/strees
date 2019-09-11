@@ -2,15 +2,17 @@
 
 # Ops to benchmark
 declare -a OPS=(
+    "argmax"
     "shuffle"
     "sort"
+    "comp_mat"
 )
 
 # Default benchmark sizes
 declare -a SIZES=(
     8
-    64
-    512
+    16
+    128
 )
 
 for OP in "${OPS[@]}";

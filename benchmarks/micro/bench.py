@@ -1,4 +1,5 @@
-from Compiler.types import sint, Array
+from Compiler.types import sint, Array, MultiArray, Matrix
+from library import for_range_parallel
 
 try:
     from c45.strees_utils import *
@@ -26,23 +27,7 @@ super_hacky_import_hack([
 ])
 
 
-def gen_dummy_cols(num_rows, num_cols):
-    """Generates list of column arrays for given dimensions."""
-    cols = [Array(num_rows, sint) for _ in range(num_cols)]
-    for col in cols:
-        col.assign_all(0)
-    return cols
-
-
-def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
-    """
-    Generates Samples with provided dimensions.
-
-    Note: all values are 0. This is fine for benchmarking since the whole algorithm is oblivious.
-    """
-    columns = gen_dummy_cols(num_samples, num_cont_attrs + num_disc_attrs + 2)
-    return Samples(columns, num_cont_attrs, num_disc_attrs)
-
+# TODO make sure that things don't get optimized away due to compile time 0 values
 
 def bench_shuffle(num_values):
     """Benchmarks stand-alone shuffle."""
@@ -66,6 +51,30 @@ def bench_sort(num_values):
     print_list(values)
 
 
+def bench_comp_mat(num_values):
+    """Benchmarks naively computing O(n**2) comparison matrix."""
+    values = Array(num_values, sint)
+    values.assign_all(0)
+    comp_mat = Matrix(num_values, num_values, sint)
+    n_parallel = 32
+
+    @for_range_parallel(n_parallel, num_values)
+    def loop(i):
+        @for_range_parallel(n_parallel, num_values - i)
+        def inner(j):
+            comp_mat[i][i + j] = values[i] <= values[i + j]
+
+    print_mat(comp_mat)
+
+
+def bench_argmax_over_fracs(num_values):
+    fractions = MultiArray(sizes=[num_values, 3], value_type=sint)
+    fractions.assign_all(0)
+
+    res = argmax_over_fracs(fractions)
+    print_list(res)
+
+
 def run_bench():
     args = program.get_args()
     operation = args[1]
@@ -76,6 +85,10 @@ def run_bench():
         bench_shuffle(num_values=num_elements)
     elif operation == "sort":
         bench_sort(num_values=num_elements)
+    elif operation == "comp_mat":
+        bench_comp_mat(num_values=num_elements)
+    elif operation == "argmax":
+        bench_argmax_over_fracs(num_values=num_elements)
     else:
         raise Exception("Unknown operation: %s" % operation)
 
