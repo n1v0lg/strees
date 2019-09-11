@@ -10,6 +10,7 @@ except ImportError:
 
 def default_config_shuffle(values, use_iter=True):
     """Configures waksman network for default shuffle algorithm."""
+    # TODO this won't generate consistent permutations if run on different machines; need to seed rand. num. gen
     if use_iter:
         return config_shuffle(len(values), value_type=sint)
     else:
