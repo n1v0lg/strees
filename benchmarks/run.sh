@@ -13,18 +13,27 @@ function parse_exec_time() {
 }
 
 function compile() {
-    ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
+    if [ "$DO_COMPILE" = true ]
+    then
+        ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
+    fi
 }
 
 function run_program_local() {
-    ./Scripts/ring.sh ${MPC_PROG_NAME}
+    if [ "$DO_RUN" = true ]
+    then
+        ./Scripts/ring.sh ${MPC_PROG_NAME}
+    fi
 }
 
 function run_program_networked() {
-    PORT=8042
-    HOST="MP-SPDZ-0"
-    RUN_OPTS="${PID} -pn ${PORT} -h ${HOST} -u"
-    ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
+    if [ "$DO_RUN" = true ]
+    then
+        PORT=8042
+        HOST="MP-SPDZ-0"
+        RUN_OPTS="${PID} -pn ${PORT} -h ${HOST} -u"
+        ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
+     fi
 }
 
 function debug_mode() {
@@ -95,11 +104,14 @@ if [ "$#" -eq 4 ]; then
 fi
 
 # fixed parameters
-PAR_OPENS=1000
+PAR_OPENS=10000
 UNROLLING=100000
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure -m ${PAR_OPENS} --budget=${UNROLLING}"
 MPC_PROG_NAME="${MPC_SRC_NAME}-${PROG_ARGS}"
 OUT_NAME="timing-${MPC_SRC_NAME}.csv"
+
+DO_COMPILE=true
+DO_RUN=true
 
 HERE=$(cd `dirname $0`; pwd)
 # TODO hacky
