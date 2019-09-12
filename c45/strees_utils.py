@@ -9,9 +9,6 @@ DEBUG = False
 # Parameter for scaling denominator in GINI index computation
 ALPHA = 10
 
-# Default number of parallel instructions per @for_range_parallel
-NUM_PAR_PER_LOOP = 128
-
 
 class Acc:
     """Accumulator class that can be used to increment/dec a secret values.
@@ -96,7 +93,6 @@ def prod(left, right):
         res[i] = left[i] * right[i]
 
     return res
-    # return Array.create_from(l * r for l, r in zip(left, right))
 
 
 def neg(bits):
@@ -112,7 +108,6 @@ def neg(bits):
         res[i] = 1 - bits[i]
 
     return res
-    # return Array.create_from(1 - bit for bit in bits)
 
 
 def lt_threshold(elements, threshold):
@@ -128,7 +123,6 @@ def lt_threshold(elements, threshold):
         res[i] = elements[i] <= threshold
 
     return res
-    # return Array.create_from(v <= threshold for v in elements)
 
 
 def array_check(arr):
