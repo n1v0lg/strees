@@ -17,7 +17,7 @@ INDEXES = dict()
 
 
 def get_indexes(n):
-    """Returns (and generates if necessary) secrete array [0, ..., n]."""
+    """Returns (and generates if necessary) secret array [0, ..., n]."""
     if n not in INDEXES:
         INDEXES[n] = Array(n, sint).create_from(sint(i) for i in range(n))
     return INDEXES[n]
@@ -358,9 +358,6 @@ def c45_single_round(samples, prep_attrs):
     # compute best attribute and threshold to split on
     candidates = MultiArray(sizes=[samples.n, 4], value_type=sint)
 
-    # @for_range_opt(samples.n)
-    # @for_range_parallel(samples.c + 1, samples.n)
-    # def f(c):
     for c in range(samples.n):
         program.curr_tape.start_new_basicblock()
         num, denom, th = compute_best_gini_cont(samples, c, prep_attrs[c])
