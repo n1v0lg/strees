@@ -95,7 +95,9 @@ if [ "$#" -eq 4 ]; then
 fi
 
 # fixed parameters
-COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
+PAR_OPENS=1000
+UNROLLING=100000
+COMPILE_OPTS="--ring=64 --optimize-hard --insecure -m ${PAR_OPENS} --budget=${UNROLLING}"
 MPC_PROG_NAME="${MPC_SRC_NAME}-${PROG_ARGS}"
 OUT_NAME="timing-${MPC_SRC_NAME}.csv"
 
