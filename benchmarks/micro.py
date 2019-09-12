@@ -64,7 +64,8 @@ def bench_comp_mat(num_values):
         def inner(j):
             comp_mat[i][i + j] = values[i] <= values[i + j]
 
-    print_mat(comp_mat)
+    # TODO avoid printing
+    # print_mat(comp_mat)
 
 
 def bench_argmax_over_fracs(num_values):
@@ -77,8 +78,9 @@ def bench_argmax_over_fracs(num_values):
 
 def run_bench():
     args = program.get_args()
-    operation = args[1]
-    num_elements = int(args[2])
+    split_args = args[1].split("-")
+    operation = split_args[0]
+    num_elements = int(split_args[1])
     print "Running %s on %s values." % (operation, num_elements)
 
     if operation == "shuffle":

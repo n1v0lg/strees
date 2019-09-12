@@ -42,7 +42,7 @@ function debug_mode() {
 }
 
 function benchmark_mode() {
-    echo "Benchmarking ${OP} on ${NUM_ELS} els"
+    echo "Benchmarking ${MPC_SRC_NAME} with ${PROG_ARGS}"
 
     # Test-run first, which will exit with error if anything breaks
     # TODO check for errors directly on timed run
@@ -70,7 +70,7 @@ function benchmark_mode() {
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
     # output results
-    echo ${OP},${NUM_ELS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+    echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
 
     # clean up temp files
     rm "$TMP_OUT" "$TMP_ERR"
@@ -78,24 +78,11 @@ function benchmark_mode() {
 
 # configurable parameters
 # TODO make argument handling more robust
-NUM_ELS=$1
-OP=$2
+MPC_SRC_NAME=$1
+PROG_ARGS=$2
 PID=$3
 
-if [ -z ${NUM_ELS} ]
-then
-    echo "Supply number of elements for benchmark"
-    exit 1
-fi
-
-if [ -z ${OP} ]
-then
-    echo "Supply benchmark type"
-    exit 1
-fi
-
 LOCAL=true
-RUN_OPTS=""
 if [ "$PID" -ne -1 ]; then
     echo "Running benchmark in networked mode"
     LOCAL=false
@@ -108,11 +95,9 @@ if [ "$#" -eq 4 ]; then
 fi
 
 # fixed parameters
-MPC_SRC_NAME=micro.py
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure"
-MPC_PROG_NAME="${MPC_SRC_NAME}-${OP}-${NUM_ELS}"
+MPC_PROG_NAME="${MPC_SRC_NAME}-${PROG_ARGS}"
 OUT_NAME="timing-${MPC_SRC_NAME}.csv"
-PROG_ARGS="${OP} ${NUM_ELS}"
 
 HERE=$(cd `dirname $0`; pwd)
 # TODO hacky

@@ -31,6 +31,6 @@ do
             echo "Benchmarking failed"
             exit 1
         fi
-        bash run.sh ${SIZE} ${OP} ${PID};
+        bash run.sh micro.py "${OP}-${SIZE}" ${PID};
     done
 done
