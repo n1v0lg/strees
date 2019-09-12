@@ -204,18 +204,18 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
 
 def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
     # TODO keep updating values as we go instead of recomputing sum
-    leq_this = sum(is_active[:row_idx + 1])
-    gt_this = sum(is_active[row_idx + 1:])
+    leq_this = tree_sum(is_active[:row_idx + 1])
+    gt_this = tree_sum(is_active[row_idx + 1:])
 
     # total rows from 0 to row_idx + 1 of class 1
-    ones_leq = sum(is_one[:row_idx + 1])
+    ones_leq = tree_sum(is_one[:row_idx + 1])
     # total rows from row_idx + 1 to total_rows of class 1
-    ones_gt = sum(is_one[row_idx + 1:])
+    ones_gt = tree_sum(is_one[row_idx + 1:])
 
     # total rows from 0 to row_idx + 1 of class 1
-    zeroes_leq = sum(is_zero[:row_idx + 1])
+    zeroes_leq = tree_sum(is_zero[:row_idx + 1])
     # total rows from row_idx + 1 to total_rows of class 1
-    zeroes_gt = sum(is_zero[row_idx + 1:])
+    zeroes_gt = tree_sum(is_zero[row_idx + 1:])
 
     # Note that ones_leq = |D'_{C_{attr_col_idx} <= c_{attr_col_idx, row_idx}} ^ D'_{Y = 1}|
     # where D' is D sorted by the attribute at attr_col_idx
@@ -316,11 +316,11 @@ def determine_if_leaf(samples):
     active_ones = pairwise_and(is_category_one, active_col)
     active_zeroes = pairwise_and(is_category_zero, active_col)
 
-    total_actives = sum(active_col)
+    total_actives = tree_sum(active_col)
 
     all_inactive = total_actives == 0
-    all_ones = sum(active_ones) == total_actives
-    all_zeroes = sum(active_zeroes) == total_actives
+    all_ones = tree_sum(active_ones) == total_actives
+    all_zeroes = tree_sum(active_zeroes) == total_actives
 
     is_leaf = log_or(all_inactive, log_or(all_ones, all_zeroes))
     return is_leaf, all_inactive, all_ones

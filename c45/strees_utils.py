@@ -1,5 +1,6 @@
 from Compiler.types import sint, Array
 from library import print_ln, print_str, for_range_parallel
+from util import tree_reduce
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
@@ -51,6 +52,11 @@ def toggle(bit, elements):
     if not isinstance(elements, Array):
         raise Exception("Call this with array")
     return elements * bit
+
+
+def tree_sum(elements):
+    """Computes sum of elements, using MP-SPDZ tree_reduce."""
+    return tree_reduce(lambda x, y: x + y, elements)
 
 
 def pairwise_and(bits_a, bits_b):
