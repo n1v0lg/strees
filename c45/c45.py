@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from Compiler.types import sint, Array, MultiArray
-from library import print_ln, if_, for_range_parallel
+from library import print_ln, if_, for_range_parallel, for_range_opt
 from util import tree_reduce
 
 # Make IDE happy
@@ -183,7 +183,8 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     num_samples = len(val_col)
     fractions = MultiArray(sizes=[num_samples, 3], value_type=sint)
 
-    @for_range_parallel(NUM_PAR_PER_LOOP, num_samples - 1)
+    # @for_range_opt(num_samples - 1)
+    @for_range_parallel(num_samples, num_samples - 1)
     def f(row_idx):
         threshold = val_col[row_idx]
         numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
@@ -346,7 +347,8 @@ def c45_single_round(samples, prep_attrs):
     # compute best attribute and threshold to split on
     candidates = MultiArray(sizes=[samples.n, 4], value_type=sint)
 
-    @for_range_parallel(NUM_PAR_PER_LOOP, samples.n)
+    # @for_range_opt(samples.n)
+    @for_range_parallel(samples.n + 1, samples.n)
     def f(c):
         num, denom, th = compute_best_gini_cont(samples, c, prep_attrs[c])
         candidates[c][0] = num
