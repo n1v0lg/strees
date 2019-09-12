@@ -275,8 +275,11 @@ def select_col_at(samples, idx):
         raise Exception("Only use this if index is secret or int")
 
     debug_sanity_check(idx)
+    # TODO for_range
     eq_flags = Array.create_from(idx == i for i in range(samples.n + samples.m))
-    return sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
+    selected = sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
+
+    return Array.create_from(v for v in selected)
 
 
 def partition_on(samples, attr_idx, threshold, is_leaf):

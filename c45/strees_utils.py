@@ -1,5 +1,5 @@
 from Compiler.types import sint, Array, MemValue
-from library import print_ln, print_str, for_range_parallel
+from library import print_ln, print_str, for_range_parallel, for_range
 from util import tree_reduce
 
 MPC_ERROR_FLAG = "MPC_ERROR"
@@ -85,21 +85,55 @@ def pairwise_and(bits_a, bits_b):
 def prod(left, right):
     """Pairwise product of elements."""
     same_len(left, right)
-    if not isinstance(left, Array) or not isinstance(right, Array):
-        raise Exception("Must be Arrays")
-    return Array.create_from(l * r for l, r in zip(left, right))
+    array_check(left)
+    array_check(right)
+
+    num_elements = len(left)
+    res = Array(num_elements, sint)
+
+    @for_range(0, num_elements)
+    def _(i):
+        res[i] = left[i] * right[i]
+
+    return res
+    # return Array.create_from(l * r for l, r in zip(left, right))
 
 
 def neg(bits):
     """Bitwise not of each element in bits (or singleton bit)."""
     if isinstance(bits, sint) or isinstance(bits, int):
         return 1 - bits
-    return Array.create_from(1 - bit for bit in bits)
+    array_check(bits)
+    num_elements = len(bits)
+    res = Array(num_elements, sint)
+
+    @for_range(0, num_elements)
+    def _(i):
+        res[i] = 1 - bits[i]
+
+    return res
+    # return Array.create_from(1 - bit for bit in bits)
 
 
 def lt_threshold(elements, threshold):
     """Compares all values to threshold value and returns result sints."""
-    return Array.create_from(v <= threshold for v in elements)
+
+    array_check(elements)
+
+    num_elements = len(elements)
+    res = Array(num_elements, sint)
+
+    @for_range(0, num_elements)
+    def _(i):
+        res[i] = elements[i] <= threshold
+
+    return res
+    # return Array.create_from(v <= threshold for v in elements)
+
+
+def array_check(arr):
+    if not isinstance(arr, Array):
+        raise Exception("Must be Array but was %s" % type(arr))
 
 
 def same_len(row_a, row_b):
