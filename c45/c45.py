@@ -377,8 +377,11 @@ def prep_attributes(samples):
     :return:
     """
     class_col = samples.get_class_col()
-    return [PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col)
-            for attr_idx in range(samples.n)]
+    prepped = []
+    for attr_idx in range(samples.n):
+        program.curr_tape.start_new_basicblock()
+        prepped.append(PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col))
+    return prepped
 
 
 def _c45(input_samples, max_iteration_count, prep_attrs=None):
