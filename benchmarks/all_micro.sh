@@ -10,8 +10,10 @@ declare -a OPS=(
 
 # Default benchmark sizes
 declare -a SIZES=(
-    8
-    16
+    64
+    128
+    256
+    1024
 )
 
 PID=-1
