@@ -90,15 +90,6 @@ def prod(left, right):
     return Array.create_from(l * r for l, r in zip(left, right))
 
 
-def inner_prod(left, right):
-    """Inner product of elements."""
-    same_len(left, right)
-    if not left:
-        return []
-    cls = left[0].get_type(0)
-    return cls.dot_product(left, right)
-
-
 def neg(bits):
     """Bitwise not of each element in bits (or singleton bit)."""
     if isinstance(bits, sint) or isinstance(bits, int):
@@ -109,12 +100,6 @@ def neg(bits):
 def lt_threshold(elements, threshold):
     """Compares all values to threshold value and returns result sints."""
     return Array.create_from(v <= threshold for v in elements)
-
-
-def pairwise_sum(columns):
-    if not all(isinstance(a, Array) for a in columns):
-        raise Exception("All operands must be arrays")
-    return reduce(lambda x, y: x + y, columns)
 
 
 def same_len(row_a, row_b):
