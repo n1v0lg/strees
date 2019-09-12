@@ -206,8 +206,9 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     zeroes_leq = Acc(sint(0))
     zeroes_gt = Acc(tree_sum(is_zero))
 
-    @for_range_opt(num_samples - 1)
-    def _(row_idx):
+    # @for_range_opt(num_samples - 1)
+    # def _(row_idx):
+    for row_idx in range(num_samples - 1):
         threshold = val_col[row_idx]
 
         leq_this.inc_by(is_active[row_idx])
