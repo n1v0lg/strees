@@ -206,13 +206,15 @@ def test():
         actual = select_col_at(Samples.from_rows(sec_mat, 3, 0), sint(1))
         runtime_assert_arr_equals([2, 5, 8], actual, default_test_name())
 
-    # def test_row_mul():
-    #     sec_mat = input_matrix([
-    #         [1, 2, 3, 1, 1],
-    #         [4, 5, 6, 1, 1],
-    #         [7, 8, 9, 1, 1]
-    #     ])
-    #     sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
+    def test_row_mul():
+        sec_mat = input_matrix([
+            [1, 2, 3, 4],
+            [4, 5, 6, 7],
+            [7, 8, 9, 10]
+        ])
+        eq_flags = input_list([0, 0, 1])
+        actual = sint.row_matrix_mul(eq_flags, sec_mat)
+        runtime_assert_arr_equals([7, 8, 9, 10], actual, default_test_name())
 
     def test_partition_on():
         sec_mat = input_matrix([
@@ -481,6 +483,7 @@ def test():
     test_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
+    test_row_mul()
     test_obl_select_col_at()
     test_partition_on()
     test_determine_if_leaf()
