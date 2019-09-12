@@ -44,27 +44,26 @@ def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
     return Samples(columns, num_cont_attrs, num_disc_attrs)
 
 
-def bench_c45(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
-    """Runs c45 algorithm on dummy data with given dimensions."""
-    samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
-    c45(samples, max_tree_depth)
-    # .reveal() \
-    # .print_self()
+def bench_prep_attributes(num_samples, num_cont_attrs):
+    """Runs attribute pre-processing (sorting and permuting) on sample data with given dimensions."""
+    samples = gen_dummy_samples(num_samples, num_cont_attrs)
+    prepped = prep_attributes(samples)
+    prepped[0].sorted_val_col.reveal()
 
 
 def run_bench():
     args = program.get_args()
     split_args = args[1].split("-")
-    num_elements = int(split_args[0])
-    max_tree_depth = int(split_args[1])
+    operation = split_args[0]
+    num_elements = int(split_args[1])
     num_cont_attrs = int(split_args[2])
-    print "Running c45 on %s with depth %s and %s cont attrs." \
-          % (num_elements, max_tree_depth, num_cont_attrs)
+    print "Running %s on %s with %s cont attrs." \
+          % (operation, num_elements, num_cont_attrs)
 
-    bench_c45(num_samples=num_elements,
-              max_tree_depth=max_tree_depth,
-              num_cont_attrs=num_cont_attrs,
-              num_disc_attrs=0)
+    if operation == "prep":
+        bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
+    else:
+        raise Exception("Unknown operation: %s" % operation)
 
 
 run_bench()
