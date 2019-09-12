@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint, Array, MultiArray
-from library import print_ln, if_, for_range_parallel, for_range_opt
+from Compiler.types import sint, Array, MultiArray, MemValue
+from library import print_ln, if_, for_range_opt, for_range
 from util import tree_reduce
 
 # Make IDE happy
@@ -171,13 +171,16 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
         # TODO use MemVal?
 
         def __init__(self, init_val):
-            self.val = init_val
+            self.val = MemValue(init_val)
 
         def inc_by(self, step):
-            self.val += step
+            self.val.write(self.get_val() + step)
 
         def dec_by(self, step):
-            self.val -= step
+            self.val.write(self.get_val() - step)
+
+        def get_val(self):
+            return self.val.read()
 
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
@@ -206,9 +209,8 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     zeroes_leq = Acc(sint(0))
     zeroes_gt = Acc(tree_sum(is_zero))
 
-    # @for_range_opt(num_samples - 1)
-    # def _(row_idx):
-    for row_idx in range(num_samples - 1):
+    @for_range(0, num_samples - 1)
+    def _(row_idx):
         threshold = val_col[row_idx]
 
         leq_this.inc_by(is_active[row_idx])
@@ -221,9 +223,9 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
         zeroes_gt.dec_by(is_zero[row_idx])
 
         numerator, denominator = _compute_gini_fraction(
-            leq_this.val, gt_this.val,
-            ones_leq.val, ones_gt.val,
-            zeroes_leq.val, zeroes_gt.val
+            leq_this.get_val(), gt_this.get_val(),
+            ones_leq.get_val(), ones_gt.get_val(),
+            zeroes_leq.get_val(), zeroes_gt.get_val()
         )
         denominator = alpha_scale(denominator)
         fractions[row_idx][0] = numerator
