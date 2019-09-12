@@ -51,6 +51,13 @@ def bench_prep_attributes(num_samples, num_cont_attrs):
     prepped[0].sorted_val_col.reveal()
 
 
+def bench_c45_single_round(num_samples, num_cont_attrs, num_disc_attrs=0):
+    """Runs c45 algorithm on dummy data with given dimensions."""
+    samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
+    prepped = prep_attributes(samples)
+    c45_single_round(samples, prepped)
+
+
 def run_bench():
     args = program.get_args()
     split_args = args[1].split("-")
@@ -62,6 +69,8 @@ def run_bench():
 
     if operation == "prep":
         bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
+    elif operation == "single":
+        bench_c45_single_round(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
     else:
         raise Exception("Unknown operation: %s" % operation)
 

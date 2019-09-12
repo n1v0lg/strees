@@ -10,7 +10,7 @@ DEBUG = False
 ALPHA = 10
 
 # Default number of parallel instructions per @for_range_parallel
-NUM_PAR_PER_LOOP = 1024
+NUM_PAR_PER_LOOP = 32
 
 
 def debug_only(f):
