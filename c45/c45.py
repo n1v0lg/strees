@@ -166,6 +166,19 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     :param prep_attr:
     :return:
     """
+
+    class Acc:
+        # TODO use MemVal?
+
+        def __init__(self, init_val):
+            self.val = init_val
+
+        def inc_by(self, step):
+            self.val += step
+
+        def dec_by(self, step):
+            self.val -= step
+
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
 
@@ -184,10 +197,33 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     fractions = MultiArray(sizes=[num_samples, 3], value_type=sint)
 
     # @for_range_opt(num_samples - 1)
-    @for_range_parallel(num_samples, num_samples - 1)
-    def f(row_idx):
+    leq_this = Acc(sint(0))
+    gt_this = Acc(tree_sum(is_active))
+
+    ones_leq = Acc(sint(0))
+    ones_gt = Acc(tree_sum(is_one))
+
+    zeroes_leq = Acc(sint(0))
+    zeroes_gt = Acc(tree_sum(is_zero))
+
+    @for_range_opt(num_samples - 1)
+    def _(row_idx):
         threshold = val_col[row_idx]
-        numerator, denominator = _compute_gini_fraction(is_active, is_one, is_zero, row_idx)
+
+        leq_this.inc_by(is_active[row_idx])
+        gt_this.dec_by(is_active[row_idx])
+
+        ones_leq.inc_by(is_one[row_idx])
+        ones_gt.dec_by(is_one[row_idx])
+
+        zeroes_leq.inc_by(is_zero[row_idx])
+        zeroes_gt.dec_by(is_zero[row_idx])
+
+        numerator, denominator = _compute_gini_fraction(
+            leq_this.val, gt_this.val,
+            ones_leq.val, ones_gt.val,
+            zeroes_leq.val, zeroes_gt.val
+        )
         denominator = alpha_scale(denominator)
         fractions[row_idx][0] = numerator
         fractions[row_idx][1] = denominator
@@ -203,20 +239,20 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     return fractions
 
 
-def _compute_gini_fraction(is_active, is_one, is_zero, row_idx):
-    # TODO keep updating values as we go instead of recomputing sum
-    leq_this = tree_sum(is_active[:row_idx + 1])
-    gt_this = tree_sum(is_active[row_idx + 1:])
-
-    # total rows from 0 to row_idx + 1 of class 1
-    ones_leq = tree_sum(is_one[:row_idx + 1])
-    # total rows from row_idx + 1 to total_rows of class 1
-    ones_gt = tree_sum(is_one[row_idx + 1:])
-
-    # total rows from 0 to row_idx + 1 of class 1
-    zeroes_leq = tree_sum(is_zero[:row_idx + 1])
-    # total rows from row_idx + 1 to total_rows of class 1
-    zeroes_gt = tree_sum(is_zero[row_idx + 1:])
+def _compute_gini_fraction(leq_this, gt_this, ones_leq, ones_gt, zeroes_leq, zeroes_gt):
+    # # TODO keep updating values as we go instead of recomputing sum
+    # leq_this = tree_sum(is_active[:row_idx + 1])
+    # gt_this = tree_sum(is_active[row_idx + 1:])
+    #
+    # # total rows from 0 to row_idx + 1 of class 1
+    # ones_leq = tree_sum(is_one[:row_idx + 1])
+    # # total rows from row_idx + 1 to total_rows of class 1
+    # ones_gt = tree_sum(is_one[row_idx + 1:])
+    #
+    # # total rows from 0 to row_idx + 1 of class 1
+    # zeroes_leq = tree_sum(is_zero[:row_idx + 1])
+    # # total rows from row_idx + 1 to total_rows of class 1
+    # zeroes_gt = tree_sum(is_zero[row_idx + 1:])
 
     # Note that ones_leq = |D'_{C_{attr_col_idx} <= c_{attr_col_idx, row_idx}} ^ D'_{Y = 1}|
     # where D' is D sorted by the attribute at attr_col_idx
@@ -348,8 +384,10 @@ def c45_single_round(samples, prep_attrs):
     candidates = MultiArray(sizes=[samples.n, 4], value_type=sint)
 
     # @for_range_opt(samples.n)
-    @for_range_parallel(samples.n + 1, samples.n)
-    def f(c):
+    # @for_range_parallel(samples.c + 1, samples.n)
+    # def f(c):
+    for c in range(samples.n):
+        program.curr_tape.start_new_basicblock()
         num, denom, th = compute_best_gini_cont(samples, c, prep_attrs[c])
         candidates[c][0] = num
         candidates[c][1] = denom
