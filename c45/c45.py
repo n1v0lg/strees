@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint, Array, MultiArray, MemValue
-from library import print_ln, if_, for_range_opt, for_range
+from Compiler.types import sint, Array, MultiArray
+from library import print_ln, if_, for_range
 from util import tree_reduce
 
 # Make IDE happy
@@ -167,21 +167,6 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     :return:
     """
 
-    class Acc:
-        # TODO use MemVal?
-
-        def __init__(self, init_val):
-            self.val = MemValue(init_val)
-
-        def inc_by(self, step):
-            self.val.write(self.get_val() + step)
-
-        def dec_by(self, step):
-            self.val.write(self.get_val() - step)
-
-        def get_val(self):
-            return self.val.read()
-
     if not samples.is_cont_attribute(attr_col_idx):
         raise Exception("Can only call this on continuous attribute")
 
@@ -222,6 +207,7 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
         zeroes_leq.inc_by(is_zero[row_idx])
         zeroes_gt.dec_by(is_zero[row_idx])
 
+        # TODO pull this out into separate, parallel loop
         numerator, denominator = _compute_gini_fraction(
             leq_this.get_val(), gt_this.get_val(),
             ones_leq.get_val(), ones_gt.get_val(),
@@ -243,20 +229,6 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
 
 
 def _compute_gini_fraction(leq_this, gt_this, ones_leq, ones_gt, zeroes_leq, zeroes_gt):
-    # # TODO keep updating values as we go instead of recomputing sum
-    # leq_this = tree_sum(is_active[:row_idx + 1])
-    # gt_this = tree_sum(is_active[row_idx + 1:])
-    #
-    # # total rows from 0 to row_idx + 1 of class 1
-    # ones_leq = tree_sum(is_one[:row_idx + 1])
-    # # total rows from row_idx + 1 to total_rows of class 1
-    # ones_gt = tree_sum(is_one[row_idx + 1:])
-    #
-    # # total rows from 0 to row_idx + 1 of class 1
-    # zeroes_leq = tree_sum(is_zero[:row_idx + 1])
-    # # total rows from row_idx + 1 to total_rows of class 1
-    # zeroes_gt = tree_sum(is_zero[row_idx + 1:])
-
     # Note that ones_leq = |D'_{C_{attr_col_idx} <= c_{attr_col_idx, row_idx}} ^ D'_{Y = 1}|
     # where D' is D sorted by the attribute at attr_col_idx
     numerator_one_term = \

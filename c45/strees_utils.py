@@ -1,4 +1,4 @@
-from Compiler.types import sint, Array
+from Compiler.types import sint, Array, MemValue
 from library import print_ln, print_str, for_range_parallel
 from util import tree_reduce
 
@@ -11,6 +11,24 @@ ALPHA = 10
 
 # Default number of parallel instructions per @for_range_parallel
 NUM_PAR_PER_LOOP = 128
+
+
+class Acc:
+    """Accumulator class that can be used to increment/dec a secret values.
+
+    Can be used inside MP-SPDZ runtime loops."""
+
+    def __init__(self, init_val):
+        self.val = MemValue(init_val)
+
+    def inc_by(self, step):
+        self.val.write(self.get_val() + step)
+
+    def dec_by(self, step):
+        self.val.write(self.get_val() - step)
+
+    def get_val(self):
+        return self.val.read()
 
 
 def debug_only(f):
