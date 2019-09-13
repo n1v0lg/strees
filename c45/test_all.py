@@ -488,8 +488,6 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
-    # This prevents compilation from exceeding rec. depth
-    program.curr_tape.start_new_basicblock()
     test_reverse_shuffle()
     test_prep_attr_create()
     test_prep_attributes()

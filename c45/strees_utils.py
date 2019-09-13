@@ -145,11 +145,12 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
     def cond_swap_with_bit(b, x, y):
         bx = b * x
         by = b * y
-        return b, bx + y - by, x - bx + by
+        return bx + y - by, x - bx + by
 
     def cond_swap(x, y):
         b = x < y
-        return cond_swap_with_bit(b, x, y)
+        x_new, y_new = cond_swap_with_bit(b, x, y)
+        return b, x_new, y_new
 
     l = sorted_length
     while l < len(keys):
@@ -168,16 +169,18 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
                     base = i * l + j
                     step = l / k
                     if k == 2:
-                        outer_comp_bit, keys[base], keys[base + step] = cond_swap(keys[base], keys[base + step])
-                        _, values[base], values[base + step] = cond_swap_with_bit(
+                        outer_comp_bit, keys[base], keys[base + step] = cond_swap(
+                            keys[base], keys[base + step])
+                        values[base], values[base + step] = cond_swap_with_bit(
                             outer_comp_bit, values[base], values[base + step])
                     else:
                         @for_range_parallel(n_parallel, n_innermost)
                         def f(i):
                             m1 = step + i * 2 * step
                             m2 = m1 + base
-                            inner_comp_bit, keys[m2], keys[m2 + step] = cond_swap(keys[m2], keys[m2 + step])
-                            _, values[m2], values[m2 + step] = cond_swap_with_bit(
+                            inner_comp_bit, keys[m2], keys[m2 + step] = cond_swap(
+                                keys[m2], keys[m2 + step])
+                            values[m2], values[m2 + step] = cond_swap_with_bit(
                                 inner_comp_bit, values[m2], values[m2 + step])
 
 
