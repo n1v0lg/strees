@@ -44,7 +44,6 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 if [ "$PID" -ne -1 ]
 then
     echo "Running benchmarks in networked mode"
-    PID=$1
 else
     echo "Running benchmarks in local mode"
 fi
