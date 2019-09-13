@@ -51,7 +51,7 @@ function debug_mode() {
 }
 
 function benchmark_mode() {
-    echo "Benchmarking ${MPC_SRC_NAME} with ${PROG_ARGS}"
+    echo "Benchmarking ${MPC_SRC_NAME} with ${PROG_ARGS} and mode ${MODE}"
 
     # Test-run first, which will exit with error if anything breaks
     # TODO check for errors directly on timed run
