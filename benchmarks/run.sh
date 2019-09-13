@@ -33,7 +33,7 @@ function run_program_networked() {
         HOST="MP-SPDZ-0"
         RUN_OPTS="${PID} -pn ${PORT} -h ${HOST} -u"
         ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
-     fi
+    fi
 }
 
 function debug_mode() {
@@ -79,7 +79,16 @@ function benchmark_mode() {
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
 
     # output results
-    echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+    if [ "$MODE" = both ]
+    then
+        echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+    elif [ "$MODE" = compile ]
+    then
+        echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME} >> ${HERE}/${OUT_NAME}
+    else
+        # run mode
+        echo ${MPC_SRC_NAME},${PROG_ARGS},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+    fi
 
     # clean up temp files
     rm "$TMP_OUT" "$TMP_ERR"
@@ -87,11 +96,11 @@ function benchmark_mode() {
 
 # Command line parsing taken from
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
-POSITIONAL=()
 
 # Defaults
 MODE=both
 
+POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
 key="$1"
