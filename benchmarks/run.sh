@@ -55,7 +55,10 @@ function benchmark_mode() {
 
     # Test-run first, which will exit with error if anything breaks
     # TODO check for errors directly on timed run
-    debug_mode > /dev/null 2>&1
+    if [ ${DO_TEST_RUN} = true ]
+    then
+        debug_mode > /dev/null 2>&1
+    fi
 
     # Format time to only output real in seconds
     TIMEFORMAT='real %3R'
@@ -99,6 +102,7 @@ function benchmark_mode() {
 
 # Defaults
 MODE=both
+DO_TEST_RUN=false
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -128,6 +132,10 @@ case $key in
     ;;
     --debug)
     DEBUG=true
+    shift # past argument
+    ;;
+    --testrun)
+    DO_TEST_RUN=true
     shift # past argument
     ;;
     *)    # unknown option

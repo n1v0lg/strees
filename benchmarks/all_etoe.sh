@@ -2,9 +2,8 @@
 
 # Tree depth
 declare -a DEPTHS=(
+    1
     2
-    3
-    4
 )
 
 # Number continuous attributes
