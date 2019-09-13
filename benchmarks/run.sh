@@ -85,22 +85,46 @@ function benchmark_mode() {
     rm "$TMP_OUT" "$TMP_ERR"
 }
 
-# configurable parameters
-# TODO make argument handling more robust
-MPC_SRC_NAME=$1
-PROG_ARGS=$2
-PID=$3
+# Command line parsing taken from
+# https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
 
+case $key in
+    -s|--source)
+    MPC_SRC_NAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -a|--args)
+    PROG_ARGS="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--pid)
+    PID="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --debug)
+    DEBUG=true
+    shift # past argument
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+# -1 for PID indicates that all parties should be run locally
 LOCAL=true
 if [ "$PID" -ne -1 ]; then
     echo "Running benchmark in networked mode"
     LOCAL=false
-fi
-
-DEBUG=false
-if [ "$#" -eq 4 ]; then
-    echo "Running benchmark in debug mode"
-    DEBUG=true
 fi
 
 # fixed parameters

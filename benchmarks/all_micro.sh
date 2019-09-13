@@ -6,14 +6,15 @@ declare -a OPS=(
     "shuffle"
     "sort"
     "comp_mat"
+    "comp_mat_par"
 )
 
 # Default benchmark sizes
 declare -a SIZES=(
-    64
     128
     256
     1024
+    2048
 )
 
 PID=-1
@@ -29,10 +30,6 @@ for OP in "${OPS[@]}";
 do
     for SIZE in "${SIZES[@]}";
     do
-        if [ "$?" -ne 0 ]; then
-            echo "Benchmarking failed"
-            exit 1
-        fi
-        bash run.sh micro.py "${OP}-${SIZE}" ${PID};
+        bash run.sh --source micro.py --args "${OP}-${SIZE}" --pid ${PID};
     done
 done

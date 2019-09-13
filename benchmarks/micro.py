@@ -1,5 +1,5 @@
 from Compiler.types import sint, Array, MultiArray, Matrix
-from library import for_range_parallel
+from library import for_range_parallel, for_range
 
 try:
     from c45.strees_utils import *
@@ -56,6 +56,19 @@ def bench_comp_mat(num_values):
     values = Array(num_values, sint)
     values.assign_all(0)
     comp_mat = Matrix(num_values, num_values, sint)
+
+    @for_range(0, num_values)
+    def loop(i):
+        @for_range(0, num_values - i)
+        def inner(j):
+            comp_mat[i][i + j] = values[i] <= values[i + j]
+
+
+def bench_comp_mat_par(num_values):
+    """Benchmarks naively computing O(n**2) comparison matrix."""
+    values = Array(num_values, sint)
+    values.assign_all(0)
+    comp_mat = Matrix(num_values, num_values, sint)
     n_parallel = 32
 
     @for_range_parallel(n_parallel, num_values)
@@ -63,9 +76,6 @@ def bench_comp_mat(num_values):
         @for_range_parallel(n_parallel, num_values - i)
         def inner(j):
             comp_mat[i][i + j] = values[i] <= values[i + j]
-
-    # TODO avoid printing
-    # print_mat(comp_mat)
 
 
 def bench_argmax_over_fracs(num_values):
@@ -89,6 +99,8 @@ def run_bench():
         bench_sort(num_values=num_elements)
     elif operation == "comp_mat":
         bench_comp_mat(num_values=num_elements)
+    elif operation == "comp_mat_par":
+        bench_comp_mat_par(num_values=num_elements)
     elif operation == "argmax":
         bench_argmax_over_fracs(num_values=num_elements)
     else:
