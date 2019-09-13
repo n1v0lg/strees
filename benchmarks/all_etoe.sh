@@ -58,6 +58,6 @@ for SIZE in "${SIZES[@]}";
 do
     for DEPTH in "${DEPTHS[@]}";
     do
-        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID} --debug;
+        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID};
     done
 done

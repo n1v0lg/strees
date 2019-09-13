@@ -67,7 +67,7 @@ class Samples:
     def with_updated_actives(self, updated_actives):
         if len(updated_actives) != len(self):
             raise Exception("Incorrect number of values")
-        new_columns = [col[:] for col in self.columns[:-1]]
+        new_columns = [col for col in self.columns[:-1]]
         new_columns.append(updated_actives)
         return Samples(new_columns, self.n, self.m)
 
