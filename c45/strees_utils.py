@@ -88,7 +88,8 @@ def prod(left, right):
     num_elements = len(left)
     res = Array(num_elements, sint)
 
-    @for_range(0, num_elements)
+    # @for_range(0, num_elements)
+    @for_range_parallel(min(32, num_elements), num_elements)
     def _(i):
         res[i] = left[i] * right[i]
 
@@ -118,7 +119,8 @@ def lt_threshold(elements, threshold):
     num_elements = len(elements)
     res = Array(num_elements, sint)
 
-    @for_range(0, num_elements)
+    # @for_range(0, num_elements)
+    @for_range_parallel(min(32, num_elements), num_elements)
     def _(i):
         res[i] = elements[i] <= threshold
 
@@ -168,6 +170,7 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
                 def inner(j):
                     base = i * l + j
                     step = l / k
+                    print_ln("base %s step %s", base, step)
                     if k == 2:
                         outer_comp_bit, keys[base], keys[base + step] = cond_swap(
                             keys[base], keys[base + step])
