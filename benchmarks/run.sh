@@ -88,23 +88,32 @@ function benchmark_mode() {
 # Command line parsing taken from
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 POSITIONAL=()
+
+# Defaults
+MODE=both
+
 while [[ $# -gt 0 ]]
 do
 key="$1"
 
 case $key in
-    -s|--source)
+    --source)
     MPC_SRC_NAME="$2"
     shift # past argument
     shift # past value
     ;;
-    -a|--args)
+    --args)
     PROG_ARGS="$2"
     shift # past argument
     shift # past value
     ;;
-    -p|--pid)
+    --pid)
     PID="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    --mode)
+    MODE="$2"
     shift # past argument
     shift # past value
     ;;
@@ -132,10 +141,19 @@ PAR_OPENS=10000
 UNROLLING=100000
 COMPILE_OPTS="--ring=64 --optimize-hard --insecure -m ${PAR_OPENS} --budget=${UNROLLING}"
 MPC_PROG_NAME="${MPC_SRC_NAME}-${PROG_ARGS}"
-OUT_NAME="timing-${MPC_SRC_NAME}.csv"
+OUT_NAME="timing-${MODE}-${MPC_SRC_NAME}.csv"
 
-DO_COMPILE=true
-DO_RUN=true
+DO_COMPILE=false
+DO_RUN=false
+if [[ (${MODE} = "compile" || ${MODE} = "both") ]]
+then
+    DO_COMPILE=true
+fi
+
+if [[ (${MODE} = "run" || ${MODE} = "both") ]]
+then
+    DO_RUN=true
+fi
 
 HERE=$(cd `dirname $0`; pwd)
 # TODO hacky
