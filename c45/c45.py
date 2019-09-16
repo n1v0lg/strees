@@ -395,17 +395,18 @@ def c45_single_round(samples, prep_attrs):
     return node, left, right
 
 
-def prep_attributes(samples):
+def prep_attributes(samples, preprocessor=PermBasedPrepAttribute.create):
     """Pre-processes sorts for all continuous attributes.
 
     :param samples:
+    :param preprocessor:
     :return:
     """
     class_col = samples.get_class_col()
     prepped = []
     for attr_idx in range(samples.n):
         program.curr_tape.start_new_basicblock()
-        prepped.append(PermBasedPrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col))
+        prepped.append(preprocessor(attr_idx, samples.get_col(attr_idx), class_col))
     return prepped
 
 
