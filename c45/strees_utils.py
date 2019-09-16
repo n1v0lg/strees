@@ -201,7 +201,7 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
 def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_parallel=32):
     l = sorted_length
     num_keys = len(keys)
-    sub_net_idx = 0
+    net_layer_iter = iter(network_bits)
     while l < num_keys:
         l *= 2
         k = 1
@@ -210,8 +210,7 @@ def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_para
             n_outer = num_keys / l
             n_inner = l / k
             n_innermost = 1 if k == 2 else k / 2 - 1
-            sub_net = network_bits[sub_net_idx]
-            sub_net_idx += 1
+            sub_net = next(net_layer_iter)
 
             @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
             def loop(i):
