@@ -184,7 +184,6 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     num_samples = len(val_col)
     fractions = MultiArray(sizes=[num_samples, 3], value_type=sint)
 
-    # @for_range_opt(num_samples - 1)
     leq_this = Acc(sint(0))
     gt_this = Acc(tree_sum(is_active))
 
@@ -197,7 +196,6 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     @for_range(0, num_samples - 1)
     def _(row_idx):
         threshold = val_col[row_idx]
-
         leq_this.inc_by(is_active[row_idx])
         gt_this.dec_by(is_active[row_idx])
 

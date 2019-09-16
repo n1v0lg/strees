@@ -1,4 +1,4 @@
-from Compiler.types import sint, Array, MemValue
+from Compiler.types import sint, Array, MemValue, MultiArray
 from library import print_ln, print_str, for_range_parallel, for_range
 from util import tree_reduce
 
@@ -142,27 +142,34 @@ def if_else_row(bit, row_a, row_b):
     return [bit.if_else(a, b) for a, b in zip(row_a, row_b)]
 
 
+def cond_swap_with_bit(b, x, y):
+    bx = b * x
+    by = b * y
+    return bx + y - by, x - bx + by
+
+
+def cond_swap(x, y):
+    b = x < y
+    x_new, y_new = cond_swap_with_bit(b, x, y)
+    return b, x_new, y_new
+
+
 # Largely copied from MP-SPDZ
-def default_sort(keys, values, sorted_length=1, n_parallel=32):
-    def cond_swap_with_bit(b, x, y):
-        bx = b * x
-        by = b * y
-        return bx + y - by, x - bx + by
-
-    def cond_swap(x, y):
-        b = x < y
-        x_new, y_new = cond_swap_with_bit(b, x, y)
-        return b, x_new, y_new
-
+def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
     l = sorted_length
-    while l < len(keys):
+    num_keys = len(keys)
+    net = []
+    while l < num_keys:
         l *= 2
         k = 1
         while k < l:
             k *= 2
-            n_outer = len(keys) / l
+            n_outer = num_keys / l
             n_inner = l / k
             n_innermost = 1 if k == 2 else k / 2 - 1
+            if store:
+                sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
+                net.append(sub_net)
 
             @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
             def loop(i):
@@ -170,19 +177,62 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
                 def inner(j):
                     base = i * l + j
                     step = l / k
-                    print_ln("base %s step %s", base, step)
                     if k == 2:
                         outer_comp_bit, keys[base], keys[base + step] = cond_swap(
                             keys[base], keys[base + step])
                         values[base], values[base + step] = cond_swap_with_bit(
                             outer_comp_bit, values[base], values[base + step])
+                        if store:
+                            sub_net[i][j][0] = outer_comp_bit
                     else:
                         @for_range_parallel(n_parallel, n_innermost)
-                        def f(i):
-                            m1 = step + i * 2 * step
+                        def f(i_inner):
+                            m1 = step + i_inner * 2 * step
                             m2 = m1 + base
                             inner_comp_bit, keys[m2], keys[m2 + step] = cond_swap(
                                 keys[m2], keys[m2 + step])
+                            values[m2], values[m2 + step] = cond_swap_with_bit(
+                                inner_comp_bit, values[m2], values[m2 + step])
+                            if store:
+                                sub_net[i][j][i_inner] = inner_comp_bit
+    return net
+
+
+def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_parallel=32):
+    l = sorted_length
+    num_keys = len(keys)
+    sub_net_idx = 0
+    while l < num_keys:
+        l *= 2
+        k = 1
+        while k < l:
+            k *= 2
+            n_outer = num_keys / l
+            n_inner = l / k
+            n_innermost = 1 if k == 2 else k / 2 - 1
+            sub_net = network_bits[sub_net_idx]
+            sub_net_idx += 1
+
+            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            def loop(i):
+                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                def inner(j):
+                    base = i * l + j
+                    step = l / k
+                    if k == 2:
+                        outer_comp_bit = sub_net[i][j][0]
+                        keys[base], keys[base + step] = cond_swap_with_bit(
+                            outer_comp_bit, keys[base], keys[base + step])
+                        values[base], values[base + step] = cond_swap_with_bit(
+                            outer_comp_bit, values[base], values[base + step])
+                    else:
+                        @for_range_parallel(n_parallel, n_innermost)
+                        def f(i_inner):
+                            m1 = step + i_inner * 2 * step
+                            m2 = m1 + base
+                            inner_comp_bit = sub_net[i][j][i_inner]
+                            keys[m2], keys[m2 + step] = cond_swap_with_bit(
+                                inner_comp_bit, keys[m2], keys[m2 + step])
                             values[m2], values[m2 + step] = cond_swap_with_bit(
                                 inner_comp_bit, values[m2], values[m2 + step])
 

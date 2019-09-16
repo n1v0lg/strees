@@ -156,6 +156,27 @@ def test():
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([1, 9, 0], actual, default_test_name())
 
+    def test_default_sort_store_network():
+        sec_mat = input_matrix([
+            [7, 0],
+            [6, 10],
+            [5, 20],
+            [4, 30],
+            [3, 40],
+            [2, 50],
+            [1, 60],
+            [0, 70]
+        ])
+        net = default_sort(get_col(sec_mat, 0), get_col(sec_mat, 1), store=True)
+
+        actual_keys = get_col(sec_mat, 0)
+        actual_values = get_col(sec_mat, 1)
+        # sort is in-place!
+        default_sort_from_stored(actual_keys, actual_values, net)
+
+        runtime_assert_arr_equals([0, 1, 2, 3, 4, 5, 6, 7], actual_keys, default_test_name())
+        runtime_assert_arr_equals([70, 60, 50, 40, 30, 20, 10, 0], actual_values, default_test_name())
+
     def test_sort_by():
         sec_mat = input_matrix([
             [2, 0],
@@ -480,6 +501,7 @@ def test():
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
     test_argmax()
+    test_default_sort_store_network()
     test_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
