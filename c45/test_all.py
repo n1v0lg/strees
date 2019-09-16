@@ -380,7 +380,7 @@ def test():
             [7, 1]
         ])
         active_col = get_col(sec_mat, 1)
-        prep_attr = PrepAttribute.create(0, get_col(sec_mat, 0), active_col)
+        prep_attr = PermBasedPrepAttribute.create(0, get_col(sec_mat, 0), active_col)
         actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
         expected = [
             [0, 0],

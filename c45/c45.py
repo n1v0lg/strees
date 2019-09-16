@@ -77,6 +77,20 @@ class Samples:
 
 class PrepAttribute:
 
+    def __init__(self, attr_idx, sorted_val_col, sorted_class_col):
+        """Create PrepAttribute object.
+
+        :param attr_idx:
+        :param sorted_val_col:
+        :param sorted_class_col:
+        """
+        self.attr_idx = attr_idx
+        self.sorted_val_col = sorted_val_col
+        self.sorted_class_col = sorted_class_col
+
+
+class PermBasedPrepAttribute(PrepAttribute):
+
     def __init__(self, attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm):
         """Create PrepAttribute object.
 
@@ -86,9 +100,7 @@ class PrepAttribute:
         :param rand_perm:
         :param open_perm:
         """
-        self.attr_idx = attr_idx
-        self.sorted_val_col = sorted_val_col
-        self.sorted_class_col = sorted_class_col
+        PrepAttribute.__init__(self, attr_idx, sorted_val_col, sorted_class_col)
         self.rand_perm = rand_perm
         self.open_perm = open_perm
 
@@ -105,8 +117,8 @@ class PrepAttribute:
         indexes = get_indexes(n)
         sorted_val_col, order_col, rand_perm = sort_and_permute(val_col, indexes)
         open_perm = order_col.reveal()
-        sorted_class_col = PrepAttribute._sort(class_col, rand_perm, open_perm)
-        return PrepAttribute(attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm)
+        sorted_class_col = PermBasedPrepAttribute._sort(class_col, rand_perm, open_perm)
+        return PermBasedPrepAttribute(attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm)
 
     @staticmethod
     def _sort(col, rand_perm, open_perm):
@@ -393,7 +405,7 @@ def prep_attributes(samples):
     prepped = []
     for attr_idx in range(samples.n):
         program.curr_tape.start_new_basicblock()
-        prepped.append(PrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col))
+        prepped.append(PermBasedPrepAttribute.create(attr_idx, samples.get_col(attr_idx), class_col))
     return prepped
 
 
