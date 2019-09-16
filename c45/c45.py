@@ -92,7 +92,7 @@ class PrepAttribute:
 class PermBasedPrepAttribute(PrepAttribute):
 
     def __init__(self, attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm):
-        """Create PrepAttribute object.
+        """Create PermBasedPrepAttribute object.
 
         :param attr_idx:
         :param sorted_val_col:
@@ -106,7 +106,7 @@ class PermBasedPrepAttribute(PrepAttribute):
 
     @staticmethod
     def create(attr_idx, val_col, class_col):
-        """Creates PrepAttribute for given attribute column.
+        """Creates PermBasedPrepAttribute for given attribute column.
 
         :param attr_idx:
         :param val_col:
@@ -129,6 +129,38 @@ class PermBasedPrepAttribute(PrepAttribute):
 
     def sort(self, col):
         return self._sort(col, self.rand_perm, self.open_perm)
+
+
+class SortNetBasedPrepAttribute(PrepAttribute):
+
+    def __init__(self, attr_idx, sorted_val_col, sorted_class_col, sorting_net):
+        """Create SortNetBasedPrepAttribute object.
+
+        :param attr_idx:
+        :param sorted_val_col:
+        :param sorted_class_col:
+        :param sorting_net:
+        """
+        PrepAttribute.__init__(self, attr_idx, sorted_val_col, sorted_class_col)
+        self.sorting_net = sorting_net
+
+    @staticmethod
+    def create(attr_idx, val_col, class_col):
+        """Creates PrepAttribute for given attribute column.
+
+        :param attr_idx:
+        :param val_col:
+        :param class_col:
+        :return:
+        """
+        sorted_val_col, sorted_class_col, sorting_net = sort_by(val_col, class_col, store=True)
+        return SortNetBasedPrepAttribute(attr_idx, sorted_val_col, sorted_class_col, sorting_net)
+
+    def sort(self, col):
+        """Sorts given column according to stored sorting network."""
+        res = col[:]
+        default_sort_from_stored(res, self.sorting_net)
+        return res
 
 
 def argmax_over_fracs(elements):

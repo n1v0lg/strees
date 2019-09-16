@@ -154,11 +154,12 @@ def cond_swap(x, y):
     return b, x_new, y_new
 
 
+# TODO reconcile below methods into one
+
 # Largely copied from MP-SPDZ
-def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
+def default_sort(keys, values, sorted_length=1, n_parallel=32):
     l = sorted_length
     num_keys = len(keys)
-    net = []
     while l < num_keys:
         l *= 2
         k = 1
@@ -167,9 +168,6 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
             n_outer = num_keys / l
             n_inner = l / k
             n_innermost = 1 if k == 2 else k / 2 - 1
-            if store:
-                sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
-                net.append(sub_net)
 
             @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
             def loop(i):
@@ -182,8 +180,6 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
                             keys[base], keys[base + step])
                         values[base], values[base + step] = cond_swap_with_bit(
                             outer_comp_bit, values[base], values[base + step])
-                        if store:
-                            sub_net[i][j][0] = outer_comp_bit
                     else:
                         @for_range_parallel(n_parallel, n_innermost)
                         def f(i_inner):
@@ -193,12 +189,49 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32, store=False):
                                 keys[m2], keys[m2 + step])
                             values[m2], values[m2 + step] = cond_swap_with_bit(
                                 inner_comp_bit, values[m2], values[m2 + step])
-                            if store:
-                                sub_net[i][j][i_inner] = inner_comp_bit
+
+
+def default_sort_and_store(keys, values, sorted_length=1, n_parallel=32):
+    l = sorted_length
+    num_keys = len(keys)
+    net = []
+    while l < num_keys:
+        l *= 2
+        k = 1
+        while k < l:
+            k *= 2
+            n_outer = num_keys / l
+            n_inner = l / k
+            n_innermost = 1 if k == 2 else k / 2 - 1
+            sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
+            net.append(sub_net)
+
+            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            def loop(i):
+                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                def inner(j):
+                    base = i * l + j
+                    step = l / k
+                    if k == 2:
+                        outer_comp_bit, keys[base], keys[base + step] = cond_swap(
+                            keys[base], keys[base + step])
+                        values[base], values[base + step] = cond_swap_with_bit(
+                            outer_comp_bit, values[base], values[base + step])
+                        sub_net[i][j][0] = outer_comp_bit
+                    else:
+                        @for_range_parallel(n_parallel, n_innermost)
+                        def f(i_inner):
+                            m1 = step + i_inner * 2 * step
+                            m2 = m1 + base
+                            inner_comp_bit, keys[m2], keys[m2 + step] = cond_swap(
+                                keys[m2], keys[m2 + step])
+                            values[m2], values[m2 + step] = cond_swap_with_bit(
+                                inner_comp_bit, values[m2], values[m2 + step])
+                            sub_net[i][j][i_inner] = inner_comp_bit
     return net
 
 
-def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_parallel=32):
+def default_sort_from_stored(keys, network_bits, sorted_length=1, n_parallel=32):
     l = sorted_length
     num_keys = len(keys)
     net_layer_iter = iter(network_bits)
@@ -222,8 +255,6 @@ def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_para
                         outer_comp_bit = sub_net[i][j][0]
                         keys[base], keys[base + step] = cond_swap_with_bit(
                             outer_comp_bit, keys[base], keys[base + step])
-                        values[base], values[base + step] = cond_swap_with_bit(
-                            outer_comp_bit, values[base], values[base + step])
                     else:
                         @for_range_parallel(n_parallel, n_innermost)
                         def f(i_inner):
@@ -232,18 +263,20 @@ def default_sort_from_stored(keys, values, network_bits, sorted_length=1, n_para
                             inner_comp_bit = sub_net[i][j][i_inner]
                             keys[m2], keys[m2 + step] = cond_swap_with_bit(
                                 inner_comp_bit, keys[m2], keys[m2 + step])
-                            values[m2], values[m2 + step] = cond_swap_with_bit(
-                                inner_comp_bit, values[m2], values[m2 + step])
 
 
-def sort_by(keys, values):
+def sort_by(keys, values, store=False):
     """Sorts keys and values keys."""
     same_len(keys, values)
     # default_sort has side-effect
     sorted_keys = keys[:]
     sorted_values = values[:]
-    default_sort(sorted_keys, sorted_values)
-    return sorted_keys, sorted_values
+    if not store:
+        default_sort(sorted_keys, sorted_values)
+        return sorted_keys, sorted_values
+    else:
+        net = default_sort_and_store(sorted_keys, sorted_values)
+        return sorted_keys, sorted_values, net
 
 
 def mat_assign_op(raw_mat, f):

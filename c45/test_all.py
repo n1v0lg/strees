@@ -167,12 +167,13 @@ def test():
             [1, 60],
             [0, 70]
         ])
-        net = default_sort(get_col(sec_mat, 0), get_col(sec_mat, 1), store=True)
+        net = default_sort_and_store(get_col(sec_mat, 0), get_col(sec_mat, 1))
 
-        actual_keys = get_col(sec_mat, 0)
-        actual_values = get_col(sec_mat, 1)
         # sort is in-place!
-        default_sort_from_stored(actual_keys, actual_values, net)
+        actual_keys = get_col(sec_mat, 0)
+        default_sort_from_stored(actual_keys, net)
+        actual_values = get_col(sec_mat, 1)
+        default_sort_from_stored(actual_values, net)
 
         runtime_assert_arr_equals([0, 1, 2, 3, 4, 5, 6, 7], actual_keys, default_test_name())
         runtime_assert_arr_equals([70, 60, 50, 40, 30, 20, 10, 0], actual_values, default_test_name())
@@ -426,6 +427,33 @@ def test():
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
 
+    def test_prep_attributes_sort_net():
+        sec_mat = input_matrix([
+            [8, 1, 0, 1],
+            [5, 2, 0, 1],
+            [7, 4, 1, 1],
+            [6, 3, 1, 1]
+        ])
+        prep_attrs = prep_attributes(Samples.from_rows(sec_mat, 2, 0), SortNetBasedPrepAttribute.create)
+
+        actual = zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col)
+        expected = [
+            [5, 0],
+            [6, 1],
+            [7, 1],
+            [8, 0]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
+        actual = zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col)
+        expected = [
+            [1, 0],
+            [2, 0],
+            [3, 1],
+            [4, 1]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
     def test_c45_single_round():
         sec_mat = input_matrix([
             [8, 1, 0, 1],
@@ -461,6 +489,21 @@ def test():
             [6, 4, 0, 1]
         ])
         actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=2)
+        expected = \
+            DN(1, 2) \
+                .l(LN(1)) \
+                .r(LN(0))
+        runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
+
+        sec_mat = input_matrix([
+            [8, 1, 1, 1],
+            [5, 2, 1, 1],
+            [7, 3, 0, 1],
+            [6, 4, 0, 1]
+        ])
+        samples = Samples.from_rows(sec_mat, 2)
+        prepped = prep_attributes(samples, SortNetBasedPrepAttribute.create)
+        actual = c45(samples, max_tree_depth=2, prep_attrs=prepped)
         expected = \
             DN(1, 2) \
                 .l(LN(1)) \
@@ -513,6 +556,7 @@ def test():
     test_reverse_shuffle()
     test_prep_attr_create()
     test_prep_attributes()
+    test_prep_attributes_sort_net()
     test_c45_single_round()
     test_c45()
 
