@@ -28,11 +28,11 @@ def random_perm(n):
     return a
 
 
-def config_shuffle_from_perm(n, value_type):
+def config_shuffle_given_perm(perm, value_type=sint):
     """ Compute config for oblivious shuffling.
 
     Take mod 2 for active sec. """
-    perm = random_perm(n)
+    n = len(perm)
     if n & (n - 1) != 0:
         # pad permutation to power of 2
         m = 2 ** int(math.ceil(math.log(n, 2)))
@@ -46,12 +46,20 @@ def config_shuffle_from_perm(n, value_type):
     return config
 
 
+def config_shuffle_for_length(n, value_type=sint):
+    """ Compute config for oblivious shuffling.
+
+    Take mod 2 for active sec. """
+    perm = random_perm(n)
+    return config_shuffle_given_perm(perm, value_type)
+
+
 def default_config_shuffle(values, use_iter=True):
     """Configures waksman network for default shuffle algorithm."""
     # TODO this won't generate consistent permutations if run on different machines; need to seed rand. num. gen
 
     if use_iter:
-        return config_shuffle_from_perm(len(values), value_type=sint)
+        return config_shuffle_for_length(len(values))
     else:
         return configure_waksman(random_perm(len(values)))
 

@@ -128,7 +128,8 @@ class PermBasedPrepAttribute(PrepAttribute):
         """
         n = len(val_col)
         open_perm = get_indexes(n).reveal()
-        rand_perm = default_config_shuffle(open_perm)
+        # null permutation
+        rand_perm = config_shuffle_given_perm(list(range(n)))
 
         return PermBasedPrepAttribute(attr_idx, val_col, class_col, rand_perm, open_perm)
 

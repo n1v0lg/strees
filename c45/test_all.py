@@ -398,7 +398,36 @@ def test():
         actual = prep_attr.sort(active_col)
         expected = [0, 1, 1, 0, 1, 0, 1, 1]
         runtime_assert_arr_equals(expected, actual, default_test_name())
-        # TODO test permutations
+
+    def test_prep_attr_create_perm_dummy():
+        sec_mat = input_matrix([
+            [3, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [4, 1],
+            [6, 1],
+            [5, 0],
+            [7, 1]
+        ])
+        active_col = get_col(sec_mat, 1)
+        prep_attr = PermBasedPrepAttribute.create_dummy(0, get_col(sec_mat, 0), active_col)
+        actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
+        expected = [
+            [3, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [4, 1],
+            [6, 1],
+            [5, 0],
+            [7, 1]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
+        actual = prep_attr.sort(active_col)
+        expected = [0, 0, 1, 1, 1, 1, 0, 1]
+        runtime_assert_arr_equals(expected, actual, default_test_name())
 
     def test_prep_attributes():
         sec_mat = input_matrix([
@@ -555,6 +584,7 @@ def test():
     test_while()
     test_reverse_shuffle()
     test_prep_attr_create()
+    test_prep_attr_create_perm_dummy()
     test_prep_attributes()
     test_prep_attributes_sort_net()
     test_c45_single_round()

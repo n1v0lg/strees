@@ -20,8 +20,6 @@ class Node:
         return self
 
 
-# TODO get rid of side-effects
-
 class TreeNode(Node):
 
     def __init__(self, is_leaf, attr_idx, threshold, is_dummy, node_class, is_secret=True):
