@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint, Array, MultiArray
+from Compiler.types import sint, Array, Matrix
 from library import print_ln, if_, for_range
 from util import tree_reduce
 
@@ -248,7 +248,7 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     is_zero = pairwise_and(neg(is_one), is_active)
 
     num_samples = len(val_col)
-    fractions = MultiArray(sizes=[num_samples, 3], value_type=sint)
+    fractions = Matrix(num_samples, 3, value_type=sint)
 
     leq_this = Acc(sint(0))
     gt_this = Acc(tree_sum(is_active))
@@ -423,7 +423,7 @@ def c45_single_round(samples, prep_attrs):
     is_leaf, is_dummy, node_class = determine_if_leaf(samples)
 
     # compute best attribute and threshold to split on
-    candidates = MultiArray(sizes=[samples.n, 4], value_type=sint)
+    candidates = Matrix(samples.n, 4, value_type=sint)
 
     for c in range(samples.n):
         program.curr_tape.start_new_basicblock()
