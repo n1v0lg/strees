@@ -121,6 +121,18 @@ class PermBasedPrepAttribute(PrepAttribute):
         return PermBasedPrepAttribute(attr_idx, sorted_val_col, sorted_class_col, rand_perm, open_perm)
 
     @staticmethod
+    def create_dummy(attr_idx, val_col, class_col):
+        """Creates dummy attribute, WITHOUT running a sort.
+
+        NOTE for benchmarking only.
+        """
+        n = len(val_col)
+        open_perm = get_indexes(n).reveal()
+        rand_perm = default_config_shuffle(open_perm)
+
+        return PermBasedPrepAttribute(attr_idx, val_col, class_col, rand_perm, open_perm)
+
+    @staticmethod
     def _sort(col, rand_perm, open_perm):
         """Sorts given column using random perm and open perm."""
         sorted_col = open_permute(col, open_perm)
