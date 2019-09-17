@@ -231,6 +231,33 @@ def default_sort_and_store(keys, values, sorted_length=1, n_parallel=32):
     return net
 
 
+def gen_dummy_net(num_keys, sorted_length=1, n_parallel=32):
+    l = sorted_length
+    net = []
+    while l < num_keys:
+        l *= 2
+        k = 1
+        while k < l:
+            k *= 2
+            n_outer = num_keys / l
+            n_inner = l / k
+            n_innermost = 1 if k == 2 else k / 2 - 1
+            sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
+            net.append(sub_net)
+
+            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            def loop(i):
+                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                def inner(j):
+                    if k == 2:
+                        sub_net[i][j][0] = sint(1)
+                    else:
+                        @for_range_parallel(n_parallel, n_innermost)
+                        def f(i_inner):
+                            sub_net[i][j][i_inner] = sint(1)
+    return net
+
+
 def default_sort_from_stored(keys, network_bits, sorted_length=1, n_parallel=32):
     l = sorted_length
     num_keys = len(keys)

@@ -169,6 +169,15 @@ class SortNetBasedPrepAttribute(PrepAttribute):
         sorted_val_col, sorted_class_col, sorting_net = sort_by(val_col, class_col, store=True)
         return SortNetBasedPrepAttribute(attr_idx, sorted_val_col, sorted_class_col, sorting_net)
 
+    @staticmethod
+    def create_dummy(attr_idx, val_col, class_col):
+        """Creates dummy attribute, WITHOUT running a sort.
+
+        NOTE for benchmarking only.
+        """
+        sorting_net = gen_dummy_net(len(val_col))
+        return SortNetBasedPrepAttribute(attr_idx, val_col, class_col, sorting_net)
+
     def sort(self, col):
         """Sorts given column according to stored sorting network."""
         res = col[:]
