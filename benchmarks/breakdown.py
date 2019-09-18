@@ -47,14 +47,13 @@ def gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs=0):
 def bench_prep_attributes(num_samples, num_cont_attrs):
     """Runs attribute pre-processing (sorting and permuting) on sample data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs)
-    prepped = prep_attributes(samples)
-    prepped[0].sorted_val_col.reveal()
+    prep_attributes(samples)
 
 
-def bench_c45_single_round(num_samples, num_cont_attrs, num_disc_attrs=0):
+def bench_c45_single_round(num_samples, num_cont_attrs, preprocessor, num_disc_attrs=0):
     """Runs c45 algorithm on dummy data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
-    prepped = prep_attributes(samples)
+    prepped = prep_attributes(samples, preprocessor=preprocessor)
     c45_single_round(samples, prepped)
 
 
@@ -69,8 +68,9 @@ def run_bench():
 
     if operation == "prep":
         bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
-    elif operation == "single":
-        bench_c45_single_round(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
+    elif operation == "single_perm_dummy":
+        bench_c45_single_round(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create_dummy,
+                               num_cont_attrs=num_cont_attrs)
     else:
         raise Exception("Unknown operation: %s" % operation)
 

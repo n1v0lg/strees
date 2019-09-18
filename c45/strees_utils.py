@@ -1,6 +1,5 @@
 from Compiler.types import sint, Array, MemValue, MultiArray, Matrix
 from library import print_ln, print_str, for_range_parallel, for_range
-from util import tree_reduce
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
@@ -69,9 +68,16 @@ def toggle(bit, elements):
     return elements * bit
 
 
-def tree_sum(elements):
-    """Computes sum of elements, using MP-SPDZ tree_reduce."""
-    return tree_reduce(lambda x, y: x + y, elements)
+def iter_sum(elements):
+    """Computes sum of elements."""
+    # res = Acc(elements[0])
+    #
+    # @for_range(1, len(elements))
+    # def _(i):
+    #     res.inc_by(elements[i])
+    #
+    # return res.get_val()
+    return sum(elements)
 
 
 def pairwise_and(bits_a, bits_b):

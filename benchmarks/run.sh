@@ -156,7 +156,7 @@ fi
 # fixed parameters
 PAR_OPENS=10000
 UNROLLING=100000
-COMPILE_OPTS="--ring=64 --optimize-hard --insecure -m ${PAR_OPENS} --budget=${UNROLLING}"
+COMPILE_OPTS="--ring=64 --optimize-hard --insecure -m ${PAR_OPENS} --budget=${UNROLLING} --profile"
 MPC_PROG_NAME="${MPC_SRC_NAME}-${PROG_ARGS}"
 OUT_NAME="timing-${MODE}-${MPC_SRC_NAME}.csv"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from Compiler.types import sint, Array, Matrix
-from library import print_ln, if_, for_range
+from library import print_ln, if_, for_range, for_range_parallel
 
 # Make IDE happy
 try:
@@ -216,7 +216,8 @@ def argmax_over_fracs(elements):
     while n_elements > step_size:
         num_its = (n_elements // step_size) - 1
 
-        @for_range(0, num_its)
+        # @for_range(0, num_its)
+        @for_range_parallel(min(32, num_its), num_its)
         def _(i):
             left_idx = i * step_size
             left = elements[left_idx]
@@ -258,13 +259,13 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     fractions = Matrix(num_samples, 3, value_type=sint)
 
     leq_this = Acc(sint(0))
-    gt_this = Acc(tree_sum(is_active))
+    gt_this = Acc(iter_sum(is_active))
 
     ones_leq = Acc(sint(0))
-    ones_gt = Acc(tree_sum(is_one))
+    ones_gt = Acc(iter_sum(is_one))
 
     zeroes_leq = Acc(sint(0))
-    zeroes_gt = Acc(tree_sum(is_zero))
+    zeroes_gt = Acc(iter_sum(is_zero))
 
     @for_range(0, num_samples - 1)
     def _(row_idx):
@@ -402,11 +403,11 @@ def determine_if_leaf(samples):
     active_ones = pairwise_and(is_category_one, active_col)
     active_zeroes = pairwise_and(is_category_zero, active_col)
 
-    total_actives = tree_sum(active_col)
+    total_actives = iter_sum(active_col)
 
     all_inactive = total_actives == 0
-    all_ones = tree_sum(active_ones) == total_actives
-    all_zeroes = tree_sum(active_zeroes) == total_actives
+    all_ones = iter_sum(active_ones) == total_actives
+    all_zeroes = iter_sum(active_zeroes) == total_actives
 
     is_leaf = log_or(all_inactive, log_or(all_ones, all_zeroes))
     return is_leaf, all_inactive, all_ones
