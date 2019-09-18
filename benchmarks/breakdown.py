@@ -71,6 +71,15 @@ def run_bench():
     elif operation == "single_perm_dummy":
         bench_c45_single_round(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create_dummy,
                                num_cont_attrs=num_cont_attrs)
+    elif operation == "single_perm_both":
+        bench_c45_single_round(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create,
+                               num_cont_attrs=num_cont_attrs)
+    elif operation == "single_sort_dummy":
+        bench_c45_single_round(num_samples=num_elements, preprocessor=SortNetBasedPrepAttribute.create_dummy,
+                               num_cont_attrs=num_cont_attrs)
+    elif operation == "single_sort_both":
+        bench_c45_single_round(num_samples=num_elements, preprocessor=SortNetBasedPrepAttribute.create,
+                               num_cont_attrs=num_cont_attrs)
     else:
         raise Exception("Unknown operation: %s" % operation)
 
