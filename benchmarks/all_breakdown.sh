@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-# Tree depth
-declare -a DEPTHS=(
-    1
+# Operations to benchmark
+declare -a OPS=(
+    "prep"
+    "single_perm_dummy"
+    "single_perm_both"
 )
 
 # Number continuous attributes
@@ -13,10 +15,13 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    64
-    256
-    1024
-    2048
+    4
+    8
+    16
+#    1024
+#    2048
+#    4096
+#    8192
 )
 
 PID=-1
@@ -52,10 +57,13 @@ else
     echo "Running benchmarks in local mode"
 fi
 
-for SIZE in "${SIZES[@]}";
+for OP in "${OPS[@]}";
 do
-    for DEPTH in "${DEPTHS[@]}";
+    for CONT_ATTR in "${CONT_ATTRS[@]}";
     do
-        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID}
+        for SIZE in "${SIZES[@]}";
+        do
+            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} --debug
+        done
     done
 done
