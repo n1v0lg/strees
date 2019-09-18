@@ -11,16 +11,6 @@ try:
 except ImportError:
     pass
 
-# Statically cached list of secret, in-order indexes
-INDEXES = dict()
-
-
-def get_indexes(n):
-    """Returns (and generates if necessary) secret array [0, ..., n]."""
-    if n not in INDEXES:
-        INDEXES[n] = Array(n, sint).create_from(sint(i) for i in range(n))
-    return INDEXES[n]
-
 
 class Samples:
 

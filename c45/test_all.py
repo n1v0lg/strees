@@ -157,6 +157,13 @@ def test():
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([1, 9, 0], actual, default_test_name())
 
+    def test_expand_idx():
+        actual = expand_idx(7, sint(4))
+        runtime_assert_arr_equals([1, 1, 1, 1, 1, 0, 0], actual, default_test_name())
+
+        actual = expand_idx(7, sint(0))
+        runtime_assert_arr_equals([1, 0, 0, 0, 0, 0, 0], actual, default_test_name())
+
     def test_default_sort_store_network():
         sec_mat = input_matrix([
             [7, 0],
@@ -603,6 +610,7 @@ def test():
                 .r(LN(-1, is_dummy=True))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
+    test_expand_idx()
     test_argmax()
     test_default_sort_store_network()
     test_sort_by()

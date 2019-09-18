@@ -8,6 +8,16 @@ DEBUG = False
 # Parameter for scaling denominator in GINI index computation
 ALPHA = 10
 
+# Statically cached list of secret, in-order indexes
+INDEXES = dict()
+
+
+def get_indexes(n):
+    """Returns (and generates if necessary) secret array [0, ..., n]."""
+    if n not in INDEXES:
+        INDEXES[n] = Array(n, sint).create_from(sint(i) for i in range(n))
+    return INDEXES[n]
+
 
 class Acc:
     """Accumulator class that can be used to increment/dec a secret values.
@@ -131,6 +141,23 @@ def lt_threshold(elements, threshold):
         res[i] = elements[i] <= threshold
 
     return res
+
+
+def expand_idx(n, index):
+    """Returns array of bits where all bits below index are set."""
+
+    bits = Array(n, sint)
+
+    @for_range_parallel(min(32, n), n)
+    def _(i):
+        bits[i] = i == index
+
+    @for_range(n - 1, 0, -1)
+    def _(i):
+        right = bits[i]
+        bits[i - 1] = right.if_else(sint(1), bits[i - 1])
+
+    return bits
 
 
 def array_check(arr):
