@@ -2,7 +2,6 @@
 
 from Compiler.types import sint, Array, Matrix
 from library import print_ln, if_, for_range
-from util import tree_reduce
 
 # Make IDE happy
 try:
@@ -195,33 +194,41 @@ def argmax_over_fracs(elements):
     :param elements: represented as rows of form [numerator, denominator, ...]
     :return row with max fraction
     """
-
-    @debug_only
-    def debug_sanity_check(d):
-        # INSECURE for debugging only!
-        # Verifies that denominator is not 0
-        @if_((d.reveal() == 0))
-        def _():
-            # Only a warning since this is acceptable when we are obliviously splitting even though we've already
-            # reached a leaf node
-            print_ln("%s 0 in denominator.", MPC_WARN_FLAG)
-
     def _select_larger(row_a, row_b):
         num_a, denom_a = row_a[0], row_a[1]
         num_b, denom_b = row_b[0], row_b[1]
 
-        debug_sanity_check(denom_a)
-        debug_sanity_check(denom_b)
-
         a_gt = (num_a * denom_b) > (num_b * denom_a)
         return if_else_row(a_gt, row_a, row_b)
 
-    if not elements:
+    n_elements = len(elements)
+
+    if n_elements == 0:
         raise Exception("No elements to argmax on")
-    if len(elements) == 1:
+    if n_elements == 1:
         return elements[0]
 
-    return tree_reduce(_select_larger, elements)
+    if not is_two_pow(n_elements):
+        raise Exception("Only support powers of two")
+
+    step_size = 1
+
+    while n_elements > step_size:
+        num_its = (n_elements // step_size) - 1
+
+        @for_range(0, num_its)
+        def _(i):
+            left_idx = i * step_size
+            left = elements[left_idx]
+
+            right_idx = (i + 1) * step_size
+            right = elements[right_idx]
+
+            elements[i * step_size][:] = _select_larger(left, right)
+
+        step_size *= 2
+
+    return elements[0]
 
 
 def compute_cont_ginis(samples, attr_col_idx, prep_attr):

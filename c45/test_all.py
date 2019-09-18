@@ -130,7 +130,7 @@ def test():
                     print_ln("%s trees have different topology", MPC_ERROR_FLAG)
 
     def test_argmax():
-        sec_mat = input_matrix([
+        sec_mat = input_as_mat([
             [1, 1, 0],
             [9, 4, 1],
             [2, 1, 2],
@@ -139,17 +139,17 @@ def test():
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([9, 4, 1], actual, default_test_name())
 
-        sec_mat = input_matrix([
+        sec_mat = input_as_mat([
             [1, 2, 0],
             [2, 5, 1],
             [2, 6, 2],
-            [1, 9, 3],
+            # [1, 9, 3],
             [9, 10, 4]
         ])
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([9, 10, 4], actual, default_test_name())
 
-        sec_mat = input_matrix([
+        sec_mat = input_as_mat([
             [1, 9, 0],
             [0, 1, 1]
         ])

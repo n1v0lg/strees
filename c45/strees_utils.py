@@ -1,4 +1,4 @@
-from Compiler.types import sint, Array, MemValue, MultiArray
+from Compiler.types import sint, Array, MemValue, MultiArray, Matrix
 from library import print_ln, print_str, for_range_parallel, for_range
 from util import tree_reduce
 
@@ -139,7 +139,7 @@ def same_len(row_a, row_b):
 
 def if_else_row(bit, row_a, row_b):
     same_len(row_a, row_b)
-    return [bit.if_else(a, b) for a, b in zip(row_a, row_b)]
+    return Array.create_from(bit.if_else(a, b) for a, b in zip(row_a, row_b))
 
 
 def cond_swap_with_bit(b, x, y):
@@ -332,6 +332,16 @@ def reveal_mat(mat):
     return mat_assign_op(mat, lambda x: x.reveal())
 
 
+def input_as_mat(mat):
+    """Inputs matrix of ints into MPC.
+    """
+    res = Matrix(len(mat), len(mat[0]), sint)
+    for r in range(len(mat)):
+        for c in range(len(mat[0])):
+            res[r][c] = mat[r][c]
+    return res
+
+
 def input_matrix(mat):
     """Inputs matrix of ints into MPC.
 
@@ -347,18 +357,23 @@ def get_col(rows, col_idx):
 
 
 def reveal_list(lst):
-    """Reveals list of sints.
-
-    TODO probably already exists somewhere.
-    """
-    if not isinstance(lst, Array):
-        raise Exception("Must be array")
-    return [val for val in lst.reveal()]
+    """Reveals array of sints."""
+    array_check(lst)
+    return lst.reveal()
 
 
 def input_list(lst):
     """Inputs list of values into MPC."""
     return Array.create_from(sint(val) for val in lst)
+
+
+def store_arr(arr, start_addr=None):
+    """Stores array in mem."""
+    array_check(arr)
+    if start_addr is None:
+        start_addr = arr.value_type.malloc(len(arr))
+    arr.store_in_mem()
+    return start_addr
 
 
 def to_col_arrays(rows):
