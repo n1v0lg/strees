@@ -1,6 +1,6 @@
 import sys
 
-from Compiler.types import sint, cint, MemValue, Array
+from Compiler.types import sint, cint, MemValue, Array, Matrix
 from library import print_ln, if_e, else_, do_while
 
 try:
@@ -139,15 +139,16 @@ def test():
         actual = argmax_over_fracs(sec_mat)
         runtime_assert_arr_equals([9, 4, 1], actual, default_test_name())
 
-        sec_mat = input_as_mat([
-            [1, 2, 0],
-            [2, 5, 1],
-            [2, 6, 2],
-            # [1, 9, 3],
-            [9, 10, 4]
-        ])
+        sec_mat = Matrix(64, 3, sint)
+        for r in range(64):
+            sec_mat[r][0] = 1
+            sec_mat[r][1] = (r + 2)
+            sec_mat[r][2] = r
+        sec_mat[30][0] = 2
+        sec_mat[30][1] = 3
+        sec_mat[30][2] = 3
         actual = argmax_over_fracs(sec_mat)
-        runtime_assert_arr_equals([9, 10, 4], actual, default_test_name())
+        runtime_assert_arr_equals([2, 3, 3], actual, default_test_name())
 
         sec_mat = input_as_mat([
             [1, 9, 0],
@@ -612,6 +613,7 @@ def test():
     test_partition_on()
     test_determine_if_leaf()
     test_while()
+    program.curr_tape.start_new_basicblock()
     test_reverse_shuffle()
     test_prep_attr_create()
     test_prep_attr_create_perm_dummy()
