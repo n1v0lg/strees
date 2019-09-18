@@ -102,7 +102,7 @@ function benchmark_mode() {
 
 # Defaults
 MODE=both
-DO_TEST_RUN=false
+DO_TEST_RUN=true
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]

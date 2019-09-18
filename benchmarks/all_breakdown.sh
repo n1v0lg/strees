@@ -10,18 +10,18 @@ declare -a OPS=(
 # Number continuous attributes
 declare -a CONT_ATTRS=(
     2
-    4
+#    4
 )
 
 # Number of samples
 declare -a SIZES=(
-    4
-    8
-    16
+#    4
+#    8
+#    16
 #    1024
-#    2048
-#    4096
-#    8192
+    2048
+    4096
+    8192
 )
 
 PID=-1
@@ -63,7 +63,7 @@ do
     do
         for SIZE in "${SIZES[@]}";
         do
-            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} --debug
+            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID}
         done
     done
 done
