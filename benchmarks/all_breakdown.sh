@@ -2,9 +2,11 @@
 
 # Operations to benchmark
 declare -a OPS=(
-    "prep"
-    "single_perm_dummy"
-    "single_perm_both"
+#    "prep"
+#    "single_perm_dummy"
+#    "single_perm_both"
+    "single_sort_dummy"
+    "single_sort_both"
 )
 
 # Number continuous attributes

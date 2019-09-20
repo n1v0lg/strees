@@ -160,6 +160,51 @@ def expand_idx(n, index):
     return bits
 
 
+def _last_active_lin_scan(values, is_active):
+    array_check(values)
+    n = len(values)
+
+    with_copies = Array(n, sint)
+    with_copies[:] = values[:]
+
+    # treating -1 as special dummy element
+    with_copies[n - 1] = is_active[n - 1].if_else(with_copies[n - 1], sint(-1))
+
+    @for_range(n - 1, 0, -1)
+    def _(i):
+        right = with_copies[i]
+        left = with_copies[i - 1]
+        is_inactive = is_active[i - 1]
+        with_copies[i - 1] = is_inactive.if_else(left, right)
+
+    is_last_active = Array(n, sint)
+    print_list(with_copies)
+
+    # Eq. checks can happen in parallel because the results are independent
+    @for_range_parallel(min(32, n - 1), n - 1)
+    def _(i):
+        flipped_idx = n - 1 - i
+        neq = with_copies[flipped_idx - 1] != with_copies[flipped_idx]
+        is_last_active[flipped_idx - 1] = neq
+
+    is_last_active[n - 1] = is_active[n - 1]
+    print_list(is_last_active)
+
+    return is_last_active
+
+
+def _last_active_log_eq(values, is_active):
+    pass
+
+
+def compute_is_last_active(values, is_active, log_depth_version=False):
+    """Computes a bit vector indicating for each value if it is the last active value in a repeated sequence."""
+    if log_depth_version:
+        raise NotImplementedError()
+    else:
+        return _last_active_lin_scan(values, is_active)
+
+
 def array_check(arr):
     if not isinstance(arr, Array):
         raise Exception("Must be Array but was %s" % type(arr))

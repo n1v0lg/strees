@@ -164,6 +164,37 @@ def test():
         actual = expand_idx(7, sint(0))
         runtime_assert_arr_equals([1, 0, 0, 0, 0, 0, 0], actual, default_test_name())
 
+    def test_compute_is_last_active_lin():
+        sec_mat = input_matrix([
+            [1, 1],
+            [1, 0],
+            [2, 1],
+            [2, 1],
+            [3, 0],
+            [4, 1],
+            [4, 0],
+            [4, 1]
+        ])
+
+        actual = compute_is_last_active(get_col(sec_mat, 0), get_col(sec_mat, 1))
+        expected = [1, 0, 0, 1, 0, 0, 0, 1]
+        runtime_assert_arr_equals(expected, actual, default_test_name())
+
+        sec_mat = input_matrix([
+            [0, 0],
+            [0, 1],
+            [0, 0],
+            [0, 0],
+            [1, 1],
+            [2, 1],
+            [2, 0],
+            [2, 0]
+        ])
+
+        actual = compute_is_last_active(get_col(sec_mat, 0), get_col(sec_mat, 1))
+        expected = [0, 1, 0, 0, 1, 1, 0, 0]
+        runtime_assert_arr_equals(expected, actual, default_test_name())
+
     def test_default_sort_store_network():
         sec_mat = input_matrix([
             [7, 0],
@@ -610,6 +641,7 @@ def test():
                 .r(LN(-1, is_dummy=True))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
+    test_compute_is_last_active_lin()
     test_expand_idx()
     test_argmax()
     test_default_sort_store_network()
