@@ -641,7 +641,7 @@ def test():
                 .r(LN(-1, is_dummy=True))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
-    test_compute_is_last_active()
+    test_compute_is_last_active(use_log=False)
     test_compute_is_last_active(use_log=True)
     test_expand_idx()
     test_argmax()

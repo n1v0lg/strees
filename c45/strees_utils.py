@@ -193,12 +193,6 @@ def _last_active_lin_scan(values, is_active):
     return is_last_active
 
 
-def zero_if(bit, elements, start_idx, end_idx):
-    """Zeroes out all entries within given range if bit is set."""
-    for i in range(start_idx, end_idx):
-        elements[i] = elements[i] * bit
-
-
 def _last_active_log_eq(values, is_active):
     size_part = 1
     num_parts = len(values) // size_part
@@ -241,7 +235,7 @@ def _last_active_log_eq(values, is_active):
     return is_last
 
 
-def compute_is_last_active(values, is_active, log_depth_version=False):
+def compute_is_last_active(values, is_active, log_depth_version=True):
     """Computes a bit vector indicating for each value if it is the last active value in a repeated sequence."""
     if log_depth_version:
         return _last_active_log_eq(values, is_active)
