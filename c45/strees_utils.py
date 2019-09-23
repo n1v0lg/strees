@@ -216,7 +216,7 @@ def _last_active_log_eq(values, is_active):
 
     while num_parts > 0:
         program.curr_tape.start_new_basicblock()
-        num_its = num_parts / 2
+        num_its = num_parts // 2
 
         @for_range_parallel(min(32, num_its), num_its)
         def _(iter_idx):
@@ -243,7 +243,7 @@ def _last_active_log_eq(values, is_active):
             left_most_actives[iter_idx] = left_lma_flag.if_else(left_lma, right_lma)
 
         size_part *= 2
-        num_parts /= 2
+        num_parts //= 2
 
     return is_last
 
