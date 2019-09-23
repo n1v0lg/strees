@@ -184,6 +184,7 @@ def argmax_over_fracs(elements):
     :param elements: represented as rows of form [numerator, denominator, ...]
     :return row with max fraction
     """
+
     def _select_larger(row_a, row_b):
         num_a, denom_a = row_a[0], row_a[1]
         num_b, denom_b = row_b[0], row_b[1]
@@ -286,6 +287,14 @@ def compute_cont_ginis(samples, attr_col_idx, prep_attr):
     fractions[num_samples - 1][0] = sint(0)
     fractions[num_samples - 1][1] = alpha_scale(sint(0))
     fractions[num_samples - 1][2] = last_threshold
+
+    is_last_active = compute_is_last_active(val_col, is_active)
+
+    # Zero out numerator for all entries that are repeated but not last in sequence
+    # since these are not valid splitting points
+    @for_range_parallel(min(32, len(val_col)), len(val_col))
+    def _(i):
+        fractions[i][0] *= is_last_active[i]
 
     return fractions
 

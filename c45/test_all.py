@@ -660,6 +660,7 @@ def test():
     test_prep_attr_create_perm_dummy()
     test_prep_attr_create_sort_dummy()
     test_prep_attributes()
+    program.curr_tape.start_new_basicblock()
     test_prep_attributes_sort_net()
     test_c45_single_round()
     test_c45()
