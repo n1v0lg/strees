@@ -247,6 +247,24 @@ def test():
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
 
+    def test_compute_cont_ginis_with_duplicates():
+        sec_mat = input_matrix([
+            [2, 1, 1],
+            [1, 1, 1],
+            [2, 1, 1],
+            [4, 0, 1]
+        ])
+        samples = Samples.from_rows(sec_mat, 1, 0)
+        actual = compute_cont_ginis(samples, 0, prep_attributes(samples)[0])
+        # TODO double-check these
+        expected = [
+            [8, alpha_scale(3), 1],
+            [0, alpha_scale(4), 2],
+            [12, alpha_scale(3), 2],
+            [0, alpha_scale(0), 4]
+        ]
+        runtime_assert_mat_equals(expected, actual, default_test_name())
+
     def test_compute_best_gini_cont():
         sec_mat = input_matrix([
             [3, 0, 1],
@@ -649,6 +667,7 @@ def test():
     test_sort_by()
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
+    test_compute_cont_ginis_with_duplicates()
     test_row_mul()
     test_obl_select_col_at()
     test_partition_on()
