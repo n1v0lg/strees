@@ -193,14 +193,58 @@ def _last_active_lin_scan(values, is_active):
     return is_last_active
 
 
+def zero_if(bit, elements, start_idx, end_idx):
+    """Zeroes out all entries within given range if bit is set."""
+    for i in range(start_idx, end_idx):
+        elements[i] = elements[i] * bit
+
+
 def _last_active_log_eq(values, is_active):
-    pass
+    size_part = 1
+    num_parts = len(values) // size_part
+
+    lmas = Array(len(values), sint)
+    lmas[:] = values[:]
+
+    lma_active = Array(len(values), sint)
+    lma_active[:] = is_active[:]
+
+    is_last = Array(len(values), sint)
+    is_last[:] = is_active[:]
+
+    # TODO clean up
+    while num_parts > 0:
+        for part_idx in range(0, num_parts - 1, 2):
+            left_start = part_idx * size_part
+            left_end = (part_idx + 1) * size_part
+
+            left_lma = lmas[part_idx]
+            left_lma_active = lma_active[part_idx]
+
+            right_lma = lmas[part_idx + 1]
+            right_lma_active = lma_active[part_idx + 1]
+
+            # Zero out left_last entry equal to right_lma
+            for i in range(left_start, left_end):
+                # TODO lots of redundancy here
+                eq_flag = right_lma == values[i]
+                both = right_lma_active * eq_flag
+                # only toggle if right_lma was active
+                is_last[i] = both.if_else(sint(0), is_last[i])
+
+            lma_active[part_idx // 2] = log_or(left_lma_active, right_lma_active)
+            lmas[part_idx // 2] = left_lma_active.if_else(left_lma, right_lma)
+
+        size_part *= 2
+        num_parts /= 2
+
+    return is_last
 
 
 def compute_is_last_active(values, is_active, log_depth_version=False):
     """Computes a bit vector indicating for each value if it is the last active value in a repeated sequence."""
     if log_depth_version:
-        raise NotImplementedError()
+        return _last_active_log_eq(values, is_active)
     else:
         return _last_active_lin_scan(values, is_active)
 
