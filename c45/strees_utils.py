@@ -178,7 +178,6 @@ def _last_active_lin_scan(values, is_active):
         with_copies[i - 1] = is_inactive.if_else(left, right)
 
     is_last_active = Array(n, sint)
-    print_list(with_copies)
 
     # Eq. checks can happen in parallel because the results are independent
     @for_range_parallel(min(32, n - 1), n - 1)
@@ -188,25 +187,35 @@ def _last_active_lin_scan(values, is_active):
         is_last_active[flipped_idx - 1] = neq
 
     is_last_active[n - 1] = is_active[n - 1]
-    print_list(is_last_active)
 
     return is_last_active
 
 
 def _last_active_log_eq(values, is_active):
+    """
+    Log-depth algorithm that computes, for each entry in values whether it's the rightmost active value in its sequence.
+
+    :param values:
+    :param is_active:
+    :return:
+    """
+    array_check(values)
+    array_check(is_active)
+
     size_part = 1
     num_parts = len(values) // size_part
 
-    lmas = Array(len(values), sint)
-    lmas[:] = values[:]
+    left_most_actives = Array(len(values), sint)
+    left_most_actives[:] = values[:]
 
-    lma_active = Array(len(values), sint)
-    lma_active[:] = is_active[:]
+    lma_flags = Array(len(values), sint)
+    lma_flags[:] = is_active[:]
 
     is_last = Array(len(values), sint)
     is_last[:] = is_active[:]
 
     while num_parts > 0:
+        program.curr_tape.start_new_basicblock()
         num_its = num_parts / 2
 
         @for_range_parallel(min(32, num_its), num_its)
@@ -215,11 +224,11 @@ def _last_active_log_eq(values, is_active):
             left_start = part_idx * size_part
             left_end = (part_idx + 1) * size_part
 
-            left_lma = lmas[part_idx]
-            left_lma_active = lma_active[part_idx]
+            left_lma = left_most_actives[part_idx]
+            left_lma_flag = lma_flags[part_idx]
 
-            right_lma = lmas[part_idx + 1]
-            right_lma_active = lma_active[part_idx + 1]
+            right_lma = left_most_actives[part_idx + 1]
+            right_lma_flag = lma_flags[part_idx + 1]
 
             inner_num_its = left_end - left_start
 
@@ -227,11 +236,11 @@ def _last_active_log_eq(values, is_active):
             @for_range_parallel(min(32, inner_num_its), inner_num_its)
             def _(i):
                 eq_flag = right_lma == values[i + left_start]
-                zero_out = 1 - (right_lma_active * eq_flag)
+                zero_out = 1 - (right_lma_flag * eq_flag)
                 is_last[i + left_start] *= zero_out
 
-            lma_active[iter_idx] = log_or(left_lma_active, right_lma_active)
-            lmas[iter_idx] = left_lma_active.if_else(left_lma, right_lma)
+            lma_flags[iter_idx] = log_or(left_lma_flag, right_lma_flag)
+            left_most_actives[iter_idx] = left_lma_flag.if_else(left_lma, right_lma)
 
         size_part *= 2
         num_parts /= 2
