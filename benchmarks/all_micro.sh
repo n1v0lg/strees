@@ -56,8 +56,6 @@ else
     echo "Running benchmarks in local mode"
 fi
 
-
-
 for OP in "${OPS[@]}";
 do
     for SIZE in "${SIZES[@]}";

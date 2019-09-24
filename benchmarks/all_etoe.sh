@@ -13,7 +13,7 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    256
+    512
     1024
     2048
 )

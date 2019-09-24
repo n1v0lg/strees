@@ -15,13 +15,22 @@ function parse_exec_time() {
 function compile() {
     if [ "$DO_COMPILE" = true ]
     then
+        if [ "$DEBUG" = true ]
+        then
+            echo "Compiling with ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}"
+        fi
         ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
+
     fi
 }
 
 function run_program_local() {
     if [ "$DO_RUN" = true ]
     then
+        if [ "$DEBUG" = true ]
+        then
+            echo "Running with ./Scripts/ring.sh ${MPC_PROG_NAME}"
+        fi
         ./Scripts/ring.sh ${MPC_PROG_NAME}
     fi
 }
@@ -32,6 +41,10 @@ function run_program_networked() {
         PORT=8042
         HOST="MP-SPDZ-0"
         RUN_OPTS="${PID} -pn ${PORT} -h ${HOST} -u"
+        if [ "$DEBUG" = true ]
+        then
+            echo "Running with ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}"
+        fi
         ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
     fi
 }
@@ -134,8 +147,8 @@ case $key in
     DEBUG=true
     shift # past argument
     ;;
-    --testrun)
-    DO_TEST_RUN=true
+    --notest)
+    DO_TEST_RUN=false
     shift # past argument
     ;;
     *)    # unknown option
