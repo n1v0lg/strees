@@ -202,6 +202,9 @@ def _last_active_log_eq(values, is_active):
     array_check(values)
     array_check(is_active)
 
+    if not is_two_pow(len(values)):
+        raise Exception("Only support powers of two")
+
     size_part = 1
     num_parts = len(values) // size_part
 
@@ -230,10 +233,8 @@ def _last_active_log_eq(values, is_active):
             right_lma = left_most_actives[part_idx + 1]
             right_lma_flag = lma_flags[part_idx + 1]
 
-            inner_num_its = left_end - left_start
-
             # Zero out left most active in left portion that is equal to right left most active
-            @for_range_parallel(min(32, inner_num_its), inner_num_its)
+            @for_range_parallel(min(32, size_part), size_part)
             def _(i):
                 eq_flag = right_lma == values[i + left_start]
                 zero_out = 1 - (right_lma_flag * eq_flag)
