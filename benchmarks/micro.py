@@ -27,34 +27,29 @@ super_hacky_import_hack([
 ])
 
 
-# TODO make sure that things don't get optimized away due to compile time 0 values
-
 def bench_shuffle(num_values):
     """Benchmarks stand-alone shuffle."""
     values = Array(num_values, sint)
-    values.assign_all(0)
+    values.assign_all(1)
     config_bits = default_config_shuffle(values)
     default_shuffle(values, config=config_bits, reverse=False)
-    print_list(values)
 
 
 def bench_sort(num_values):
     """Benchmarks stand-alone sort."""
     keys = Array(num_values, sint)
-    keys.assign_all(0)
+    keys.assign_all(1)
 
     values = Array(num_values, sint)
-    values.assign_all(0)
+    values.assign_all(1)
 
     default_sort(keys, values)
-    print_list(keys)
-    print_list(values)
 
 
 def bench_comp_mat(num_values):
     """Benchmarks naively computing O(n**2) comparison matrix."""
     values = Array(num_values, sint)
-    values.assign_all(0)
+    values.assign_all(1)
     comp_mat = Matrix(num_values, num_values, sint)
 
     @for_range(0, num_values)
@@ -67,7 +62,7 @@ def bench_comp_mat(num_values):
 def bench_comp_mat_par(num_values):
     """Benchmarks naively computing O(n**2) comparison matrix."""
     values = Array(num_values, sint)
-    values.assign_all(0)
+    values.assign_all(1)
     comp_mat = Matrix(num_values, num_values, sint)
     n_parallel = 32
 
@@ -79,11 +74,28 @@ def bench_comp_mat_par(num_values):
 
 
 def bench_argmax_over_fracs(num_values):
+    """Benchmarks argmax over fractions."""
     fractions = MultiArray(sizes=[num_values, 3], value_type=sint)
-    fractions.assign_all(0)
+    fractions.assign_all(1)
 
-    res = argmax_over_fracs(fractions)
-    print_list(res)
+    argmax_over_fracs(fractions)
+
+
+def bench_lt_threshold(num_values):
+    values = Array(num_values, sint)
+    values.assign_all(1)
+
+    lt_threshold(values, sint(1))
+
+
+def bench_is_last_active(num_values, log_depth_version):
+    values = Array(num_values, sint)
+    values.assign_all(1)
+
+    is_active = Array(num_values, sint)
+    values.assign_all(1)
+
+    compute_is_last_active(values, is_active, log_depth_version)
 
 
 def run_bench():
@@ -103,6 +115,12 @@ def run_bench():
         bench_comp_mat_par(num_values=num_elements)
     elif operation == "argmax":
         bench_argmax_over_fracs(num_values=num_elements)
+    elif operation == "lt_threshold":
+        bench_lt_threshold(num_values=num_elements)
+    elif operation == "is_last_active_lin":
+        bench_is_last_active(num_values=num_elements, log_depth_version=False)
+    elif operation == "is_last_active_log":
+        bench_is_last_active(num_values=num_elements, log_depth_version=True)
     else:
         raise Exception("Unknown operation: %s" % operation)
 

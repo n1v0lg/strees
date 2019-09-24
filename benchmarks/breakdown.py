@@ -50,6 +50,13 @@ def bench_prep_attributes(num_samples, num_cont_attrs):
     prep_attributes(samples)
 
 
+def bench_prep_attr_sort(num_samples, preprocessor):
+    """Runs PrepAttr.sort on given number of samples."""
+    samples = gen_dummy_samples(num_samples, 1)
+    prepped = prep_attributes(samples, preprocessor=preprocessor)
+    prepped[0].sort(samples.get_active_col())
+
+
 def bench_c45_single_round(num_samples, num_cont_attrs, preprocessor, num_disc_attrs=0):
     """Runs c45 algorithm on dummy data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
@@ -68,6 +75,10 @@ def run_bench():
 
     if operation == "prep":
         bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
+    elif operation == "dummy_perm_sort":
+        bench_prep_attr_sort(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create_dummy)
+    elif operation == "dummy_sort_sort":
+        bench_prep_attr_sort(num_samples=num_elements, preprocessor=SortNetBasedPrepAttribute.create_dummy)
     elif operation == "single_perm_dummy":
         bench_c45_single_round(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create_dummy,
                                num_cont_attrs=num_cont_attrs)

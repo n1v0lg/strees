@@ -2,9 +2,11 @@
 
 # Operations to benchmark
 declare -a OPS=(
-#    "prep"
-#    "single_perm_dummy"
-#    "single_perm_both"
+    "prep"
+    "dummy_perm_sort"
+    "dummy_sort_sort"
+    "single_perm_dummy"
+    "single_perm_both"
     "single_sort_dummy"
     "single_sort_both"
 )
@@ -12,22 +14,19 @@ declare -a OPS=(
 # Number continuous attributes
 declare -a CONT_ATTRS=(
     2
-#    4
+    4
 )
 
 # Number of samples
 declare -a SIZES=(
-#    4
-#    8
-#    16
-#    1024
+    512
+    1024
     2048
-    4096
-    8192
 )
 
 PID=-1
 MODE=both
+DEBUG_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -43,6 +42,10 @@ case $key in
     MODE="$2"
     shift # past argument
     shift # past value
+    ;;
+    --debug)
+    DEBUG_STR="--debug"
+    shift # past argument
     ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -65,7 +68,7 @@ do
     do
         for SIZE in "${SIZES[@]}";
         do
-            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID}
+            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
         done
     done
 done

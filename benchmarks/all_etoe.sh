@@ -13,7 +13,6 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    64
     256
     1024
     2048
@@ -21,6 +20,7 @@ declare -a SIZES=(
 
 PID=-1
 MODE=both
+DEBUG_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -36,6 +36,10 @@ case $key in
     MODE="$2"
     shift # past argument
     shift # past value
+    ;;
+    --debug)
+    DEBUG_STR="--debug"
+    shift # past argument
     ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -56,6 +60,6 @@ for SIZE in "${SIZES[@]}";
 do
     for DEPTH in "${DEPTHS[@]}";
     do
-        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID}
+        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
     done
 done

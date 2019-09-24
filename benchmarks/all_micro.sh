@@ -6,17 +6,21 @@ declare -a OPS=(
     "shuffle"
     "sort"
     "comp_mat_par"
+    "lt_threshold"
+    "is_last_active_lin"
+    "is_last_active_log"
 )
 
 # Default benchmark sizes
 declare -a SIZES=(
-    256
+    512
     1024
     2048
 )
 
 PID=-1
 MODE=both
+DEBUG_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -33,6 +37,10 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --debug)
+    DEBUG_STR="--debug"
+    shift # past argument
+    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -48,10 +56,12 @@ else
     echo "Running benchmarks in local mode"
 fi
 
+
+
 for OP in "${OPS[@]}";
 do
     for SIZE in "${SIZES[@]}";
     do
-        bash run.sh --source micro.py --args "${OP}-${SIZE}" --mode ${MODE} --pid ${PID};
+        bash run.sh --source micro.py --args "${OP}-${SIZE}" --mode ${MODE} --pid ${PID} ${DEBUG_STR};
     done
 done
