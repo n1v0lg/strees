@@ -225,7 +225,6 @@ def _last_active_log_eq(values, is_active):
         def _(iter_idx):
             part_idx = 2 * iter_idx
             left_start = part_idx * size_part
-            left_end = (part_idx + 1) * size_part
 
             left_lma = left_most_actives[part_idx]
             left_lma_flag = lma_flags[part_idx]
@@ -249,7 +248,7 @@ def _last_active_log_eq(values, is_active):
     return is_last
 
 
-def compute_is_last_active(values, is_active, log_depth_version=True):
+def compute_is_last_active(values, is_active, log_depth_version=False):
     """Computes a bit vector indicating for each value if it is the last active value in a repeated sequence."""
     if log_depth_version:
         return _last_active_log_eq(values, is_active)
