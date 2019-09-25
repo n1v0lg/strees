@@ -150,31 +150,6 @@ def expand_idx(n, index):
     return bits
 
 
-def _last_active_lin_scan(values, is_active):
-    array_check(values)
-    n = len(values)
-
-    with_copies = Array(n, sint)
-    with_copies[:] = values[:]
-
-    # treating -1 as special dummy element
-    with_copies[n - 1] = is_active[n - 1].if_else(with_copies[n - 1], sint(-1))
-    with_copies = copy_log_depth(with_copies, is_active)
-
-    is_last_active = Array(n, sint)
-
-    # Eq. checks can happen in parallel because the results are independent
-    @for_range_parallel(min(32, n - 1), n - 1)
-    def _(i):
-        flipped_idx = n - 1 - i
-        neq = with_copies[flipped_idx - 1] != with_copies[flipped_idx]
-        is_last_active[flipped_idx - 1] = neq
-
-    is_last_active[n - 1] = is_active[n - 1]
-
-    return is_last_active
-
-
 def copy_lin_scan(values, is_active):
     """Fills all inactive values with closest rightmost active neighbors, using a linear scan."""
     n = len(is_active)
@@ -236,63 +211,6 @@ def copy_log_depth(values, is_active):
         num_parts //= 2
 
     return with_copy
-
-
-def _last_active_log_eq(values, is_active):
-    """
-    Log-depth algorithm that computes, for each entry in values whether it's the rightmost active value in its sequence.
-
-    :param values:
-    :param is_active:
-    :return:
-    """
-    array_check(values)
-    array_check(is_active)
-
-    if not is_two_pow(len(values)):
-        raise Exception("Only support powers of two")
-
-    size_part = 1
-    num_parts = len(values) // size_part
-
-    left_most_actives = Array(len(values), sint)
-    left_most_actives[:] = values[:]
-
-    lma_flags = Array(len(values), sint)
-    lma_flags[:] = is_active[:]
-
-    is_last = Array(len(values), sint)
-    is_last[:] = is_active[:]
-
-    while num_parts > 0:
-        program.curr_tape.start_new_basicblock()
-        num_its = num_parts // 2
-
-        @for_range_parallel(min(32, num_its), num_its)
-        def _(iter_idx):
-            part_idx = 2 * iter_idx
-            left_start = part_idx * size_part
-
-            left_lma = left_most_actives[part_idx]
-            left_lma_flag = lma_flags[part_idx]
-
-            right_lma = left_most_actives[part_idx + 1]
-            right_lma_flag = lma_flags[part_idx + 1]
-
-            # Zero out left most active in left portion that is equal to right left most active
-            @for_range_parallel(min(32, size_part), size_part)
-            def _(i):
-                eq_flag = right_lma == values[i + left_start]
-                zero_out = 1 - (right_lma_flag * eq_flag)
-                is_last[i + left_start] *= zero_out
-
-            lma_flags[iter_idx] = log_or(left_lma_flag, right_lma_flag)
-            left_most_actives[iter_idx] = left_lma_flag.if_else(left_lma, right_lma)
-
-        size_part *= 2
-        num_parts //= 2
-
-    return is_last
 
 
 def compute_is_last_active(values, is_active, log_depth_version=True):
