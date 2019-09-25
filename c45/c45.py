@@ -320,6 +320,7 @@ def compute_best_gini_cont(samples, attr_col_idx, prep_attr):
     :return:
     """
     cand_ginis = compute_cont_ginis(samples, attr_col_idx, prep_attr)
+    program.curr_tape.start_new_basicblock()
     return argmax_over_fracs(cand_ginis)
 
 
@@ -445,6 +446,8 @@ def c45_single_round(samples, prep_attrs):
     # TODO Base case: check if partitioning on best attribute doesn't actually further partition the data
     # This can happen if it's not possible to partition the data perfectly, i.e., we end up with partitions that
     # include both class 0 and class 1 samples
+
+    program.curr_tape.start_new_basicblock()
 
     # partition samples on selected attribute
     left, right = partition_on(samples, attr_idx, thresh, is_leaf)
