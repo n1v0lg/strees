@@ -169,13 +169,7 @@ def _last_active_lin_scan(values, is_active):
 
     # treating -1 as special dummy element
     with_copies[n - 1] = is_active[n - 1].if_else(with_copies[n - 1], sint(-1))
-
-    @for_range(n - 1, 0, -1)
-    def _(i):
-        right = with_copies[i]
-        left = with_copies[i - 1]
-        is_inactive = is_active[i - 1]
-        with_copies[i - 1] = is_inactive.if_else(left, right)
+    with_copies = copy_log_depth(with_copies, is_active)
 
     is_last_active = Array(n, sint)
 
@@ -189,6 +183,69 @@ def _last_active_lin_scan(values, is_active):
     is_last_active[n - 1] = is_active[n - 1]
 
     return is_last_active
+
+
+def copy_lin_scan(values, is_active):
+    """Fills all inactive values with closest rightmost active neighbors, using a linear scan."""
+    n = len(is_active)
+
+    @for_range(n - 1, 0, -1)
+    def _(i):
+        right = values[i]
+        left = values[i - 1]
+        is_inactive = is_active[i - 1]
+        values[i - 1] = is_inactive.if_else(left, right)
+
+    return values
+
+
+def copy_log_depth(values, is_active):
+    """Fills all inactive values with closest rightmost active neighbors, in log depth."""
+    array_check(values)
+    array_check(is_active)
+
+    if not is_two_pow(len(values)):
+        raise Exception("Only support powers of two")
+
+    size_part = 1
+    num_parts = len(values) // size_part
+
+    with_copy = values[:]
+    with_copy_active = is_active[:]
+
+    lmas = with_copy[:]
+    lmas_active = with_copy_active[:]
+
+    while num_parts > 0:
+        program.curr_tape.start_new_basicblock()
+        num_its = num_parts // 2
+
+        @for_range_parallel(min(32, num_its), num_its)
+        def _(iter_idx):
+            part_idx = 2 * iter_idx
+            left_start = part_idx * size_part
+
+            left_start = part_idx * size_part
+
+            right_lma = lmas[part_idx + 1]
+            right_lma_active = lmas_active[part_idx + 1]
+
+            # Copy right lma over all not yet filled in values in left
+            @for_range_parallel(min(32, size_part), size_part)
+            def _(i):
+                active_i = with_copy_active[i + left_start]
+                with_copy[i + left_start] = active_i.if_else(with_copy[i + left_start], right_lma)
+                with_copy_active[i + left_start] = log_or(active_i, right_lma_active)
+
+            left_lma = lmas[part_idx]
+            left_lma_active = lmas_active[part_idx]
+            lmas_active[iter_idx] = log_or(left_lma_active, right_lma_active)
+            lmas[iter_idx] = left_lma_active.if_else(left_lma, right_lma)
+
+        size_part *= 2
+        num_parts //= 2
+
+    return with_copy
 
 
 def _last_active_log_eq(values, is_active):
