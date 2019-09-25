@@ -30,7 +30,7 @@ def gen_dummy_cols(num_rows, num_cols):
     """Generates list of column arrays for given dimensions."""
     cols = [Array(num_rows, sint) for _ in range(num_cols)]
     for col in cols:
-        col.assign_all(0)
+        col.assign_all(1)
     return cols
 
 

@@ -30,7 +30,7 @@ def gen_dummy_cols(num_rows, num_cols):
     """Generates list of column arrays for given dimensions."""
     cols = [Array(num_rows, sint) for _ in range(num_cols)]
     for col in cols:
-        col.assign_all(0)
+        col.assign_all(1)
     return cols
 
 
@@ -48,8 +48,6 @@ def bench_c45(num_samples, max_tree_depth, num_cont_attrs, num_disc_attrs=0):
     """Runs c45 algorithm on dummy data with given dimensions."""
     samples = gen_dummy_samples(num_samples, num_cont_attrs, num_disc_attrs)
     c45(samples, max_tree_depth)
-    # .reveal() \
-    # .print_self()
 
 
 def run_bench():
