@@ -305,12 +305,33 @@ def _last_active_log_eq(values, is_active):
     return is_last
 
 
-def compute_is_last_active(values, is_active, log_depth_version=False):
+def compute_is_last_active(values, is_active, log_depth_version=True):
     """Computes a bit vector indicating for each value if it is the last active value in a repeated sequence."""
+    array_check(values)
+    n = len(values)
+
+    with_copies = Array(n, sint)
+    with_copies[:] = values[:]
+
+    # treating -1 as special dummy element
+    with_copies[n - 1] = is_active[n - 1].if_else(with_copies[n - 1], sint(-1))
     if log_depth_version:
-        return _last_active_log_eq(values, is_active)
+        with_copies = copy_log_depth(with_copies, is_active)
     else:
-        return _last_active_lin_scan(values, is_active)
+        with_copies = copy_lin_scan(with_copies, is_active)
+
+    is_last_active = Array(n, sint)
+
+    # Eq. checks can happen in parallel because the results are independent
+    @for_range_parallel(min(32, n - 1), n - 1)
+    def _(i):
+        flipped_idx = n - 1 - i
+        neq = with_copies[flipped_idx - 1] != with_copies[flipped_idx]
+        is_last_active[flipped_idx - 1] = neq
+
+    is_last_active[n - 1] = is_active[n - 1]
+
+    return is_last_active
 
 
 def array_check(arr):
