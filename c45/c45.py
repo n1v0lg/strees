@@ -350,6 +350,7 @@ def select_col_at(samples, idx):
     # TODO for_range
     eq_flags = Array.create_from(idx == i for i in range(samples.n + samples.m))
     selected = sint.row_matrix_mul(eq_flags, samples.columns[0:samples.n + samples.m])
+    program.curr_tape.start_new_basicblock()
 
     return Array.create_from(v for v in selected)
 
@@ -369,7 +370,10 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
 
     # TODO this only works for binary discrete attributes
     go_left = lt_threshold(selected_col, threshold)
+    program.curr_tape.start_new_basicblock()
+
     go_right = neg(go_left)
+    program.curr_tape.start_new_basicblock()
 
     # mask out rows that are already inactive
     active_col = samples.get_active_col()
@@ -379,6 +383,8 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
 
     # set both indicator vectors to 0 if we're at a leaf node
     is_internal = neg(is_leaf)
+    program.curr_tape.start_new_basicblock()
+
     go_left = toggle(is_internal, go_left)
     go_right = toggle(is_internal, go_right)
 

@@ -80,13 +80,6 @@ def toggle(bit, elements):
 
 def iter_sum(elements):
     """Computes sum of elements."""
-    # res = Acc(elements[0])
-    #
-    # @for_range(1, len(elements))
-    # def _(i):
-    #     res.inc_by(elements[i])
-    #
-    # return res.get_val()
     return sum(elements)
 
 
@@ -104,7 +97,6 @@ def prod(left, right):
     num_elements = len(left)
     res = Array(num_elements, sint)
 
-    # @for_range(0, num_elements)
     @for_range_parallel(min(32, num_elements), num_elements)
     def _(i):
         res[i] = left[i] * right[i]
@@ -129,13 +121,11 @@ def neg(bits):
 
 def lt_threshold(elements, threshold):
     """Compares all values to threshold value and returns result sints."""
-
     array_check(elements)
 
     num_elements = len(elements)
     res = Array(num_elements, sint)
 
-    # @for_range(0, num_elements)
     @for_range_parallel(min(32, num_elements), num_elements)
     def _(i):
         res[i] = elements[i] <= threshold
