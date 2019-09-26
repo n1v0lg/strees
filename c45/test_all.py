@@ -659,6 +659,7 @@ def test():
                 .r(LN(-1, is_dummy=True))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
+    sys.setrecursionlimit(2000)
     test_compute_is_last_active(use_log=True)
     test_compute_is_last_active(use_log=False)
     test_expand_idx()
@@ -670,6 +671,7 @@ def test():
     test_compute_cont_ginis_with_duplicates()
     program.curr_tape.start_new_basicblock()
     test_row_mul()
+    program.curr_tape.start_new_basicblock()
     test_obl_select_col_at()
     test_partition_on()
     test_determine_if_leaf()
@@ -678,6 +680,7 @@ def test():
     test_reverse_shuffle()
     test_prep_attr_create()
     test_prep_attr_create_perm_dummy()
+    program.curr_tape.start_new_basicblock()
     test_prep_attr_create_sort_dummy()
     test_prep_attributes()
     program.curr_tape.start_new_basicblock()

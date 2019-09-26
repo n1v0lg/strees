@@ -90,8 +90,7 @@ def open_permute(values, open_perm):
     array_check(values)
     reordered = Array(len(values), sint)
 
-    @for_range(0, len(values))
-    def _(idx):
+    for idx in range(len(values)):
         old_idx = open_perm[idx]
         reordered[idx] = values[old_idx]
 
