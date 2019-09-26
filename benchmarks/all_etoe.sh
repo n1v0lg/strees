@@ -3,19 +3,18 @@
 # Tree depth
 declare -a DEPTHS=(
     1
+    2
+    3
 )
 
 # Number continuous attributes
 declare -a CONT_ATTRS=(
     2
-    4
 )
 
 # Number of samples
 declare -a SIZES=(
-    512
     1024
-    2048
 )
 
 PID=-1
@@ -60,6 +59,9 @@ for SIZE in "${SIZES[@]}";
 do
     for DEPTH in "${DEPTHS[@]}";
     do
-        bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-2" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
+        for CONT_ATTR in "${CONT_ATTRS[@]}";
+        do
+            bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-${CONT_ATTRS}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
+        done
     done
 done
