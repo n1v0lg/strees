@@ -17,6 +17,7 @@ SIZE=256
 PID=-1
 MODE=both
 DEBUG_STR=""
+MAL_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -35,6 +36,10 @@ case $key in
     ;;
     --debug)
     DEBUG_STR="--debug"
+    shift # past argument
+    ;;
+    --mal)
+    MAL_STR="--mal"
     shift # past argument
     ;;
     *)    # unknown option
@@ -56,6 +61,6 @@ for OP in "${OPS[@]}";
 do
     for CONT_ATTR in "${CONT_ATTRS[@]}";
     do
-        bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
+        bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
     done
 done

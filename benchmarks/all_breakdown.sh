@@ -17,14 +17,17 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    2048
-    4096
-    8192
+    4
+    8
+#    2048
+#    4096
+#    8192
 )
 
 PID=-1
 MODE=both
 DEBUG_STR=""
+MAL_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -43,6 +46,10 @@ case $key in
     ;;
     --debug)
     DEBUG_STR="--debug"
+    shift # past argument
+    ;;
+    --mal)
+    MAL_STR="--mal"
     shift # past argument
     ;;
     *)    # unknown option
@@ -66,7 +73,8 @@ do
     do
         for SIZE in "${SIZES[@]}";
         do
-            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
+            ARG="${OP}-${SIZE}-${CONT_ATTR}"
+            bash run.sh --source breakdown.py --args ${ARG} --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
         done
     done
 done

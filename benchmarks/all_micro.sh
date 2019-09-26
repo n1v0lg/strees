@@ -21,6 +21,7 @@ declare -a SIZES=(
 PID=-1
 MODE=both
 DEBUG_STR=""
+MAL_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -39,6 +40,10 @@ case $key in
     ;;
     --debug)
     DEBUG_STR="--debug"
+    shift # past argument
+    ;;
+    --mal)
+    MAL_STR="--mal"
     shift # past argument
     ;;
     *)    # unknown option
@@ -60,6 +65,6 @@ for OP in "${OPS[@]}";
 do
     for SIZE in "${SIZES[@]}";
     do
-        bash run.sh --source micro.py --args "${OP}-${SIZE}" --mode ${MODE} --pid ${PID} ${DEBUG_STR};
+        bash run.sh --source micro.py --args "${OP}-${SIZE}" --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
     done
 done

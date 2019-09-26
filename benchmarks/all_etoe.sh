@@ -20,6 +20,7 @@ declare -a SIZES=(
 PID=-1
 MODE=both
 DEBUG_STR=""
+MAL_STR=""
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -38,6 +39,10 @@ case $key in
     ;;
     --debug)
     DEBUG_STR="--debug"
+    shift # past argument
+    ;;
+    --mal)
+    MAL_STR="--mal"
     shift # past argument
     ;;
     *)    # unknown option
@@ -61,7 +66,8 @@ do
     do
         for CONT_ATTR in "${CONT_ATTRS[@]}";
         do
-            bash run.sh --source etoe.py --args "${SIZE}-${DEPTH}-${CONT_ATTRS}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
+            ARG="${SIZE}-${DEPTH}-${CONT_ATTRS}"
+            bash run.sh --source etoe.py --args ${ARG} --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
         done
     done
 done
