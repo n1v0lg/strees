@@ -38,7 +38,7 @@ class Samples:
 
     def is_cont_attribute(self, col_idx):
         if col_idx > self.n + self.m:
-            raise ValueError
+            raise ValueError()
         return col_idx < self.n
 
     def get_class_col_idx(self):
