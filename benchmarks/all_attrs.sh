@@ -1,26 +1,18 @@
 #!/usr/bin/env bash
 
-# Operations to benchmark
 declare -a OPS=(
     "prep"
     "dummy_perm_sort"
-    "dummy_sort_sort"
     "single_perm_dummy"
-    "single_sort_dummy"
-    "single_perm_both"
 )
 
-# Number continuous attributes
 declare -a CONT_ATTRS=(
     2
+    4
+    8
 )
 
-# Number of samples
-declare -a SIZES=(
-    2048
-    4096
-    8192
-)
+SIZE=256
 
 PID=-1
 MODE=both
@@ -64,9 +56,6 @@ for OP in "${OPS[@]}";
 do
     for CONT_ATTR in "${CONT_ATTRS[@]}";
     do
-        for SIZE in "${SIZES[@]}";
-        do
-            bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
-        done
+        bash run.sh --source breakdown.py --args "${OP}-${SIZE}-${CONT_ATTR}" --mode ${MODE} --pid ${PID} ${DEBUG_STR}
     done
 done

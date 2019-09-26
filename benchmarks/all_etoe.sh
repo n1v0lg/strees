@@ -14,7 +14,7 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    1024
+    256
 )
 
 PID=-1
