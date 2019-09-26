@@ -2,6 +2,7 @@ import math
 import random as rand
 
 from Compiler.types import sint, Array
+from library import for_range
 from permutation import configure_waksman, rec_shuffle, shuffle
 
 rand.seed(42)
@@ -56,8 +57,6 @@ def config_shuffle_for_length(n, value_type=sint):
 
 def default_config_shuffle(values, use_iter=True):
     """Configures waksman network for default shuffle algorithm."""
-    # TODO this won't generate consistent permutations if run on different machines; need to seed rand. num. gen
-
     if use_iter:
         return config_shuffle_for_length(len(values))
     else:
@@ -88,10 +87,12 @@ def sort_and_permute(key_col, val_col):
 
 def open_permute(values, open_perm):
     """Applies a public permutation to an Array of sints."""
-    if not isinstance(values, Array):
-        raise Exception("Must be array")
+    array_check(values)
     reordered = Array(len(values), sint)
-    for idx, val in enumerate(values):
+
+    @for_range(0, len(values))
+    def _(idx):
         old_idx = open_perm[idx]
         reordered[idx] = values[old_idx]
+
     return reordered

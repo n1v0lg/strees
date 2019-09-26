@@ -668,6 +668,7 @@ def test():
     test_compute_cont_ginis()
     test_compute_best_gini_cont()
     test_compute_cont_ginis_with_duplicates()
+    program.curr_tape.start_new_basicblock()
     test_row_mul()
     test_obl_select_col_at()
     test_partition_on()
