@@ -2,26 +2,25 @@
 
 # Operations to benchmark
 declare -a OPS=(
-    "prep"
-    "dummy_perm_sort"
-    "dummy_sort_sort"
-    "single_perm_dummy"
+#    "prep"
+#    "dummy_perm_sort"
+#    "dummy_sort_sort"
+#    "single_perm_dummy"
     "single_perm_both"
-    "single_sort_dummy"
-    "single_sort_both"
+#    "single_sort_dummy"
+#    "single_sort_both"
 )
 
 # Number continuous attributes
 declare -a CONT_ATTRS=(
     2
-    4
 )
 
 # Number of samples
 declare -a SIZES=(
-    512
-    1024
-    2048
+#    2048
+#    4096
+    8192
 )
 
 PID=-1

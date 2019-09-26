@@ -117,8 +117,6 @@ def run_bench():
         bench_argmax_over_fracs(num_values=num_elements)
     elif operation == "lt_threshold":
         bench_lt_threshold(num_values=num_elements)
-    elif operation == "is_last_active_lin":
-        bench_is_last_active(num_values=num_elements, log_depth_version=False)
     elif operation == "is_last_active_log":
         bench_is_last_active(num_values=num_elements, log_depth_version=True)
     else:

@@ -64,6 +64,11 @@ def bench_c45_single_round(num_samples, num_cont_attrs, preprocessor, num_disc_a
     c45_single_round(samples, prepped)
 
 
+def bench_select_col(num_samples, num_cont_attrs):
+    samples = gen_dummy_samples(num_samples, num_cont_attrs, 0)
+    select_col_at(samples, sint(1))
+
+
 def run_bench():
     args = program.get_args()
     split_args = args[1].split("-")
@@ -75,6 +80,8 @@ def run_bench():
 
     if operation == "prep":
         bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
+    elif operation == "select_col":
+        bench_select_col(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
     elif operation == "dummy_perm_sort":
         bench_prep_attr_sort(num_samples=num_elements, preprocessor=PermBasedPrepAttribute.create_dummy)
     elif operation == "dummy_sort_sort":
