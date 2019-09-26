@@ -31,7 +31,7 @@ function run_program_local() {
         then
             echo "Running with ./Scripts/ring.sh ${MPC_PROG_NAME}"
         fi
-        ./Scripts/ring.sh ${MPC_PROG_NAME}
+        ./Scripts/${RUN_SCRIPT_LOCAL}.sh ${MPC_PROG_NAME}
     fi
 }
 
@@ -45,7 +45,7 @@ function run_program_networked() {
         then
             echo "Running with ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}"
         fi
-        ./replicated-ring-party.x ${RUN_OPTS} ${MPC_PROG_NAME}
+        ./${RUN_SCRIPT_NET}.x ${RUN_OPTS} ${MPC_PROG_NAME}
     fi
 }
 
@@ -116,6 +116,9 @@ function benchmark_mode() {
 # Defaults
 MODE=both
 DO_TEST_RUN=true
+# By default, use passively secure backends
+RUN_SCRIPT_NET="replicated-ring-party"
+RUN_SCRIPT_LOCAL="ring"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -145,6 +148,12 @@ case $key in
     ;;
     --debug)
     DEBUG=true
+    shift # past argument
+    ;;
+    --mal)
+    # running with active security
+    RUN_SCRIPT_NET="malicious-rep-ring-party"
+    RUN_SCRIPT_LOCAL="mal-rep-ring"
     shift # past argument
     ;;
     --notest)
