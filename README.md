@@ -16,15 +16,15 @@ bash build.sh
 
 This might take a while. Once it's done you should get a bash terminal inside a Docker container.
 
-The folder that contains `strees` is mounted into container. This means that you can modify the source files *outside* Docker and the changes will show up inside the instance. 
+The folder that contains `strees` is mounted into the container. This means that you can modify the source files *outside* Docker and the changes will show up inside the instance. 
 
 From the Docker terminal prompt `cd ../strees/`.
 
 Run `bash test.sh`. This should eventually print `All tests OK.`
 
-To run all tests and examples with the output shown, run `bast run.sh`. 
+To run all tests and examples with the output shown, run `bash run.sh test_all.py`. 
 
-The main code is under `c45/c45.py`. A good entry point is the `c45` method, and `main`. 
+The core implementation is under `c45/c45.py`. A good entry point is the `c45` method. 
 
 Note that once you exit the terminal, the Docker container will shut down. You don't need to rebuild it. Just run to restart it and get another bash session:
 
@@ -32,19 +32,19 @@ Note that once you exit the terminal, the Docker container will shut down. You d
 docker start mpspdz && docker exec -ti mpspdz /bin/bash
 ```
 
+## Benchmarking
+
+You can find the benchmark code under `/benchmarks`. See `/benchmarks/README.md` for more info. 
+
 ## Limitations
 
 This is very much work in progress. Some limitations include:
 
-* A lot of the building blocks are not optimized. The sort I'm using for instance is a naive bubble sort.
-* There are probably a lot of MP-SPDZ primitives that we should use instead of the building blocks I hacked together.
 * Discrete attributes are not yet supported. Only continuous attributes for now.
 * There is only a fully oblivious version of the algorithm implemented, I don't take advantage of revealing some of the tree structure etc. yet.
 * The algorithm runs exactly for the specified number of iterations.
 * The continuous attribute values are currently just integer values.
-* Currently the number of samples must be a power of 2, as required by the underlying oblivious shuffle.
-* Not well tested, things will probably break when you run the main algorithm on more complicated inputs.
-* Only supports binary discrete attributes, and binary classes.
+* The number of samples must be a power of 2, as required by the underlying oblivious shuffle. Same goes for the number of attributes.
 
 ## Misc
 
