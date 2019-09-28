@@ -30,7 +30,7 @@ chmod 400 path_to_key_file
 
 From each instance, you can use the `all_*.sh` scripts in the `/benchmarks` dir to run a benchmark.
 
-Use `bash all_*.sh --help` to get a list of all command line args.
+Use `bash all_*.sh --help` to get a list of all command line args (sorry not done with that yet, so it currently won't work!).
 
 For each benchmark, you first need to run a compile pass (note: this could take a long time). For example to run the micro benchmark script, use:
 

@@ -2,12 +2,12 @@
 
 # Operations to benchmark
 declare -a OPS=(
-    "prep"
-    "dummy_perm_sort"
-    "dummy_sort_sort"
-    "single_perm_dummy"
-    "single_sort_dummy"
-    "single_perm_both"
+    "prep" # offline prep, i.e., sorting and encoding sort net as per
+    "dummy_perm_sort" # sorting via permutation network approach
+    "dummy_sort_sort" # sorting via pre-computed sorting network approach
+    "single_perm_dummy" # single iteration of c45, without pre-processing, using permutation network
+    "single_sort_dummy" # single iteration of c45, without pre-processing, using sorting network
+    "single_perm_both" # pre-processing + single iteration of c45, using permutation network
 )
 
 # Number continuous attributes
@@ -17,11 +17,9 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    4
-    8
-#    2048
-#    4096
-#    8192
+    2048
+    4096
+    8192
 )
 
 PID=-1
