@@ -97,4 +97,4 @@ We still need timings for:
 
 ## Common Issues
 
-- Compile stage raises `RuntimeError: maximum recursion depth exceeded`. For large programs, the optimization pass performs very deep recursion which can lead to this exception. To fix it, try increasing recursion limit in Python. In `MP-SPDZ/compile.py`, add `sys.setrecursionlimit(2000)`. Try increasing past `2000` if the issue persists.
+- Compile stage raises `RuntimeError: maximum recursion depth exceeded`. For large programs, the optimization pass performs very deep recursion which can lead to this exception. To fix it, try increasing the recursion limit in Python. In `MP-SPDZ/compile.py`, add `sys.setrecursionlimit(3000)`. Try increasing past `3000` if the issue persists.
