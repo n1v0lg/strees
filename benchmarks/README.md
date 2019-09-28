@@ -30,6 +30,8 @@ chmod 400 path_to_key_file
 
 From each instance, you can use the `all_*.sh` scripts in the `/benchmarks` dir to run a benchmark.
 
+__Note__ run all benchmarks in `screen` mode, i.e., start a screen session with `screen -S bench`. That way you don't have to keep your ssh session alive; if you get disconnected, you can just re-enter your screen session with `screen -x bench` once you've ssh'ed back into the instance.
+
 Use `bash all_*.sh --help` to get a list of all command line args (sorry not done with that yet, so it currently won't work!).
 
 For each benchmark, you first need to run a compile pass (note: this could take a long time). For example to run the micro benchmark script, use:
