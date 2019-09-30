@@ -2,8 +2,6 @@
 
 # Tree depth
 declare -a DEPTHS=(
-    1
-    2
     3
 )
 
@@ -14,7 +12,10 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
-    256
+    #1024
+    #2048
+    4096
+#    8192
 )
 
 PID=-1
@@ -66,7 +67,7 @@ do
     do
         for CONT_ATTR in "${CONT_ATTRS[@]}";
         do
-            ARG="${SIZE}-${DEPTH}-${CONT_ATTRS}"
+            ARG="${SIZE}-${DEPTH}-${CONT_ATTR}"
             bash run.sh --source etoe.py --args ${ARG} --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
         done
     done

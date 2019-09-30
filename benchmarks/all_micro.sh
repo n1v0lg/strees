@@ -13,6 +13,8 @@ declare -a OPS=(
 
 # Default benchmark sizes
 declare -a SIZES=(
+    512
+    1024
     2048
     4096
     8192
