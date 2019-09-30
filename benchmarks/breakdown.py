@@ -69,6 +69,12 @@ def bench_select_col(num_samples, num_cont_attrs):
     select_col_at(samples, sint(1))
 
 
+def bench_compute_ginis(num_samples, num_cont_attrs=2):
+    samples = gen_dummy_samples(num_samples, num_cont_attrs, 0)
+    prepped = prep_attributes(samples, PermBasedPrepAttribute.create_dummy)
+    compute_cont_ginis(samples, 0, prepped[0])
+
+
 def run_bench():
     args = program.get_args()
     split_args = args[1].split("-")
@@ -95,9 +101,8 @@ def run_bench():
     elif operation == "single_sort_dummy":
         bench_c45_single_round(num_samples=num_elements, preprocessor=SortNetBasedPrepAttribute.create_dummy,
                                num_cont_attrs=num_cont_attrs)
-    elif operation == "single_sort_both":
-        bench_c45_single_round(num_samples=num_elements, preprocessor=SortNetBasedPrepAttribute.create,
-                               num_cont_attrs=num_cont_attrs)
+    elif operation == "compute_ginis":
+        bench_compute_ginis(num_samples=num_elements)
     else:
         raise Exception("Unknown operation: %s" % operation)
 

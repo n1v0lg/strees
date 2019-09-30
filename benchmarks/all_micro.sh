@@ -2,17 +2,18 @@
 
 # Ops to benchmark
 declare -a OPS=(
+#    "shuffle"
+#    "sort"
+#    "lt_threshold"
     "argmax"
-    "shuffle"
-    "sort"
-    "lt_threshold"
-    "is_last_active_lin"
     "is_last_active_log"
     "comp_mat_par"
 )
 
 # Default benchmark sizes
 declare -a SIZES=(
+    512
+    1024
     2048
     4096
     8192

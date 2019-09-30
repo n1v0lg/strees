@@ -2,6 +2,7 @@
 
 # Operations to benchmark
 declare -a OPS=(
+    "compute_ginis"
     "prep" # offline prep, i.e., sorting and encoding sort net as perm
     "dummy_perm_sort" # sorting via permutation network approach
     "dummy_sort_sort" # sorting via pre-computed sorting network approach
@@ -17,6 +18,8 @@ declare -a CONT_ATTRS=(
 
 # Number of samples
 declare -a SIZES=(
+    512
+    1024
     2048
     4096
     8192
