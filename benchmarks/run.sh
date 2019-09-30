@@ -119,8 +119,6 @@ DO_TEST_RUN=true
 # By default, use passively secure backends
 RUN_SCRIPT_NET="replicated-ring-party"
 RUN_SCRIPT_LOCAL="ring"
-# TODO use pyenv
-PYTHON_IMPL="python"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -162,10 +160,6 @@ case $key in
     DO_TEST_RUN=false
     shift # past argument
     ;;
-    --pypy)
-    PYTHON_IMPL="pypy"
-    shift # past argument
-    ;;
     *)    # unknown option
     POSITIONAL+=("$1") # save it in an array for later
     shift # past argument
@@ -173,6 +167,13 @@ case $key in
 esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+
+# TODO use pyenv
+if pypy --version; then
+    PYTHON_IMPL="pypy"
+else
+    PYTHON_IMPL="python"
+fi
 
 # -1 for PID indicates that all parties should be run locally
 LOCAL=true

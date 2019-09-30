@@ -7,7 +7,7 @@ declare -a OPS=(
     "dummy_sort_sort" # sorting via pre-computed sorting network approach
     "single_perm_dummy" # single iteration of c45, without pre-processing, using permutation network
     "single_sort_dummy" # single iteration of c45, without pre-processing, using sorting network
-    "single_perm_both" # pre-processing + single iteration of c45, using permutation network
+#    "single_perm_both" # pre-processing + single iteration of c45, using permutation network
 )
 
 # Number continuous attributes
