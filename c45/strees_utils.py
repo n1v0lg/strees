@@ -88,6 +88,17 @@ def pairwise_and(bits_a, bits_b):
     return prod(bits_a, bits_b)
 
 
+def inner_prod(left, right):
+    """Inner product of elements."""
+    array_check(left)
+    array_check(right)
+    same_len(left, right)
+    if not left:
+        return []
+    cls = left[0].get_type(0)
+    return cls.dot_product(left, right)
+
+
 def prod(left, right):
     """Pairwise product of elements."""
     same_len(left, right)

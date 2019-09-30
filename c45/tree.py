@@ -32,7 +32,7 @@ class TreeNode(Node):
         :param threshold: threshold value to split on (bogus value if leaf node)
         :param is_dummy: flag indicating if this is a dummy leaf node (i.e., a fake leaf node that is an ancestor of
         a real leaf node)
-        :param node_class: class of the node (bogus value if no leaf node)
+        :param node_class: class of the node (bogus value if not leaf node)
         """
         Node.__init__(self)
         self.is_leaf = is_leaf

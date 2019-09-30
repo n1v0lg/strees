@@ -480,6 +480,21 @@ def prep_attributes(samples, preprocessor=PermBasedPrepAttribute.create):
     return prepped
 
 
+def process_terminals(terminals):
+    """Forces each terminal node to be a leaf node, and computes its output class."""
+    for node, samples in terminals:
+        class_col = samples.get_class_col()
+        actives = samples.get_active_col()
+        num_active_ones = inner_prod(class_col, actives)
+        num_actives = iter_sum(actives)
+
+        # only works for binary classes
+        forced_node_class = (2 * num_active_ones) >= num_actives
+        node.is_leaf = sint(1)
+        node.is_dummy = sint(0)
+        node.node_class = forced_node_class
+
+
 def _c45(input_samples, max_iteration_count, prep_attrs=None):
     """Runs C4.5 algorithm to construct decision tree.
 
@@ -497,8 +512,11 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
     queue = deque([(None, input_samples)])
     root = None
 
+    # (node, sample) tuples at the lowest layer of the tree--these are automatic leaf nodes
+    terminals = []
+
     # Create tree in a BFS-like traversal
-    for _ in range(max_iteration_count):
+    for i in range(max_iteration_count):
         # TODO this fixes the open instruction merge issue
         program.curr_tape.start_new_basicblock()
         parent, samples = queue.popleft()
@@ -519,6 +537,12 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
         # parent
         queue.append((node, left_samples))
         queue.append((node, right_samples))
+
+        # track terminal nodes
+        if i >= max_iteration_count // 2:
+            terminals.append((node, samples))
+
+    process_terminals(terminals)
 
     return Tree(root)
 

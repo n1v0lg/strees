@@ -605,6 +605,7 @@ def test():
             [6, 4, 0, 1]
         ])
         actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=2)
+        # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
                 .l(LN(1)) \
@@ -620,6 +621,7 @@ def test():
         samples = Samples.from_rows(sec_mat, 2)
         prepped = prep_attributes(samples, SortNetBasedPrepAttribute.create)
         actual = c45(samples, max_tree_depth=2, prep_attrs=prepped)
+        # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
                 .l(LN(1)) \
@@ -633,14 +635,15 @@ def test():
             [5, 1, 1, 1]
         ])
         actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=3)
+        # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
                 .l(DN(1, 1)
                    .l(LN(1))
                    .r(LN(0))) \
                 .r(LN(1)
-                   .l(LN(-1, is_dummy=True))
-                   .r(LN(-1, is_dummy=True)))
+                   .l(LN(1))
+                   .r(LN(1)))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
         sec_mat = input_matrix([
@@ -650,13 +653,14 @@ def test():
             [4, 1, 1]
         ])
         actual = c45(Samples.from_rows(sec_mat, 1), max_tree_depth=2)
+        # actual.reveal().print_self()
         # TODO this makes sense, but is it right?
         # since all samples have the same class,
         # we don't partition on any attribute and end up with a leaf for the root
         expected = \
             LN(1) \
-                .l(LN(-1, is_dummy=True)) \
-                .r(LN(-1, is_dummy=True))
+                .l(LN(1)) \
+                .r(LN(1))
         runtime_assert_tree_equals(Tree(expected), actual, default_test_name())
 
     sys.setrecursionlimit(2000)

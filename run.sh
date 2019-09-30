@@ -8,6 +8,6 @@ SPDZ_ROOT=${HERE}/../MP-SPDZ
 cd ${SPDZ_ROOT}
 
 # .py extension so we can use an IDE
-./compile.py --ring=64 --optimize-hard --insecure ${HERE}/c45/${MPC_SRC_NAME} && \
-./Scripts/ring.sh ${MPC_SRC_NAME} && \
-./Scripts/mal-rep-ring.sh ${MPC_SRC_NAME}
+./compile.py --ring=64 --optimize-hard --insecure ${HERE}/c45/${MPC_SRC_NAME} \
+&& ./Scripts/ring.sh ${MPC_SRC_NAME} \
+&& ./Scripts/mal-rep-ring.sh ${MPC_SRC_NAME}
