@@ -2,7 +2,7 @@
 
 # Operations to benchmark
 declare -a OPS=(
-    "prep" # offline prep, i.e., sorting and encoding sort net as per
+    "prep" # offline prep, i.e., sorting and encoding sort net as perm
     "dummy_perm_sort" # sorting via permutation network approach
     "dummy_sort_sort" # sorting via pre-computed sorting network approach
     "single_perm_dummy" # single iteration of c45, without pre-processing, using permutation network

@@ -2,7 +2,7 @@
 
 declare -a OPS=(
     "prep"
-    "dummy_perm_sort"
+#    "dummy_perm_sort"
     "single_perm_dummy"
 )
 

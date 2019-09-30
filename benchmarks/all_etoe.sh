@@ -5,6 +5,8 @@ declare -a DEPTHS=(
     1
     2
     3
+    4
+    5
 )
 
 # Number continuous attributes
@@ -66,7 +68,7 @@ do
     do
         for CONT_ATTR in "${CONT_ATTRS[@]}";
         do
-            ARG="${SIZE}-${DEPTH}-${CONT_ATTRS}"
+            ARG="${SIZE}-${DEPTH}-${CONT_ATTR}"
             bash run.sh --source etoe.py --args ${ARG} --mode ${MODE} --pid ${PID} ${DEBUG_STR} ${MAL_STR}
         done
     done

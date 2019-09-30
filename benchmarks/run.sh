@@ -17,9 +17,9 @@ function compile() {
     then
         if [ "$DEBUG" = true ]
         then
-            echo "Compiling with ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}"
+            echo "Compiling with ${PYTHON_IMPL} ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}"
         fi
-        ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
+        ${PYTHON_IMPL} ./compile.py ${COMPILE_OPTS} ${HERE}/${MPC_SRC_NAME} ${PROG_ARGS}
 
     fi
 }
@@ -119,6 +119,8 @@ DO_TEST_RUN=true
 # By default, use passively secure backends
 RUN_SCRIPT_NET="replicated-ring-party"
 RUN_SCRIPT_LOCAL="ring"
+# TODO use pyenv
+PYTHON_IMPL="python"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -158,6 +160,10 @@ case $key in
     ;;
     --notest)
     DO_TEST_RUN=false
+    shift # past argument
+    ;;
+    --pypy)
+    PYTHON_IMPL="pypy"
     shift # past argument
     ;;
     *)    # unknown option
