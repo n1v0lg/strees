@@ -85,11 +85,15 @@ function benchmark_mode() {
 
     # TODO MP-SPDZ appears to exit its main process before finishing all writes
     #  need to figure out a way to wait for all subprocesses to finish before parsing stdout
+    COMMUNICATION=0
     if [ "$LOCAL" = true ]
     then
         { time run_program_local; } > ${TMP_OUT} 2>${TMP_ERR}
     else
+        COMMS_BEFORE=$(cat /proc/net/dev | grep ens | awk '{print $2}')
         { time run_program_networked; } > ${TMP_OUT} 2>${TMP_ERR}
+        COMMS_AFTER=$(cat /proc/net/dev | grep ens | awk '{print $2}')
+        COMMUNICATION=$(($COMMS_AFTER-$COMMS_BEFORE))
     fi
 
     EXEC_TIME=$(parse_exec_time "$TMP_OUT" "$TMP_ERR")
@@ -97,13 +101,13 @@ function benchmark_mode() {
     # output results
     if [ "$MODE" = both ]
     then
-        echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+        echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME},${EXEC_TIME},$COMMUNICATION >> ${HERE}/${OUT_NAME}
     elif [ "$MODE" = compile ]
     then
         echo ${MPC_SRC_NAME},${PROG_ARGS},${COMP_TIME} >> ${HERE}/${OUT_NAME}
     else
         # run mode
-        echo ${MPC_SRC_NAME},${PROG_ARGS},${EXEC_TIME} >> ${HERE}/${OUT_NAME}
+        echo ${MPC_SRC_NAME},${PROG_ARGS},${EXEC_TIME},$COMMUNICATION >> ${HERE}/${OUT_NAME}
     fi
 
     # clean up temp files
