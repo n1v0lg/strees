@@ -482,7 +482,7 @@ def prep_attributes(samples, preprocessor=PermBasedPrepAttribute.create):
 
 def process_terminals(terminals):
     """Forces each terminal node to be a leaf node, and computes its output class."""
-    for node, samples in terminals:
+    for parent, samples in terminals:
         class_col = samples.get_class_col()
         actives = samples.get_active_col()
         num_active_ones = inner_prod(class_col, actives)
@@ -490,9 +490,11 @@ def process_terminals(terminals):
 
         # only works for binary classes
         forced_node_class = (2 * num_active_ones) >= num_actives
-        node.is_leaf = sint(1)
-        node.is_dummy = sint(0)
-        node.node_class = forced_node_class
+        node = TreeNode(cint(1), cint(0), cint(0), cint(0), forced_node_class)
+        if not parent.left:
+            parent.left = node
+        else:
+            parent.right = node
 
 
 def _c45(input_samples, max_iteration_count, prep_attrs=None):
@@ -517,6 +519,7 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
 
     # Create tree in a BFS-like traversal
     for i in range(max_iteration_count):
+        #import pdb; pdb.set_trace()
         # TODO this fixes the open instruction merge issue
         program.curr_tape.start_new_basicblock()
         parent, samples = queue.popleft()
@@ -538,11 +541,14 @@ def _c45(input_samples, max_iteration_count, prep_attrs=None):
         queue.append((node, left_samples))
         queue.append((node, right_samples))
 
-        # track terminal nodes
-        if i >= max_iteration_count // 2:
-            terminals.append((node, samples))
+    # NOTE we now require that max_iteration_count is a power of 2
+    process_terminals(queue)
 
-    process_terminals(terminals)
+#         # track terminal nodes
+#         if i >= max_iteration_count // 2:
+#             terminals.append((node, samples))
+
+#     process_terminals(terminals)
 
     return Tree(root)
 

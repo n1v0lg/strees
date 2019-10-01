@@ -604,7 +604,7 @@ def test():
             [7, 3, 0, 1],
             [6, 4, 0, 1]
         ])
-        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=2)
+        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=1)
         # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
@@ -620,7 +620,7 @@ def test():
         ])
         samples = Samples.from_rows(sec_mat, 2)
         prepped = prep_attributes(samples, SortNetBasedPrepAttribute.create)
-        actual = c45(samples, max_tree_depth=2, prep_attrs=prepped)
+        actual = c45(samples, max_tree_depth=1, prep_attrs=prepped)
         # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
@@ -634,7 +634,7 @@ def test():
             [4, 2, 0, 1],
             [5, 1, 1, 1]
         ])
-        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=3)
+        actual = c45(Samples.from_rows(sec_mat, 2), max_tree_depth=2)
         # actual.reveal().print_self()
         expected = \
             DN(1, 2) \
@@ -652,7 +652,7 @@ def test():
             [3, 1, 1],
             [4, 1, 1]
         ])
-        actual = c45(Samples.from_rows(sec_mat, 1), max_tree_depth=2)
+        actual = c45(Samples.from_rows(sec_mat, 1), max_tree_depth=1)
         # actual.reveal().print_self()
         # TODO this makes sense, but is it right?
         # since all samples have the same class,
