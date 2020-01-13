@@ -1,5 +1,5 @@
-from Compiler.types import sint, Array, MemValue, MultiArray, Matrix
-from library import print_ln, print_str, for_range_parallel, for_range
+# from Compiler.types import sint, Array, MemValue, MultiArray, Matrix
+# from library import print_ln, print_str, for_range_parallel, for_range
 
 MPC_ERROR_FLAG = "MPC_ERROR"
 MPC_WARN_FLAG = "MPC_WARN"
@@ -75,7 +75,11 @@ def toggle(bit, elements):
     """Keeps elements same if bit is 1, sets all to 0 otherwise"""
     if not isinstance(elements, Array):
         raise Exception("Call this with array")
-    return elements * bit
+    res = Array(len(elements), sint)
+    @for_range_opt(len(elements))
+    def _(i):
+        res[i] = elements[i] * bit
+    return res
 
 
 def iter_sum(elements):
@@ -291,16 +295,16 @@ def default_sort(keys, values, sorted_length=1, n_parallel=32):
         k = 1
         while k < l:
             k *= 2
-            n_outer = num_keys / l
-            n_inner = l / k
-            n_innermost = 1 if k == 2 else k / 2 - 1
+            n_outer = num_keys // l
+            n_inner = l // k
+            n_innermost = 1 if k == 2 else k // 2 - 1
 
-            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            @for_range_parallel(n_parallel // n_innermost // n_inner, n_outer)
             def loop(i):
-                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                @for_range_parallel(n_parallel // n_innermost, n_inner)
                 def inner(j):
                     base = i * l + j
-                    step = l / k
+                    step = l // k
                     if k == 2:
                         outer_comp_bit, keys[base], keys[base + step] = cond_swap(
                             keys[base], keys[base + step])
@@ -326,18 +330,18 @@ def default_sort_and_store(keys, values, sorted_length=1, n_parallel=32):
         k = 1
         while k < l:
             k *= 2
-            n_outer = num_keys / l
-            n_inner = l / k
-            n_innermost = 1 if k == 2 else k / 2 - 1
+            n_outer = num_keys // l
+            n_inner = l // k
+            n_innermost = 1 if k == 2 else k // 2 - 1
             sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
             net.append(sub_net)
 
-            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            @for_range_parallel(n_parallel // n_innermost // n_inner, n_outer)
             def loop(i):
-                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                @for_range_parallel(n_parallel // n_innermost, n_inner)
                 def inner(j):
                     base = i * l + j
-                    step = l / k
+                    step = l // k
                     if k == 2:
                         outer_comp_bit, keys[base], keys[base + step] = cond_swap(
                             keys[base], keys[base + step])
@@ -365,15 +369,15 @@ def gen_dummy_net(num_keys, sorted_length=1, n_parallel=32):
         k = 1
         while k < l:
             k *= 2
-            n_outer = num_keys / l
-            n_inner = l / k
-            n_innermost = 1 if k == 2 else k / 2 - 1
+            n_outer = num_keys // l
+            n_inner = l // k
+            n_innermost = 1 if k == 2 else k // 2 - 1
             sub_net = MultiArray([n_outer, n_inner, n_innermost], sint)
             net.append(sub_net)
 
-            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            @for_range_parallel(n_parallel // n_innermost // n_inner, n_outer)
             def loop(i):
-                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                @for_range_parallel(n_parallel // n_innermost, n_inner)
                 def inner(j):
                     if k == 2:
                         sub_net[i][j][0] = sint(1)
@@ -393,17 +397,17 @@ def default_sort_from_stored(keys, network_bits, sorted_length=1, n_parallel=32)
         k = 1
         while k < l:
             k *= 2
-            n_outer = num_keys / l
-            n_inner = l / k
-            n_innermost = 1 if k == 2 else k / 2 - 1
+            n_outer = num_keys // l
+            n_inner = l // k
+            n_innermost = 1 if k == 2 else k // 2 - 1
             sub_net = next(net_layer_iter)
 
-            @for_range_parallel(n_parallel / n_innermost / n_inner, n_outer)
+            @for_range_parallel(n_parallel // n_innermost // n_inner, n_outer)
             def loop(i):
-                @for_range_parallel(n_parallel / n_innermost, n_inner)
+                @for_range_parallel(n_parallel // n_innermost, n_inner)
                 def inner(j):
                     base = i * l + j
-                    step = l / k
+                    step = l // k
                     if k == 2:
                         outer_comp_bit = sub_net[i][j][0]
                         keys[base], keys[base + step] = cond_swap_with_bit(

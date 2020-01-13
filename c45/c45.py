@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-from Compiler.types import sint, Array, Matrix
-from library import print_ln, if_, for_range, for_range_parallel
 
-# Make IDE happy
-try:
-    from tree import *
-    from strees_utils import *
-    from perm import *
-except ImportError:
-    pass
+# # Make IDE happy
+# try:
+#     from tree import *
+#     from strees_utils import *
+#     from perm import *
+#     from Compiler.library import print_ln, if_, for_range, for_range_parallel
+#     from Compiler.types import sint, Array, Matrix
+# except ImportError:
+#     pass
 
 
 class Samples:
@@ -384,7 +384,6 @@ def partition_on(samples, attr_idx, threshold, is_leaf):
     # set both indicator vectors to 0 if we're at a leaf node
     is_internal = neg(is_leaf)
     program.curr_tape.start_new_basicblock()
-
     go_left = toggle(is_internal, go_left)
     go_right = toggle(is_internal, go_right)
 

@@ -1,13 +1,12 @@
 import sys
 
-from Compiler.types import sint, cint, MemValue, Array, Matrix
-from library import print_ln, if_e, else_, do_while
-
 try:
     from tree import *
     from strees_utils import *
     from perm import *
     from c45 import *
+    from Compiler.types import sint, cint, MemValue, Array, Matrix
+    from library import print_ln, if_e, else_, do_while
 except ImportError:
     pass
 
@@ -17,8 +16,7 @@ def super_hacky_import_hack(local_module_names):
     from os.path import dirname, abspath, join
     root_dir = dirname(abspath(program.infile))
     for local_module_name in local_module_names:
-        execfile(join(root_dir, local_module_name), globals())
-
+        exec(__builtins__.open(join(root_dir, local_module_name)).read(), globals())
 
 # NOTE: Order matters!
 super_hacky_import_hack([
@@ -439,7 +437,7 @@ def test():
         ])
         active_col = get_col(sec_mat, 1)
         prep_attr = PermBasedPrepAttribute.create(0, get_col(sec_mat, 0), active_col)
-        actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
+        actual = list(zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col))
         expected = [
             [0, 0],
             [1, 1],
@@ -469,7 +467,7 @@ def test():
         ])
         active_col = get_col(sec_mat, 1)
         prep_attr = PermBasedPrepAttribute.create_dummy(0, get_col(sec_mat, 0), active_col)
-        actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
+        actual = list(zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col))
         expected = [
             [3, 0],
             [0, 0],
@@ -499,7 +497,7 @@ def test():
         ])
         active_col = get_col(sec_mat, 1)
         prep_attr = SortNetBasedPrepAttribute.create_dummy(0, get_col(sec_mat, 0), active_col)
-        actual = zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col)
+        actual = list(zip(prep_attr.sorted_val_col, prep_attr.sorted_class_col))
         expected = [
             [3, 0],
             [0, 0],
@@ -525,7 +523,7 @@ def test():
         ])
         prep_attrs = prep_attributes(Samples.from_rows(sec_mat, 2, 0))
 
-        actual = zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col)
+        actual = list(zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col))
         expected = [
             [5, 0],
             [6, 1],
@@ -534,7 +532,7 @@ def test():
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
 
-        actual = zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col)
+        actual = list(zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col))
         expected = [
             [1, 0],
             [2, 0],
@@ -552,7 +550,7 @@ def test():
         ])
         prep_attrs = prep_attributes(Samples.from_rows(sec_mat, 2, 0), SortNetBasedPrepAttribute.create)
 
-        actual = zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col)
+        actual = list(zip(prep_attrs[0].sorted_val_col, prep_attrs[0].sorted_class_col))
         expected = [
             [5, 0],
             [6, 1],
@@ -561,7 +559,7 @@ def test():
         ]
         runtime_assert_mat_equals(expected, actual, default_test_name())
 
-        actual = zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col)
+        actual = list(zip(prep_attrs[1].sorted_val_col, prep_attrs[1].sorted_class_col))
         expected = [
             [1, 0],
             [2, 0],

@@ -1,8 +1,8 @@
 import math
 import random as rand
 
-from Compiler.types import sint, Array
-from library import for_range
+# from Compiler.types import sint, Array
+# from library import for_range
 from permutation import configure_waksman, rec_shuffle, shuffle
 
 rand.seed(42)
@@ -20,7 +20,7 @@ def random_perm(n):
 
     WARNING: randomness fixed at compile-time, this is NOT secure
     """
-    a = range(n)
+    a = list(range(n))
     for i in range(n - 1, 0, -1):
         j = rand.randint(0, i)
         t = a[i]
@@ -37,7 +37,7 @@ def config_shuffle_given_perm(perm, value_type=sint):
     if n & (n - 1) != 0:
         # pad permutation to power of 2
         m = 2 ** int(math.ceil(math.log(n, 2)))
-        perm += range(n, m)
+        perm += list(range(n, m))
     config_bits = configure_waksman(perm)
     # 2-D array
     config = Array(len(config_bits) * len(perm), value_type.reg_type)

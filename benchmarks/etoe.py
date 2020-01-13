@@ -1,4 +1,5 @@
 from Compiler.types import sint, Array
+import builtins
 
 try:
     from c45.strees_utils import *
@@ -13,7 +14,7 @@ def super_hacky_import_hack(local_module_names):
     from os.path import dirname, abspath, join
     root_dir = dirname(abspath(program.infile))
     for local_module_name in local_module_names:
-        execfile(join(root_dir, local_module_name), globals())
+        exec(builtins.open(join(root_dir, local_module_name)).read(), globals())
 
 
 # NOTE: Order matters!
@@ -56,8 +57,8 @@ def run_bench():
     num_elements = int(split_args[0])
     max_tree_depth = int(split_args[1])
     num_cont_attrs = int(split_args[2])
-    print "Running c45 on %s with depth %s and %s cont attrs." \
-          % (num_elements, max_tree_depth, num_cont_attrs)
+    print("Running c45 on %s with depth %s and %s cont attrs." \
+          % (num_elements, max_tree_depth, num_cont_attrs))
 
     bench_c45(num_samples=num_elements,
               max_tree_depth=max_tree_depth,

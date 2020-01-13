@@ -173,10 +173,10 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 # TODO use pyenv
-if pypy --version; then
-    PYTHON_IMPL="pypy"
+if pypy3 --version; then
+    PYTHON_IMPL="pypy3"
 else
-    PYTHON_IMPL="python"
+    PYTHON_IMPL="python3"
 fi
 
 # -1 for PID indicates that all parties should be run locally

@@ -1,4 +1,5 @@
 from Compiler.types import sint, Array
+import builtins
 
 try:
     from c45.strees_utils import *
@@ -13,7 +14,7 @@ def super_hacky_import_hack(local_module_names):
     from os.path import dirname, abspath, join
     root_dir = dirname(abspath(program.infile))
     for local_module_name in local_module_names:
-        execfile(join(root_dir, local_module_name), globals())
+        exec(builtins.open(join(root_dir, local_module_name)).read(), globals())
 
 
 # NOTE: Order matters!
@@ -81,8 +82,8 @@ def run_bench():
     operation = split_args[0]
     num_elements = int(split_args[1])
     num_cont_attrs = int(split_args[2])
-    print "Running %s on %s with %s cont attrs." \
-          % (operation, num_elements, num_cont_attrs)
+    print("Running %s on %s with %s cont attrs." \
+          % (operation, num_elements, num_cont_attrs))
 
     if operation == "prep":
         bench_prep_attributes(num_samples=num_elements, num_cont_attrs=num_cont_attrs)
