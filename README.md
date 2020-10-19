@@ -2,11 +2,17 @@
 
 A prototype implementation of the C4.5 algorithm for secure decision tree training in MP-SPDZ.
 
+Accompanies [Secure training of decision trees with continuous attributes](https://eprint.iacr.org/2020/1130)
+
+## Disclaimer
+
+This is a research prototype. No claims as to security or correctness. Please do not use in produciton.
+
 ## Setting up, testing, running
 
 Requires Docker to run.
 
-Requires MP-SPDZ repo (tested with commit [`3faa8a0`](https://github.com/data61/MP-SPDZ/commit/3faa8a0d4ab2a49eb94355ad8ff5c14f58cfb142)) to be in the parent directory. So if you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
+Requires MP-SPDZ repo (tested with commit [`3faa8a0`](https://github.com/data61/MP-SPDZ/commit/3faa8a0d4ab2a49eb94355ad8ff5c14f58cfb142)) to be in the parent directory. If you've cloned this project into `foo/bar/`, MP-SPDZ needs to be under `foo/bar` (or just adjust the shell scripts accordingly). Note that MP-SPDZ only needs to be there, doesn't need to be compiled or even compilable in your system as everything will run in a Docker container.
 
 To set up, run (make sure Docker is running!):
 
