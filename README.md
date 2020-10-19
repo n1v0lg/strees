@@ -2,7 +2,7 @@
 
 A prototype implementation of the C4.5 algorithm for secure decision tree training in MP-SPDZ.
 
-Accompanies [Secure training of decision trees with continuous attributes](https://eprint.iacr.org/2020/1130)
+Protocols etc. here: [Secure training of decision trees with continuous attributes](https://eprint.iacr.org/2020/1130).
 
 ## Disclaimer
 
